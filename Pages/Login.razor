@@ -1,0 +1,34 @@
+﻿@page "/login"
+
+@using home_pisos_vinilicos.Application.Interfaces
+@using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Domain.Models
+@inject IAuthenticationService AuthenticationService
+
+<h3>Login</h3>
+
+<div>
+    <label>Email: </label>
+    <input @bind="email" />
+</div>
+<div>
+    <label>Password: </label>
+    <input type="password" @bind="password" />
+</div>
+<button @onclick="HandleLogin">Login</button>
+
+@if (!string.IsNullOrEmpty(loginResult))
+{
+    <p>@loginResult</p>
+}
+
+@code {
+    private string email;
+    private string password;
+    private string loginResult;
+
+    private async Task HandleLogin()
+    {
+        loginResult = await AuthenticationService.LoginAsync(email, password);
+    }
+}

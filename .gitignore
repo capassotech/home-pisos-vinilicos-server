@@ -1,0 +1,65 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# ReSharper
+*.DotSettings
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Packages
+*.nupkg
+*.snupkg
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Node.js
+node_modules/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]eleases/
+[Rr]eleasesPublic/
+x64/
+x86/
+build/
+bin/
+obj/
+
+# Dotnet specific
+*.dll
+*.exe
+*.pdb
+*.mdb
+*.swp
+
+# Azure Functions
+local.settings.json
