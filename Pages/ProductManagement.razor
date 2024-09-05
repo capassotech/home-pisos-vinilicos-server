@@ -1,0 +1,83 @@
+﻿@page "/product-management"
+
+@* @using home_pisos_vinilicos_admin.Domain
+@inject ProductServiceFront productService
+@using home_pisos_vinilicos.ServicesFront *@
+
+<h3>Gestión de Productos</h3>
+
+<div class="actions">
+    <button>Agregar Nuevo Producto</button>
+    <input placeholder="Buscar producto..." />
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nombre del Producto</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+     @*    @if (filteredProducts != null)
+        {
+            @foreach (var product in filteredProducts)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.category</td>
+                    <td>@product.Price</td>
+                    <td>
+                        <button @onclick="() => EditProduct(product.IdProduct)">✏️</button>
+                        <button @onclick="() => DeleteProduct(product.IdProduct)">🗑️</button>
+                    </td>
+                </tr>
+            }
+        } *@
+    </tbody>
+</table>
+
+@* @code {
+    private List<Product> products;
+    private List<Product> filteredProducts;
+    private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        products = await productService.GetProductsAsync();
+        filteredProducts = products;
+    }
+
+    private async Task DeleteProduct(string id)
+    {
+        var confirmed = await productService.DeleteProductAsync(id);
+        if (confirmed)
+        {
+            await LoadProducts();
+        }
+    }
+
+    private void EditProduct(string id)
+    {
+        // Lógica para editar el producto
+    }
+
+    private void CreateProduct()
+    {
+        // Lógica para crear un nuevo producto
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value.ToString();
+        filteredProducts = products.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+}
+ *@

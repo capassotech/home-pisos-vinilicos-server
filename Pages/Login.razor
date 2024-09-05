@@ -1,34 +1,81 @@
 ﻿@page "/login"
 
+<head>
+    <link href="css/login.css" rel="stylesheet" />
+</head>
+
 @using home_pisos_vinilicos.Application.Interfaces
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Models
 @inject IAuthenticationService AuthenticationService
 
-<h3>Login</h3>
+<div class="container">
+    <div class="login-container">
+        <div class="login-logo">
+            <img src="/css/images/logo.png" alt="Logo de la Empresa" />
 
-<div>
-    <label>Email: </label>
-    <input @bind="email" />
-</div>
-<div>
-    <label>Password: </label>
-    <input type="password" @bind="password" />
-</div>
-<button @onclick="HandleLogin">Login</button>
+        </div>
 
-@if (!string.IsNullOrEmpty(loginResult))
-{
-    <p>@loginResult</p>
-}
+        <div class="login-form">
+            <div class="email">
+                <input @bind="email" placeholder="Email" />
+                @if (!string.IsNullOrEmpty(emailError))
+                {
+                    <p class="error-message">@emailError</p>
+                }
+            </div>
+            <div class="contraseña">
+                <input type="password" @bind="password" placeholder="Contraseña" />
+                @if (!string.IsNullOrEmpty(passwordError))
+                {
+                    <p class="error-message">@passwordError</p>
+                }
+            </div>
+            <button @onclick="HandleLogin" class="btn btn-primary">Iniciar Sesión</button>
+            <div>
+                <a href="/recuperar-password" class="link-recovery">¿Olvidó su contraseña?</a>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(loginResult))
+        {
+            <p class="login-result">@loginResult</p>
+        }
+    </div>
+</div>
 
 @code {
     private string email;
     private string password;
     private string loginResult;
+    private string emailError;
+    private string passwordError;
 
     private async Task HandleLogin()
     {
+        if (string.IsNullOrEmpty(email))
+        {
+            emailError = "El campo de email es requerido.";
+        }
+        else
+        {
+            emailError = null;
+        }
+
+        if (string.IsNullOrEmpty(password))
+        {
+            passwordError = "El campo de contraseña es requerido.";
+        }
+        else
+        {
+            passwordError = null;
+        }
+
+        if (!string.IsNullOrEmpty(emailError) || !string.IsNullOrEmpty(passwordError))
+        {
+            return;
+        }
+
         loginResult = await AuthenticationService.LoginAsync(email, password);
     }
 }
