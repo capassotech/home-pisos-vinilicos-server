@@ -4,8 +4,9 @@ using home_pisos_vinilicos.Shared.DTOs;
 
 namespace home_pisos_vinilicos.Controllers
 {
+    
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/producto")]
     public class ProductController : ControllerBase
     {
 
