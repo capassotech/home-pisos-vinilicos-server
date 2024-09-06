@@ -1,8 +1,9 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
+using home_pisos_vinilicos.Domain;
 using Microsoft.AspNetCore.Mvc;
 
-namespace home_pisos_vinilicos_admin.Server.Controllers
+namespace home_pisos_vinilicos.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -94,10 +95,5 @@ namespace home_pisos_vinilicos_admin.Server.Controllers
                 return StatusCode(500, $"Error al eliminar producto: {ex.Message}");
             }
         }
-    }
-
-    public class Product
-    {
-        public string Nombre { get; set; }
     }
 }
