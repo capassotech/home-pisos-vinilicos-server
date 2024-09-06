@@ -1,6 +1,6 @@
 ﻿using home_pisos_vinilicos.Domain.Entities;
 
-namespace home_pisos_vinilicos_admin.Domain
+namespace home_pisos_vinilicos.Domain
 {
     public class Product
     {

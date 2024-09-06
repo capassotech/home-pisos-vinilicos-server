@@ -2,7 +2,7 @@
 using home_pisos_vinilicos.Application;
 using home_pisos_vinilicos.Shared.DTOs;
 
-namespace home_pisos_vinilicos.Server.Controllers
+namespace home_pisos_vinilicos.Controllers
 {
     [ApiController]
     [Route("api/producto")]
