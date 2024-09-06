@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using home_pisos_vinilicos.Application.Interfaces;
+using home_pisos_vinilicos.Domain.Models;
+using home_pisos_vinilicos.Application.DTOs;
 
 namespace home_pisos_vinilicos.Application.Controllers
 {
@@ -27,24 +29,46 @@ namespace home_pisos_vinilicos.Application.Controllers
         }
      
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
-            var result = await _authenticationService.LoginAsync(request.Email, request.Password);
+            var result = await _authenticationService.LoginAsync( request.Email, request.Password);
 
             return Ok(result);
         }
+
+        
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto request)
+        {
+            var result = await _authenticationService.RegisterUserAsync(request.Email, request.Password);
+
+            if (result.StartsWith("Successfully"))
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
+        {
+            var result = await _authenticationService.ForgotPasswordAsync(request.Email);
+
+            if (result)
+            {
+                return Ok("Password recovery email sent successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to send recovery email.");
+            }
+        }
+
+    }
+
     
-}
-
-    public class RegisterRequest
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-
-    public class LoginRequest
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
 }
