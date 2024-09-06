@@ -1,8 +1,8 @@
-﻿using home_pisos_vinilicos.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
-namespace home_pisos_vinilicos_admin.Domain
+
+namespace home_pisos_vinilicos_admin.Domain.Entities
 {
     [Table("Products")]
     public class Product

@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
-using home_pisos_vinilicos_admin.Domain;
-using home_pisos_vinilicos.Shared.DTOs;
+using home_pisos_vinilicos_admin.Domain.Entities;
+using home_pisos_vinilicos.Application.DTOs;
 
-namespace home_pisos_vinilicos.Application
+namespace home_pisos_vinilicos.Application.Services
 {
     public class ProductService
     {

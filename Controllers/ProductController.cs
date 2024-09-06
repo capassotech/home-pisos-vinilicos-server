@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using home_pisos_vinilicos.Application;
-using home_pisos_vinilicos.Shared.DTOs;
+using home_pisos_vinilicos.Application.Services;
+using home_pisos_vinilicos.Application.DTOs;
 
-namespace home_pisos_vinilicos.Server.Controllers
+namespace home_pisos_vinilicos.Controllers
 {
     
     [Route("api/[controller]")]

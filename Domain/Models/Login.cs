@@ -1,6 +1,6 @@
 ﻿namespace home_pisos_vinilicos.Domain.Models
 {
-    public class LoginModel
+    public class Login
     {
         public string Email { get; set; }
         public string Password { get; set; }

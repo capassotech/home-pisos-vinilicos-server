@@ -1,4 +1,4 @@
-﻿namespace home_pisos_vinilicos.Shared.DTOs
+﻿namespace home_pisos_vinilicos.Application.DTOs
 {
     public class ProductDto
     {
