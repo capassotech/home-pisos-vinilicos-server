@@ -1,7 +1,7 @@
 ﻿using home_pisos_vinilicos.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace home_pisos_vinilicos_admin.Server.Controllers
+namespace home_pisos_vinilicos.Controllers
 {
     [ApiController]
     [Route("[controller]")]

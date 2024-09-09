@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace home_pisos_vinilicos_admin.Domain
+namespace home_pisos_vinilicos.Domain
 {
     [Table("Products")]
     public class Product

@@ -1,83 +1,121 @@
 ﻿@page "/product-management"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using home_pisos_vinilicos.Shared.DTOs
+@using System.Net.Http.Json
+@using home_pisos_vinilicos.Application
+@inject ProductService productService
 
-@* @using home_pisos_vinilicos_admin.Domain
-@inject ProductServiceFront productService
-@using home_pisos_vinilicos.ServicesFront *@
+<h3>Lista de Productos</h3>
 
-<h3>Gestión de Productos</h3>
-
-<div class="actions">
-    <button>Agregar Nuevo Producto</button>
-    <input placeholder="Buscar producto..." />
+<!-- Filtros y Búsqueda -->
+<div class="mb-3">
+    <input type="text" @bind="searchText" @oninput="FilterProducts" placeholder="Buscar productos..." class="form-control" />
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Nombre del Producto</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-     @*    @if (filteredProducts != null)
-        {
-            @foreach (var product in filteredProducts)
+<!-- Botón de Agregar Nuevo Producto -->
+<button type="submit" @onclick="AddNewProduct">Agregar Nuevo Producto</button>
+
+<!-- Tabla de Productos -->
+@if (products != null)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre del Producto</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
             {
-                <tr>
+                <tr class="@GetHighlightClass(product)">
                     <td>@product.Name</td>
-                    <td>@product.category</td>
-                    <td>@product.Price</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price.ToString("C")</td>
                     <td>
-                        <button @onclick="() => EditProduct(product.IdProduct)">✏️</button>
-                        <button @onclick="() => DeleteProduct(product.IdProduct)">🗑️</button>
+                        <button class="btn btn-warning btn-sm" @onclick="() => EditProduct(product.IdProduct)">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
             }
-        } *@
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No se encontraron productos.</p>
+}
 
-@* @code {
-    private List<Product> products;
-    private List<Product> filteredProducts;
-    private string searchTerm = string.Empty;
+@code {
+    private List<ProductDto> products;
+    private List<ProductDto> filteredProducts;
+    private string searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadProducts();
-    }
-
-    private async Task LoadProducts()
-    {
-        products = await productService.GetProductsAsync();
-        filteredProducts = products;
-    }
-
-    private async Task DeleteProduct(string id)
-    {
-        var confirmed = await productService.DeleteProductAsync(id);
-        if (confirmed)
+        try
         {
-            await LoadProducts();
+            var productEntities = await productService.GetAllAsync();
+            products = productEntities.Select(p => new ProductDto
+                {
+                    IdProduct = p.IdProduct,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price
+                }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar productos: {ex.Message}");
         }
     }
 
-    private void EditProduct(string id)
+    protected void FilterProducts()
     {
-        // Lógica para editar el producto
+        if (products != null)
+        {
+            filteredProducts = products
+                .Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
     }
 
-    private void CreateProduct()
+    protected void AddNewProduct()
     {
-        // Lógica para crear un nuevo producto
+        Console.WriteLine("Botón de agregar nuevo producto clickeado.");
+        NavigationManager.NavigateTo("/add-product");
     }
 
-    private void OnSearchChanged(ChangeEventArgs e)
+    protected void EditProduct(string id)
     {
-        searchTerm = e.Value.ToString();
-        filteredProducts = products.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        NavigationManager.NavigateTo($"/edit-product/{id}");
+    }
+
+    protected async Task DeleteProduct(string id)
+    {
+        var response = await Http.DeleteAsync($"api/product/delete/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            products.Remove(products.First(p => p.IdProduct == id));
+            FilterProducts();
+            Console.WriteLine("Producto eliminado exitosamente.");
+        }
+        else
+        {
+            Console.WriteLine("No se pudo eliminar el producto.");
+        }
+    }
+
+    private string GetHighlightClass(ProductDto product)
+    {
+        var recentProducts = products.OrderByDescending(p => p.IdProduct).Take(6).Select(p => p.IdProduct).ToList();
+        return recentProducts.Contains(product.IdProduct) ? "highlight" : "";
     }
 }
- *@

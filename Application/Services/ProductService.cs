@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
-using home_pisos_vinilicos_admin.Domain;
+using home_pisos_vinilicos.Domain;
 using home_pisos_vinilicos.Shared.DTOs;
 
 namespace home_pisos_vinilicos.Application

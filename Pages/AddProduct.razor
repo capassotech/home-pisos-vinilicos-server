@@ -1,0 +1,47 @@
+﻿@page "/add-product"
+@inject ProductService productService
+@using home_pisos_vinilicos.Shared.DTOs
+@using home_pisos_vinilicos.Application
+
+@inject NavigationManager NavigationManager
+
+<h3>Agregar Nuevo Producto</h3>
+
+<div>
+    <label>Nombre:</label>
+    <input @bind="productDto.Name" class="form-control" />
+</div>
+<div>
+    <label>Descripción:</label>
+    <input @bind="productDto.Description" class="form-control" />
+</div>
+<div>
+    <label>Precio:</label>
+    <input @bind="productDto.Price" type="number" class="form-control" />
+</div>
+
+<button class="btn btn-primary mt-3" @onclick="SaveProduct">Guardar Producto</button>
+
+@code {
+    private ProductDto productDto = new ProductDto();
+
+    private async Task SaveProduct()
+    {
+        try
+        {
+            var success = await productService.SaveAsync(productDto);
+            if (success)
+            {
+                NavigationManager.NavigateTo("/product-management");
+            }
+            else
+            {
+                Console.WriteLine("Error al guardar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}

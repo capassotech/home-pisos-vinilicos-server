@@ -1,4 +1,4 @@
-﻿using home_pisos_vinilicos_admin.Domain;
+﻿using home_pisos_vinilicos.Domain;
 
 namespace home_pisos_vinilicos.Data.Repositories.IRepository
 {
