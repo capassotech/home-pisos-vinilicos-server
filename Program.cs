@@ -5,7 +5,6 @@ using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
 using home_pisos_vinilicos.Data;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
-using home_pisos_vinilicos.ServicesFront;
 
 var builder = WebApplication.CreateBuilder(args);
 
