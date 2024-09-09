@@ -6,52 +6,60 @@
 @using home_pisos_vinilicos.Application
 @inject ProductService productService
 
-<h3>Lista de Productos</h3>
+<head>
+    <link href="css/productManagement.css" rel="stylesheet" />
+</head>
 
-<!-- Filtros y Búsqueda -->
-<div class="mb-3">
-    <input type="text" @bind="searchText" @oninput="FilterProducts" placeholder="Buscar productos..." class="form-control" />
-</div>
+<div class="container-management-products">
+    <h3 class="title-products">Productos en la tienda</h3>
+    <!-- Filtros y Búsqueda -->
+    <div class="search">
+        <input type="text" @bind="searchText" placeholder="Buscar productos..." class="form-control" />
+        <button @onclick="FilterProducts">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
 
-<!-- Botón de Agregar Nuevo Producto -->
-<button type="submit" @onclick="AddNewProduct">Agregar Nuevo Producto</button>
+    <!-- Botón de Agregar Nuevo Producto -->
+    <button type="submit" @onclick="AddNewProduct" class="button-add">AGREGAR NUEVO PRODUCTO</button>
 
-<!-- Tabla de Productos -->
-@if (products != null)
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nombre del Producto</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in products)
-            {
-                <tr class="@GetHighlightClass(product)">
-                    <td>@product.Name</td>
-                    <td>@product.Description</td>
-                    <td>@product.Price.ToString("C")</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => EditProduct(product.IdProduct)">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+    <!-- Tabla de Productos -->
+    @if (filteredProducts != null && filteredProducts.Any())
+    {
+        <table class="table table-striped table-products">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No se encontraron productos.</p>
-}
+            </thead>
+            <tbody>
+                @foreach (var product in filteredProducts)
+                {
+                    <tr class="@GetHighlightClass(product)">
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>@product.Price.ToString("C")</td>
+                        <td>
+                            <button class="btn btn-sm" @onclick="() => EditProduct(product.IdProduct)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No se encontraron productos.</p>
+    }
+</div>
 
 @code {
     private List<ProductDto> products;
@@ -70,6 +78,8 @@ else
                     Description = p.Description,
                     Price = p.Price
                 }).ToList();
+
+            filteredProducts = products; 
         }
         catch (Exception ex)
         {

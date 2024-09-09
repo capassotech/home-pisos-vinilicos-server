@@ -5,8 +5,15 @@
 
 @inject NavigationManager NavigationManager
 
+<head>
+    <link href="css/addProduct.css" rel="stylesheet" />
+</head>
+
+<div class="add-product-container">
+
 <h3>Agregar Nuevo Producto</h3>
 
+<div class="form-add-product">
 <div>
     <label>Nombre:</label>
     <input @bind="productDto.Name" class="form-control" />
@@ -19,9 +26,9 @@
     <label>Precio:</label>
     <input @bind="productDto.Price" type="number" class="form-control" />
 </div>
-
 <button class="btn btn-primary mt-3" @onclick="SaveProduct">Guardar Producto</button>
-
+    </div>
+</div>
 @code {
     private ProductDto productDto = new ProductDto();
 
