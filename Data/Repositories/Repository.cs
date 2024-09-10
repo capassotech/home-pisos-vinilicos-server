@@ -4,6 +4,10 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {

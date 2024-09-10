@@ -53,16 +53,58 @@ namespace home_pisos_vinilicos.Application.Services
             }
         }
 
+        public async Task<bool> ValidateTokenAsync(string token)
+        {
+            try
+            {
+                var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                return decodedToken != null;
+            }
+            catch (FirebaseAuthException ex)
+            {
+                Console.WriteLine($"Error validating token: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
-            // generar token de recuperación y enviarlo por correo
-            var token = Guid.NewGuid().ToString(); // Token temporal de ejemplo
+            try
+            {
+                var resetLink = await GeneratePasswordResetLinkAsync(email);
+                if (resetLink != null)
+                {
+                    return await SendPasswordResetEmailAsync(email, resetLink);
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in ForgotPasswordAsync: {ex.Message}");
+                return false;
+            }
+        }
 
+        private async Task<string?> GeneratePasswordResetLinkAsync(string email)
+        {
+            try
+            {
+                return "https://example.com/reset-password?token=some-token"; // Placeholder
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error generating password reset link: {ex.Message}");
+                return null;
+            }
+        }
+
+        private async Task<bool> SendPasswordResetEmailAsync(string email, string resetLink)
+        {
             // Ejemplo de envío de correo (SMTP)
             var mailMessage = new MailMessage("noreply@yourapp.com", email)
             {
                 Subject = "Password Recovery",
-                Body = $"Use this token to recover your password: {token}"
+                Body = $"Use this link to recover your password: {resetLink}"
             };
 
             using (var smtpClient = new SmtpClient("smtp.your-email-provider.com"))
@@ -77,7 +119,7 @@ namespace home_pisos_vinilicos.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine($"Error sending password reset email: {ex.Message}");
                     return false;
                 }
             }

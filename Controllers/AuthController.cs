@@ -2,6 +2,7 @@
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Domain.Models;
 using home_pisos_vinilicos.Application.DTOs;
+using FirebaseAdmin.Auth;
 
 namespace home_pisos_vinilicos.Application.Controllers
 {
@@ -67,6 +68,29 @@ namespace home_pisos_vinilicos.Application.Controllers
                 return BadRequest("Failed to send recovery email.");
             }
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var idToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (idToken != null)
+            {
+                try
+                {
+                    var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+                    await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(decodedToken.Uid);
+                    return Ok("Logout successful.");
+                }
+                catch
+                {
+                    return Unauthorized("Invalid token");
+                }
+            }
+
+            return Unauthorized("No token provided");
+        }
+
 
     }
 
