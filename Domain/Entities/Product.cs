@@ -40,6 +40,12 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "INT")]
         public int Quantity { get; set; }
 
+        [Column(TypeName = "BIT")]
+        public bool IsFeatured { get; set; }
+
+        [Column(TypeName = "Date")]
+        public DateTime CreatedDate { get; set; }
+
         /*
 
         [Required]

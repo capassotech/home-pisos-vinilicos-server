@@ -9,6 +9,7 @@
         public decimal Size { get; set; }
         public String Color { get; set; }
         public int Quantity { get; set; }
+        public bool IsFeatured { get; set; }
         //public Category category { get; set; }
     }
 }
