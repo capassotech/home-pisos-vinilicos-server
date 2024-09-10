@@ -12,6 +12,7 @@
 
 <div class="container-management-products">
     <h3 class="title-products">Productos en la tienda</h3>
+
     <!-- Filtros y Búsqueda -->
     <div class="search">
         <input type="text" @bind="searchText" placeholder="Buscar productos..." class="form-control" />
@@ -20,8 +21,22 @@
         </button>
     </div>
 
-    <!-- Botón de Agregar Nuevo Producto -->
-    <button type="submit" @onclick="AddNewProduct" class="button-add">AGREGAR NUEVO PRODUCTO</button>
+    <button type="submit" @onclick="AddNewProduct" class="button-add" aria-label="Click me">
+        <i class="fas fa-plus"></i> AGREGAR NUEVO PRODUCTO
+    </button>
+
+    <!-- Formulario de Edición -->
+    @if (editingProduct != null)
+    {
+        <div class="edit-form">
+            <h4>Editar Producto</h4>
+            <input type="text" @bind="editingProduct.Name" placeholder="Nombre" />
+            <input type="text" @bind="editingProduct.Description" placeholder="Categoría" />
+            <input type="number" @bind="editingProduct.Price" placeholder="Precio" />
+            <button @onclick="SaveProduct">Guardar</button>
+            <button @onclick="CancelEdit">Cancelar</button>
+        </div>
+    }
 
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
@@ -43,7 +58,7 @@
                         <td>@product.Description</td>
                         <td>@product.Price.ToString("C")</td>
                         <td>
-                            <button class="btn btn-sm" @onclick="() => EditProduct(product.IdProduct)">
+                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
@@ -64,6 +79,7 @@
 @code {
     private List<ProductDto> products;
     private List<ProductDto> filteredProducts;
+    private ProductDto editingProduct;
     private string searchText = "";
 
     protected override async Task OnInitializedAsync()
@@ -79,7 +95,7 @@
                     Price = p.Price
                 }).ToList();
 
-            filteredProducts = products; 
+            filteredProducts = products;
         }
         catch (Exception ex)
         {
@@ -103,15 +119,60 @@
         NavigationManager.NavigateTo("/add-product");
     }
 
-    protected void EditProduct(string id)
+    protected void StartEditProduct(ProductDto product)
     {
-        NavigationManager.NavigateTo($"/edit-product/{id}");
+        editingProduct = new ProductDto
+            {
+                IdProduct = product.IdProduct,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price
+            };
+    }
+
+    protected async Task SaveProduct()
+    {
+        if (editingProduct == null)
+        {
+            Console.WriteLine("No hay un producto en edición.");
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/product/update/{editingProduct.IdProduct}", editingProduct);
+            if (response.IsSuccessStatusCode)
+            {
+                var updatedProduct = await response.Content.ReadFromJsonAsync<ProductDto>();
+                var index = products.FindIndex(p => p.IdProduct == updatedProduct.IdProduct);
+                if (index != -1)
+                {
+                    products[index] = updatedProduct;
+                    FilterProducts();
+                    Console.WriteLine("Producto actualizado exitosamente.");
+                }
+                editingProduct = null; 
+            }
+            else
+            {
+                Console.WriteLine($"Error al actualizar el producto: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar el producto: {ex.Message}");
+        }
+    }
+
+    protected void CancelEdit()
+    {
+        editingProduct = null; 
     }
 
     protected async Task DeleteProduct(string id)
     {
-        var response = await Http.DeleteAsync($"api/product/delete/{id}");
-        if (response.IsSuccessStatusCode)
+        var success = await productService.DeleteAsync(id);
+        if (success)
         {
             products.Remove(products.First(p => p.IdProduct == id));
             FilterProducts();
@@ -122,7 +183,6 @@
             Console.WriteLine("No se pudo eliminar el producto.");
         }
     }
-
     private string GetHighlightClass(ProductDto product)
     {
         var recentProducts = products.OrderByDescending(p => p.IdProduct).Take(6).Select(p => p.IdProduct).ToList();

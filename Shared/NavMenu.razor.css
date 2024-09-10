@@ -1,14 +1,14 @@
 .navbar-toggler {
     background-color: #ffffff;
     border-bottom: 1px solid #d6d5d5;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 0 rgba(0,0,0,0), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .top-row {
     height: 3.5rem;
-    background-color: #FFFFFF; 
+    background-color: #FFFFFF;
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
 }
 
@@ -16,16 +16,22 @@
     font-size: 1.1rem;
     display: flex;
     align-items: center;
+    color: #ffffff; 
 }
+
 .oi {
     width: 2rem;
     font-size: 1.1rem;
     vertical-align: text-top;
     top: -2px;
+    color: #ffffff; 
 }
+
 .nav-link i {
-    margin-right: 0.5rem; 
+    margin-right: 0.5rem;
+    color: #ffffff; 
 }
+
 .nav-item {
     font-size: 0.9rem;
     padding-bottom: 0.5rem;
@@ -40,7 +46,7 @@
     }
 
     .nav-item ::deep a {
-        color: #000000;
+        color: #ffffff;
         border-radius: 4px;
         height: 3rem;
         display: flex;
@@ -48,29 +54,30 @@
         line-height: 3rem;
     }
 
-.nav-item ::deep a.active {
-    background-color: rgba(255,255,255,0.25);
-    color: white;
-}
+        .nav-item ::deep a.active {
+            background-color: rgba(255,255,255,0.25);
+            color: #ffffff; 
+        }
 
-.nav-item ::deep a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
-
+        .nav-item ::deep a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff; 
+        }
 
 .logo-nav {
-    height: 40px; 
+    height: 40px;
 }
 
 .sidebar {
-    background-color: #b7b7b7;
+    background: #bdc3c7;
+    background: -webkit-linear-gradient(to left, #bdc3c7, #2c3e50);
+    background: linear-gradient(to left, #bdc3c7, #2c3e50);
     height: 100vh;
     width: 250px;
 }
 
     .sidebar .nav-link {
-        color: #000000; 
+        color: #ffffff; 
     }
 
 @media (max-width: 641px) {
@@ -79,22 +86,21 @@
     }
 
     .navbar-toggler-icon {
-        color: black;
+        color: #ffffff; 
     }
+
     .sidebar {
         width: 100%;
     }
 }
 
 
-    @media (min-width: 641px) {
-        .navbar-toggler {
-            display: none;
-        }
-
-        .collapse {
-            display: block;
-        }
-
-       
+@media (min-width: 641px) {
+    .navbar-toggler {
+        display: none;
     }
+
+    .collapse {
+        display: block;
+    }
+}

@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@layout LoginLayout
 
 <head>
     <link href="css/login.css" rel="stylesheet" />
@@ -10,37 +11,38 @@
 @inject IAuthenticationService AuthenticationService
 
 <div class="container">
-    <div class="login-container">
-        <div class="login-logo">
-            <img src="/css/images/logo.png" alt="Logo de la Empresa" />
+    <div class="wrapper">
+        <form @onsubmit="HandleLogin">
+            <p class="form-login">Login</p>
 
-        </div>
-
-        <div class="login-form">
-            <div class="email">
-                <input @bind="email" placeholder="Email" />
+            <div class="input-box">
+                <input @bind="email" required placeholder="Email" type="email" />
                 @if (!string.IsNullOrEmpty(emailError))
                 {
                     <p class="error-message">@emailError</p>
                 }
             </div>
-            <div class="contraseña">
-                <input type="password" @bind="password" placeholder="Contraseña" />
+
+            <div class="input-box">
+                <input @bind="password" required placeholder="Password" type="password" />
                 @if (!string.IsNullOrEmpty(passwordError))
                 {
                     <p class="error-message">@passwordError</p>
                 }
             </div>
-            <button @onclick="HandleLogin" class="btn btn-primary">Iniciar Sesión</button>
-            <div>
-                <a href="/recuperar-password" class="link-recovery">¿Olvidó su contraseña?</a>
-            </div>
-        </div>
 
-        @if (!string.IsNullOrEmpty(loginResult))
-        {
-            <p class="login-result">@loginResult</p>
-        }
+            <div class="remember-forgot">
+                <a href="/recuperar-password">Forgot Password</a>
+            </div>
+
+            <button class="btn" type="submit">Login</button>
+
+            @if (!string.IsNullOrEmpty(loginResult))
+            {
+                <p class="login-result">@loginResult</p>
+            }
+
+        </form>
     </div>
 </div>
 
