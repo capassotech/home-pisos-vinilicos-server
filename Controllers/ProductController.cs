@@ -57,7 +57,8 @@ namespace home_pisos_vinilicos.Controllers
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateProductById(string id, ProductDto requestDto)
         {
-            requestDto.IdProduct = id; 
+            requestDto.IdProduct = id;
+            Console.WriteLine(id);
             var result = await productService.UpdateAsync(requestDto);
             if (result)
             {

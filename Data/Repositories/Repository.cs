@@ -31,11 +31,13 @@ namespace home_pisos_vinilicos.Data.Repositories
             if (filter != null)
             {
                 var filtered = entities.AsQueryable().Where(filter).ToList();
+                Console.WriteLine($"Datos filtrados: {filtered.Count}");
                 return filtered;
             }
 
             return entities;
         }
+
 
         public async Task<T> GetById(string id, bool tracked = true)
         {

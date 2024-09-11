@@ -3,31 +3,64 @@ using home_pisos_vinilicos.Application.Interfaces;
 using System;
 using System.Threading.Tasks;
 using System.Net.Mail;
+using home_pisos_vinilicos.Data.Repositories.IRepository;
+using home_pisos_vinilicos.Domain.Models;
 
 namespace home_pisos_vinilicos.Application.Services
 {
+    /*
     public class AuthenticationService : IAuthenticationService
     {
+        private readonly ILoginRepository _loginRepository;  // Cambia a ILoginRepository
         private readonly HttpClient _httpClient;
+        private readonly string firebaseApiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM";
 
-        public AuthenticationService(HttpClient httpClient)
+        public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient)
         {
+            _loginRepository = loginRepository;  // Cambia a ILoginRepository
             _httpClient = httpClient;
         }
 
         public async Task<string> LoginAsync(string email, string password)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
+            string firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseApiKey}";
+            var payload = new
+            {
+                Email = email,
+                Password = password,
+                returnSecureToken = true
+            };
 
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return await response.Content.ReadAsStringAsync();
+                var response = await _httpClient.PostAsJsonAsync(firebaseAuthUrl, payload);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+
+                    var usersFromDb = await _loginRepository.GetAll(u => u.Email == email);  // Cambia a _loginRepository
+
+                    if (!usersFromDb.Any())
+                    {
+                        return "Usuario no encontrado en la base de datos.";
+                    }
+
+                    return result;  // Aquí puedes retornar el token u otra información según sea necesario
+                }
+                else
+                {
+                    return "Login fallido";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return "Login failed";
+                return $"Error: {ex.Message}";
             }
         }
+
+        
+
 
         public async Task<string> RegisterUserAsync(string email, string password)
         {
@@ -39,20 +72,35 @@ namespace home_pisos_vinilicos.Application.Services
 
             try
             {
+                // Crear un nuevo usuario en Firebase Authentication
                 UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(userRecordArgs);
+
+                // Crear una instancia de Login para almacenar en tu base de datos
+                var newUser = new Login
+                {
+                    Email = email,
+                    IdLogin = userRecord.Uid,
+                    // Otros campos que quieras guardar
+                };
+
+                // Insertar el nuevo usuario en tu base de datos
+                await _loginRepository.Insert(newUser);
+
                 return $"Successfully created new user: {userRecord.Uid}";
             }
             catch (FirebaseAuthException ex)
             {
-                
+                // Manejar errores específicos de Firebase Auth
                 return $"Error creating new user: {ex.Message}";
             }
             catch (Exception ex)
             {
+                // Manejar errores generales
                 return $"Unexpected error: {ex.Message}";
             }
         }
 
+        
         public async Task<bool> ValidateTokenAsync(string token)
         {
             try
@@ -124,5 +172,7 @@ namespace home_pisos_vinilicos.Application.Services
                 }
             }
         }
+    
     }
+    */
 }
