@@ -1,20 +1,19 @@
-using home_pisos_vinilicos.Data.Repositories.IRepository;
-using home_pisos_vinilicos_admin.Domain.Entities;
-using System.Linq.Expressions;
+﻿using home_pisos_vinilicos.Data.Repositories.IRepository;
+using home_pisos_vinilicos.Domain.Models;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
-    public class ProductRepository : FirebaseRepository<Product>, IProductRepository
+    public class LoginRepository : FirebaseRepository<Login>, ILoginRepository
     {
-        public ProductRepository() : base()
+        public LoginRepository() : base()
         {
         }
 
-        public override async Task<bool> Insert(Product newProduct)
+        public override async Task<bool> Insert(Login newLogin)
         {
             try
             {
-                return await base.Insert(newProduct);
+                return await base.Insert(newLogin);
             }
             catch (Exception)
             {
@@ -22,11 +21,11 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(Product updateProduct)
+        public override async Task<bool> Update(Login updateLogin)
         {
             try
             {
-                return await base.Update(updateProduct);
+                return await base.Update(updateLogin);
             }
             catch (Exception)
             {
@@ -45,8 +44,5 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return false;
             }
         }
-
-       
-
     }
 }

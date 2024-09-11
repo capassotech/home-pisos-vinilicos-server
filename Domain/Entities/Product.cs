@@ -1,15 +1,15 @@
-﻿using home_pisos_vinilicos.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
-namespace home_pisos_vinilicos.Domain
+
+namespace home_pisos_vinilicos_admin.Domain.Entities
 {
     [Table("Products")]
     public class Product
     {
         [Key]
         [Column(TypeName = "VARCHAR(50)")]
-        public string IdProduct { get; set; }
+        public string? IdProduct { get; set; }
 
 
         [Required]
@@ -39,6 +39,12 @@ namespace home_pisos_vinilicos.Domain
         [Required]
         [Column(TypeName = "INT")]
         public int Quantity { get; set; }
+
+        [Column(TypeName = "BIT")]
+        public bool IsFeatured { get; set; }
+
+        [Column(TypeName = "Date")]
+        public DateTime CreatedDate { get; set; }
 
         /*
 

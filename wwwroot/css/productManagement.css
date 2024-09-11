@@ -27,7 +27,6 @@
         color: #ffff;
         border: none;
         border-radius: 5px;
-        width: 50px;
         height: 50px;
         box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
     }
@@ -61,6 +60,7 @@
     gap: 0.75rem;
     box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
     transition: all 0.6s ease;
+    height: 50px;
 }
 
     .button-add:hover {
@@ -75,18 +75,84 @@
 .table-products {
     width: 80%;
     margin-top: 4%;
-    padding: 2%;
+    padding: 20px;
+    border-radius: 4px;
     border-radius: 0.5rem;
 }
-
-    .table-products thead {
+th, td {
+    padding: 12px;
+    text-transform: uppercase;
+}
+    thead {
         color: #ffff;
     }
 
-    th{
-        text-transform: uppercase;
-    }
 
 tr {
-    background-color: #6C7A89;
+    background-color: #919ba3;
+}
+
+
+
+.edit-form {
+    background-color: #919ba3;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    margin-top: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+    .edit-form input {
+        display: block;
+        width: 70%;
+        border-radius: 4px;
+        border: none;
+        background-color: #ffffff;
+        padding: 10px;
+        margin-bottom: 5px;
+    }
+
+    .edit-form button {
+        background-color: #488aec;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        margin: 0.5rem 0;
+        width: 150px;
+    }
+
+        .edit-form button:hover {
+            background-color: #366bbf;
+        }
+
+.container-buttons{
+    display: flex;
+    align-items:center;
+    justify-content: space-around;
+    flex-direction: row;
+    gap: 2%;
+}
+
+.table-featured-products{
+    width:80%
+}
+
+.title-featured{
+    font-weight: bolder;
+    margin-top: 2%;
+}
+
+.guardar-cancelar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+    gap: 2%;
 }

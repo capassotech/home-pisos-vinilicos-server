@@ -4,6 +4,7 @@ using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
 using home_pisos_vinilicos.Data;
+using home_pisos_vinilicos.Data.Repositories;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddControllers();
 
 // Servicios con interfaz
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ISecureDataService, SecureDataService>();
 
 // Servicios sin interfaz
 builder.Services.AddScoped<ProductService>();
@@ -22,6 +25,7 @@ builder.Services.AddHttpClient();
 
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));

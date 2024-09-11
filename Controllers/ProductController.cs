@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using home_pisos_vinilicos.Application;
-using home_pisos_vinilicos.Shared.DTOs;
+using home_pisos_vinilicos.Application.Services;
+using home_pisos_vinilicos.Application.DTOs;
 
 namespace home_pisos_vinilicos.Controllers
 {
@@ -83,5 +84,26 @@ namespace home_pisos_vinilicos.Controllers
                 return BadRequest($"No se pudo eliminar el registro. El error es: {ex.Message}");
             }
         }
+
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ProductDto>>> SearchProducts(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("El término de búsqueda no puede estar vacío.");
+            }
+
+            try
+            {
+                var products = await productService.SearchAsync(query);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
     }
 }

@@ -1,31 +1,33 @@
 .navbar-toggler {
-    background-color: #ffffff;
+    background-color: #ffff;
     border-bottom: 1px solid #d6d5d5;
     box-shadow: 0 2px 0 rgba(0,0,0,0), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .top-row {
-    height: 3.5rem;
-    background-color: #FFFFFF;
+    height: 60px;
+    background-color: #ffff;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .navbar-brand {
-    font-size: 1.1rem;
+    height: 50px;
     display: flex;
     align-items: center;
     color: #ffffff; 
 }
-
-.oi {
-    width: 2rem;
-    font-size: 1.1rem;
-    vertical-align: text-top;
-    top: -2px;
-    color: #ffffff; 
-}
+    .navbar-brand img {
+        height: 50px;
+    }
+    .oi {
+        width: 2rem;
+        font-size: 1.1rem;
+        vertical-align: text-top;
+        top: -2px;
+        color: #ffffff;
+    }
 
 .nav-link i {
     margin-right: 0.5rem;
@@ -64,9 +66,6 @@
             color: #ffffff; 
         }
 
-.logo-nav {
-    height: 40px;
-}
 
 .sidebar {
     background: #bdc3c7;
