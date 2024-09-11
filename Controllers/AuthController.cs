@@ -28,16 +28,16 @@ namespace home_pisos_vinilicos.Application.Controllers
         {
             return Ok("Hello from the TestController!");
         }
-     
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
-            var result = await _authenticationService.LoginAsync( request.Email, request.Password);
-
+            var result = await _authenticationService.LoginAsync(request.Email, request.Password);
             return Ok(result);
         }
 
-        
+
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto request)
         {
