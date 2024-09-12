@@ -58,7 +58,6 @@ namespace home_pisos_vinilicos.Application.Services
         {
             if (productDto.IsFeatured)
             {
-                // Verificar que no haya más de 6 productos destacados
                 var featuredProducts = await _productRepository.GetAll(p => p.IsFeatured);
                 if (featuredProducts.Count >= 6)
                 {
@@ -68,7 +67,6 @@ namespace home_pisos_vinilicos.Application.Services
 
             var product = _mapper.Map<Product>(productDto);
 
-            // Asignar la fecha de creación
             product.CreatedDate = DateTime.UtcNow;
 
             var result = await _productRepository.Insert(product);
@@ -84,15 +82,12 @@ namespace home_pisos_vinilicos.Application.Services
 
         public async Task<List<ProductDto>> SearchAsync(string query)
         {
-            // Definir el filtro de búsqueda. Aquí buscamos por nombre o descripción.
             Expression<Func<Product, bool>> filter = p =>
                 p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(query, StringComparison.OrdinalIgnoreCase);
 
-            // Obtener productos que coinciden con el filtro
             var products = await _productRepository.GetAll(filter);
 
-            // Mapear la lista de productos a ProductDto
             var productDtos = _mapper.Map<List<ProductDto>>(products);
 
             return productDtos;

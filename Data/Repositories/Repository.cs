@@ -26,7 +26,19 @@ namespace home_pisos_vinilicos.Data.Repositories
                 .Child(typeof(T).Name)
                 .OnceAsync<T>();
 
-            var entities = firebaseResult.Select(x => x.Object).ToList();
+            var entities = firebaseResult.Select(x =>
+            {
+                var entity = x.Object;
+
+                var keyProperty = GetKeyProperty();
+                if (keyProperty != null && keyProperty.CanWrite)
+                {
+                    // Asignar el ID generado por Firebase (x.Key) a la propiedad marcada con [Key]
+                    keyProperty.SetValue(entity, x.Key);
+                }
+
+                return entity;
+            }).ToList();
 
             if (filter != null)
             {
@@ -37,6 +49,7 @@ namespace home_pisos_vinilicos.Data.Repositories
 
             return entities;
         }
+
 
 
         public async Task<T> GetById(string id, bool tracked = true)
@@ -61,11 +74,23 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
+                // Inserta el objeto en Firebase y obtiene la respuesta con el ID generado
                 var firebaseResponse = await _firebaseClient
                     .Child(typeof(T).Name)
                     .PostAsync(entity);
 
-                return firebaseResponse != null;
+                if (firebaseResponse == null)
+                    return false;
+
+                var entityId = firebaseResponse.Key;
+
+                var keyProperty = GetKeyProperty();
+                if (!string.IsNullOrEmpty(entityId) && keyProperty != null)
+                {
+                    keyProperty.SetValue(entity, entityId);  
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -73,6 +98,7 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return false;
             }
         }
+
 
         public virtual async Task<bool> Update(T entity)
         {

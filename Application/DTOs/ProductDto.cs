@@ -2,7 +2,7 @@
 {
     public class ProductDto
     {
-        public string IdProduct { get; set; }
+        public string? IdProduct { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
         public String Description { get; set; }
