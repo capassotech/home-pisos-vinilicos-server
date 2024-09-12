@@ -40,11 +40,41 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "INT")]
         public int Quantity { get; set; }
 
+
         [Column(TypeName = "BIT")]
         public bool IsFeatured { get; set; }
 
+
         [Column(TypeName = "Date")]
         public DateTime CreatedDate { get; set; }
+
+
+        [Required]
+        [Column(TypeName = "VARCHAR(50)")]
+        public String Model { get; set; }
+
+        [Required]
+        [Column(TypeName = "VARCHAR(50)")]
+        public String Dimensions { get; set; }
+
+
+        [Required]
+        [Column(TypeName = "DECIMAL(18, 2)")]
+        public decimal SurfacePerBox { get; set; }
+
+
+        [Column(TypeName = "BIT")]
+        public bool RequiresUnderlay { get; set; }
+
+
+
+        [Required]
+        [Column(TypeName = "DECIMAL(18, 2)")]
+        public decimal PricePerSquareMeter { get; set; }
+
+
+        [Column(TypeName = "VARCHAR(50)")]
+        public String TechnicalSheet { get; set; }
 
         /*
 
