@@ -2,6 +2,7 @@
     background-color: #ffff;
     border-bottom: 1px solid #d6d5d5;
     box-shadow: 0 2px 0 rgba(0,0,0,0), 0 2px 4px rgba(0,0,0,0.1);
+    margin-top:5%;
 }
 
 .top-row {
@@ -80,21 +81,19 @@
     }
 
 @media (max-width: 641px) {
-    .navbar-brand img {
+    .navbar-brand{
         display: none;
     }
 
-    .navbar-toggler-icon {
-        color: #ffffff; 
-    }
+        .navbar-brand img{
+            display:none;
+        }
+        .navbar-toggler-icon {
+            color: #ffffff;
+        }
 
     .sidebar {
         width: 100%;
-    }
-    .top-row{
-       padding-top: 0;
-       flex-wrap: no-wrap;
-       height: auto;
     }
 }
 

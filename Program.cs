@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using Firebase.Database;
 using home_pisos_vinilicos.Application;
 using home_pisos_vinilicos.Application.Interfaces;
@@ -32,6 +33,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));
+
 
 // Firebase Client
 builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
