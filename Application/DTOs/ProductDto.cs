@@ -10,6 +10,13 @@
         public String Color { get; set; }
         public int Quantity { get; set; }
         public bool IsFeatured { get; set; }
+        public String Model { get; set; }
+        public String Dimensions { get; set; }
+        public decimal SurfacePerBox { get; set; }
+        public bool RequiresUnderlay { get; set; }
+        public decimal PricePerSquareMeter { get; set; }
+        public String TechnicalSheet { get; set; }
+
         //public Category category { get; set; }
     }
 }
