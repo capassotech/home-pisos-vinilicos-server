@@ -33,6 +33,27 @@
         </button>
     </div>
 
+    <!-- Formulario de Edición -->
+    @if (isModalOpen)
+    {
+        <div class="edit-form">
+            <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
+
+            @if (!isNewProduct)
+            {
+                <p>ID del Producto: @editingProduct.IdProduct</p>
+            }
+
+            <input type="text" @bind="editingProduct.Name" placeholder="Nombre" />
+            <input type="text" @bind="editingProduct.Description" placeholder="Categoría" />
+            <input type="number" @bind="editingProduct.Price" placeholder="Precio" />
+            <div class="container-buttons">
+            <button @onclick="SaveProduct">Guardar</button>
+            <button @onclick="CancelEdit">Cancelar</button>
+            </div>
+        </div>
+    }
+
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {
@@ -51,7 +72,7 @@
                     <tr class="@GetHighlightClass(product)">
                         <td>@product.Name</td>
                         <td>@product.Description</td>
-                        <td>@product.Price.ToString("C")</td>
+                        <td>@product.Price</td>
                         <td class="buttons-edition">
                             <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
                                 <i class="fas fa-pencil-alt"></i>

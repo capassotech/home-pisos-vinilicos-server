@@ -131,6 +131,12 @@ tr {
         width: 150px;
     }
 
+    .edit-form h4 {
+        color: #ffff;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
         .edit-form button:hover {
             background-color: #366bbf;
         }
