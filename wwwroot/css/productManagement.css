@@ -11,6 +11,10 @@
     padding-top: 2%;
     font-weight: bolder;
 }
+.container-search{
+    display:flex;
+    flex-direction: row;
+}
 
 .search {
     padding-top: 2%;
@@ -18,7 +22,6 @@
     display: flex;
     flex-direction: row;
     gap: 2%;
- 
 }
 
     .search button {
@@ -141,7 +144,8 @@ tr {
 }
 
 .table-featured-products{
-    width:80%
+    width:80%;
+    margin-top: 2%;
 }
 
 .title-featured{
@@ -155,4 +159,76 @@ tr {
     justify-content: space-around;
     flex-direction: row;
     gap: 2%;
+}
+
+.line {
+    width: 400px;
+    border-top: 3px solid #919ba3 ;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+    .pagination-controls button {
+        margin: 0 5px;
+        padding: 5px;
+        background-color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .pagination-controls button i {
+            font-size: 16px;
+            color: #333; 
+        }
+
+        .pagination-controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5; 
+        }
+
+    .pagination-controls span {
+        margin: 0 10px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .pagination-controls button:hover {
+        background-color: #f0f0f0; 
+    }
+
+.buttons-edition {
+ }
+@media (max-width: 700px) {
+    .container-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container-search {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .edit-form{
+        width: 90%;
+    }
+    .table-products {
+        width: 90%;
+    }
+    .table-featured-products {
+        width: 90%;
+    }
 }

@@ -13,45 +13,25 @@
 
 <div class="container-management-products">
     <h3 class="title-products">Productos en la tienda</h3>
+    <div class="line"></div>
 
     <!-- Filtros y Búsqueda -->
     <div class="container-buttons">
-        <div class="search">
-            <input type="text" @bind="searchText" placeholder="Nombre" class="form-control" />
-            <button @onclick="FilterProducts">
-                Buscar
-            </button>
-            <input type="text" @bind="searchText" placeholder="Descripcion" class="form-control" />
-            <button @onclick="FilterProducts">
-                Buscar
-            </button>
+        <div class="container-search">
+            <div class="search">
+                <input type="text" @bind="searchText" placeholder="Nombre" class="form-control" />
+                <button @onclick="FilterProducts">Buscar</button>
+            </div>
+            <div class="search">
+                <input type="text" @bind="searchText" placeholder="Descripcion" class="form-control" />
+                <button @onclick="FilterProducts">Buscar</button>
+            </div>
         </div>
 
         <button type="submit" @onclick="AddNewProduct" class="button-add" aria-label="Click me">
             <i class="fas fa-plus"></i> AGREGAR NUEVO PRODUCTO
         </button>
     </div>
-
-    <!-- Formulario de Edición -->
-    @if (isModalOpen)
-    {
-        <div class="edit-form">
-            <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
-
-            @if (!isNewProduct)
-            {
-                <p>ID del Producto: @editingProduct.IdProduct</p>
-            }
-
-            <input type="text" @bind="editingProduct.Name" placeholder="Nombre" />
-            <input type="text" @bind="editingProduct.Description" placeholder="Categoría" />
-            <input type="number" @bind="editingProduct.Price" placeholder="Precio" />
-            <div class="guardar-cancelar">
-            <button @onclick="SaveProduct">Guardar</button>
-            <button @onclick="CancelEdit">Cancelar</button>
-            </div>
-        </div>
-    }
 
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
@@ -66,13 +46,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var product in filteredProducts)
+                @foreach (var product in GetPaginatedProducts())
                 {
                     <tr class="@GetHighlightClass(product)">
                         <td>@product.Name</td>
                         <td>@product.Description</td>
                         <td>@product.Price.ToString("C")</td>
-                        <td>
+                        <td class="buttons-edition">
                             <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
@@ -80,13 +60,11 @@
                                 @if (product.IsFeatured)
                                 {
                                     <i class="fas fa-star"></i>
-                  
                                 }
                                 else
                                 {
                                     <i class="far fa-star"></i>
-
-                                    }
+                                }
                             </button>
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
                                 <i class="fas fa-trash"></i>
@@ -96,6 +74,17 @@
                 }
             </tbody>
         </table>
+
+        <!-- Botones de Paginación -->
+        <div class="pagination-controls">
+            <button @onclick="PreviousPage">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span>Página @currentPage de @totalPages</span>
+            <button @onclick="NextPage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
     }
     else
     {
@@ -106,6 +95,8 @@
     @if (featuredProducts != null && featuredProducts.Any())
     {
         <h4 class="title-featured">PRODUCTOS DESTACADOS</h4>
+        <div class="line"></div>
+
         <table class="table table-featured-products">
             <thead>
                 <tr>
@@ -127,7 +118,6 @@
         </table>
     }
 </div>
-
 @code {
     private List<ProductDto> products = new List<ProductDto>();
     private List<ProductDto> filteredProducts = new List<ProductDto>();
@@ -136,10 +126,14 @@
     private string searchText = "";
     private bool isNewProduct = true;
     private bool isModalOpen = false;
+    private int currentPage = 1;
+    private int pageSize = 5; 
+    private int totalPages = 1;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadProducts();
+        CalculateTotalPages();
     }
 
     private async Task LoadProducts()
@@ -158,18 +152,12 @@
 
             filteredProducts = products;
             featuredProducts = products.Where(p => p.IsFeatured).ToList();
+            CalculateTotalPages();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar productos: {ex.Message}");
         }
-    }
-
-    protected void FilterProducts()
-    {
-        filteredProducts = products
-            .Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
     }
 
     protected async void AddNewProduct()
@@ -284,4 +272,44 @@
         var recentProducts = products.OrderByDescending(p => p.IdProduct).Take(6).Select(p => p.IdProduct).ToList();
         return recentProducts.Contains(product.IdProduct) ? "highlight" : "";
     }
+
+    protected void FilterProducts()
+    {
+        filteredProducts = products
+            .Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        CalculateTotalPages(); // Recalcular páginas después de filtrar productos
+        currentPage = 1; // Reiniciar a la primera página después de filtrar
+    }
+
+    private List<ProductDto> GetPaginatedProducts()
+    {
+        return filteredProducts
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling(filteredProducts.Count / (double)pageSize);
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+        }
+    }
 }
+

@@ -80,7 +80,7 @@
     }
 
 @media (max-width: 641px) {
-    .logo-nav {
+    .navbar-brand img {
         display: none;
     }
 
@@ -90,6 +90,11 @@
 
     .sidebar {
         width: 100%;
+    }
+    .top-row{
+       padding-top: 0;
+       flex-wrap: no-wrap;
+       height: auto;
     }
 }
 
