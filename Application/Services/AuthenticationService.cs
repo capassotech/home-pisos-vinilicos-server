@@ -8,7 +8,7 @@ using home_pisos_vinilicos.Domain.Models;
 
 namespace home_pisos_vinilicos.Application.Services
 {
-    /*
+    
     public class AuthenticationService : IAuthenticationService
     {
         private readonly ILoginRepository _loginRepository;  // Cambia a ILoginRepository
@@ -17,7 +17,7 @@ namespace home_pisos_vinilicos.Application.Services
 
         public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient)
         {
-            _loginRepository = loginRepository;  // Cambia a ILoginRepository
+            _loginRepository = loginRepository;  
             _httpClient = httpClient;
         }
 
@@ -26,31 +26,30 @@ namespace home_pisos_vinilicos.Application.Services
             string firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseApiKey}";
             var payload = new
             {
-                Email = email,
-                Password = password,
+                email = email.Trim().ToLower(), 
+                password = password,
                 returnSecureToken = true
             };
 
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(firebaseAuthUrl, payload);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadAsStringAsync();
-
-                    var usersFromDb = await _loginRepository.GetAll(u => u.Email == email);  // Cambia a _loginRepository
+                    var usersFromDb = await _loginRepository.GetAll(u => u.Email == email.Trim().ToLower());
 
                     if (!usersFromDb.Any())
                     {
                         return "Usuario no encontrado en la base de datos.";
                     }
 
-                    return result;  // Aquí puedes retornar el token u otra información según sea necesario
+                    return responseContent; 
                 }
                 else
                 {
-                    return "Login fallido";
+                    return $"Login fallido: {responseContent}";
                 }
             }
             catch (Exception ex)
@@ -59,7 +58,6 @@ namespace home_pisos_vinilicos.Application.Services
             }
         }
 
-        
 
 
         public async Task<string> RegisterUserAsync(string email, string password)
@@ -79,7 +77,6 @@ namespace home_pisos_vinilicos.Application.Services
                 var newUser = new Login
                 {
                     Email = email,
-                    IdLogin = userRecord.Uid,
                     // Otros campos que quieras guardar
                 };
 
@@ -174,5 +171,5 @@ namespace home_pisos_vinilicos.Application.Services
         }
     
     }
-    */
+    
 }

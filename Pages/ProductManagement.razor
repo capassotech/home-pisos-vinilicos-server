@@ -21,15 +21,11 @@
                 <input type="text" @bind="searchText" placeholder="Nombre" class="form-control" />
                 <button @onclick="FilterProducts">Buscar</button>
             </div>
-            <div class="search">
-                <input type="text" @bind="searchText" placeholder="Descripcion" class="form-control" />
-                <button @onclick="FilterProducts">Buscar</button>
-            </div>
-        </div>
-
         <button type="submit" @onclick="AddNewProduct" class="button-add" aria-label="Click me">
             <i class="fas fa-plus"></i> AGREGAR NUEVO PRODUCTO
         </button>
+        </div>
+
     </div>
 
     <!-- Formulario de Edición -->
@@ -39,11 +35,6 @@
         <div class="modal-overlay">
             <div class="edit-form">
                 <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
-
-                @if (!isNewProduct)
-                {
-                    <p>ID del Producto: @editingProduct.IdProduct</p>
-                }
 
                 <label for="name">Nombre del producto</label>
                 <input id="name" type="text" @bind="editingProduct.Name" placeholder="Nombre" required />

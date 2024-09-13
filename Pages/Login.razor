@@ -8,6 +8,7 @@
 @using home_pisos_vinilicos.Application.Interfaces
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Models
+@inject NavigationManager Navigation
 @inject IAuthenticationService AuthenticationService
 
 <div class="container">
@@ -80,5 +81,9 @@
         }
 
         loginResult = await AuthenticationService.LoginAsync(email, password);
+        if (loginResult != null && !loginResult.StartsWith("Login fallido"))
+        {
+            Navigation.NavigateTo("/product-management");
+        }
     }
 }

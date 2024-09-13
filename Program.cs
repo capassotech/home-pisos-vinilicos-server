@@ -22,8 +22,10 @@ builder.Services.AddScoped<ISecureDataService, SecureDataService>();
 // Servicios sin interfaz
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<LoginService>();
+
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

@@ -9,6 +9,7 @@
 .title-products {
     text-transform: uppercase;
     padding-top: 2%;
+    margin-bottom:2%;
     font-weight: bolder;
 }
 .container-search{
@@ -16,9 +17,9 @@
     flex-direction: row;
     justify-content: space-between;
     gap: 2%;
+    align-items: center;
+    width: 80%;
 }
-
-
 
 .search {
     padding-top: 2%;
@@ -30,7 +31,7 @@
 
     .search button {
         background-color: #488aec;
-        padding: 2%;
+        padding: 5%;
         color: #ffff;
         border: none;
         border-radius: 5px;
@@ -176,6 +177,7 @@ tr {
     flex-direction: row;
     gap: 2%;
     margin-top: 2%;
+    width: 100%;
 }
 
 .table-featured-products {
