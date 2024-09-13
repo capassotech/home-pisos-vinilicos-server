@@ -33,33 +33,90 @@
     </div>
 
     <!-- Formulario de Edición -->
+    <!-- Formulario de Edición -->
     @if (isModalOpen)
     {
-        <div class="edit-form">
-            <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
+        <div class="modal-overlay">
+            <div class="edit-form">
+                <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
 
-            @if (!isNewProduct)
-            {
-                <p>ID del Producto: @editingProduct.IdProduct</p>
-            }
+                @if (!isNewProduct)
+                {
+                    <p>ID del Producto: @editingProduct.IdProduct</p>
+                }
 
-            <input type="text" @bind="editingProduct.Name" placeholder="Nombre" />
-            <input type="text" @bind="editingProduct.Description" placeholder="Descripción" />
-            <input type="number" @bind="editingProduct.Price" placeholder="Precio" />
-            <input type="number" @bind="editingProduct.Size" placeholder="Tamaño" />
-            <input type="text" @bind="editingProduct.Color" placeholder="Color" />
-            <input type="number" @bind="editingProduct.Quantity" placeholder="Cantidad" />
-            <input type="text" @bind="editingProduct.Model" placeholder="Modelo" />
-            <input type="text" @bind="editingProduct.Dimensions" placeholder="Dimensiones" />
-            <input type="number" @bind="editingProduct.SurfacePerBox" placeholder="Superficie por Caja" />
-            <input type="number" @bind="editingProduct.PricePerSquareMeter" placeholder="Precio por Metro Cuadrado" />
-            <input type="text" @bind="editingProduct.TechnicalSheet" placeholder="Ficha Técnica" />
-            <div class="container-buttons">
-            <button @onclick="SaveProduct">Guardar</button>
-            <button @onclick="CancelEdit">Cancelar</button>
+                <label for="name">Nombre del producto</label>
+                <input id="name" type="text" @bind="editingProduct.Name" placeholder="Nombre" required />
+
+               @*  <label for="category">Categoría</label>
+                <select id="category" @bind="editingProduct.Category">
+                    <option value="">Seleccione una categoría</option>
+                    <!-- Agrega aquí las opciones de categorías -->
+                </select>
+ *@
+                <label for="price">Precio</label>
+                <input id="price" type="number" step="0.01" @bind="editingProduct.Price" placeholder="Precio" required />
+
+                <label for="description">Descripción</label>
+                <textarea id="description" @bind="editingProduct.Description" placeholder="Descripción" required></textarea>
+
+                <label for="size">Tamaño</label>
+                <input id="size" type="number" step="0.01" @bind="editingProduct.Size" placeholder="Tamaño" required />
+
+                <label for="color">Color</label>
+                <input id="color" type="text" @bind="editingProduct.Color" placeholder="Color" />
+
+                <label for="quantity">Cantidad</label>
+                <input id="quantity" type="number" @bind="editingProduct.Quantity" placeholder="Cantidad" required />
+
+                <div class="ckeckboxes">
+                <label for="isFeatured">Destacar producto</label>
+                <input id="isFeatured" type="checkbox" @bind="editingProduct.IsFeatured" />
+                </div>
+
+                <label for="model">Modelo</label>
+                <input id="model" type="text" @bind="editingProduct.Model" placeholder="Modelo" required />
+
+                <label for="dimensions">Dimensiones</label>
+                <input id="dimensions" type="text" @bind="editingProduct.Dimensions" placeholder="Dimensiones (e.g., 2m x 3m)" required />
+
+                <label for="surfacePerBox">Superficie por Caja</label>
+                <input id="surfacePerBox" type="number" step="0.01" @bind="editingProduct.SurfacePerBox" placeholder="Superficie por Caja" required />
+
+                <div class="ckeckboxes">
+                <label for="requiresUnderlay">Requiere Manta</label>
+                <input id="requiresUnderlay" type="checkbox" @bind="editingProduct.RequiresUnderlay" />
+                </div>
+
+                <label for="pricePerSquareMeter">Precio por m²</label>
+                <input id="pricePerSquareMeter" type="number" step="0.01" @bind="editingProduct.PricePerSquareMeter" placeholder="Precio por m²" required />
+
+                <label for="technicalSheet">Ficha Técnica</label>
+                <textarea id="technicalSheet" @bind="editingProduct.TechnicalSheet" placeholder="Ficha Técnica"></textarea>
+
+                @if (isLoading)
+                {
+                    <div class="spinner">Cargando...</div>
+                }
+
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success">@successMessage</div>
+                }
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="container-buttons">
+                    <button @onclick="SaveProduct" disabled="@isLoading">Guardar</button>
+                    <button @onclick="CancelEdit">Cancelar</button>
+                </div>
             </div>
         </div>
     }
+    
 
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
@@ -156,6 +213,10 @@
     private int currentPage = 1;
     private int pageSize = 5; 
     private int totalPages = 1;
+    private string successMessage = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -215,6 +276,8 @@
 
         isNewProduct = true;
         isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
     }
 
     protected void StartEditProduct(ProductDto product)
@@ -244,10 +307,15 @@
             };
         isNewProduct = false;
         isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
     }
 
     private async Task SaveProduct()
     {
+        isLoading = true;
+        successMessage = "";
+        errorMessage = "";
         try
         {
             if (isNewProduct)
@@ -258,16 +326,19 @@
                 {
                     Console.WriteLine("Producto guardado exitosamente.");
                     products.Add(editingProduct);
+                    successMessage = "Producto agregado exitosamente.";
                 }
                 else
                 {
                     Console.WriteLine("Error: No se pudo guardar el producto.");
+                    errorMessage = "Error al guardar el producto";
                 }
             }
             else
             {
                 Console.WriteLine($"Actualizando producto con ID: {editingProduct.IdProduct}");
                 await productService.UpdateAsync(editingProduct);
+                successMessage = "Producto actualizado exitosamente.";
             }
 
             await LoadProducts();
@@ -276,6 +347,10 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error al guardar el producto: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
