@@ -30,29 +30,38 @@ namespace home_pisos_vinilicos.Application.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.LoginAsync(request.Email, request.Password);
-            return Ok(result);
-        }
 
-
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto request)
-        {
-            var result = await _authenticationService.RegisterUserAsync(request.Email, request.Password);
-
-            if (result.StartsWith("Successfully"))
+            if (result.IsSuccess)
             {
                 return Ok(result);
             }
-            else
-            {
-                return BadRequest(result);
-            }
+
+            return Unauthorized(result.Message);
         }
-        
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            var result = await _authenticationService.RegisterAsync(request.Email, request.Password);
+            return Ok(result);
+        }
+
+        public class RegisterRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+        public class LoginRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+        /*
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
@@ -90,7 +99,7 @@ namespace home_pisos_vinilicos.Application.Controllers
 
             return Unauthorized("No token provided");
         }
-
+        */
 
     }
 

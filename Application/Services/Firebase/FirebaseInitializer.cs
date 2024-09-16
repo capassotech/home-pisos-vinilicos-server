@@ -7,7 +7,7 @@ namespace home_pisos_vinilicos.Application.Services.Firebase
     {
         public static void InitializeFirebase()
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "Server", "firebase.json");
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "firebase.json");
             if (File.Exists(path))
             {
                 if (FirebaseApp.DefaultInstance == null)

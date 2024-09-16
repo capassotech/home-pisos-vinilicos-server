@@ -80,8 +80,10 @@
             return;
         }
 
-        loginResult = await AuthenticationService.LoginAsync(email, password);
-        if (loginResult != null && !loginResult.StartsWith("Login fallido"))
+
+        var result = await AuthenticationService.LoginAsync(email, password);
+
+        if (result.IsSuccess)
         {
             Navigation.NavigateTo("/product-management");
         }

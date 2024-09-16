@@ -1,12 +1,14 @@
 ﻿
 
+using home_pisos_vinilicos.Application.DTOs;
+
 namespace home_pisos_vinilicos.Application.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<string> LoginAsync(string email, string password);
-        Task<string> RegisterUserAsync(string email, string password);
-        Task<bool> ForgotPasswordAsync(string email);
-        Task<bool> ValidateTokenAsync(string token);
+        Task<string> RegisterAsync(string email, string password);
+        Task<AuthResult> LoginAsync(string email, string password);
+        //Task<bool> ForgotPasswordAsync(string email);
+        //Task<bool> ValidateTokenAsync(string token);
     }
 }

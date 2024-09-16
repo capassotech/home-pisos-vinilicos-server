@@ -63,3 +63,5 @@ obj/
 
 # Azure Functions
 local.settings.json
+firebase.json
+
