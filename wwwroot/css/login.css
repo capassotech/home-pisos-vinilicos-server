@@ -172,3 +172,10 @@
     .register-link p a:hover {
         text-decoration: underline;
     }
+
+
+.login-result {
+    text-align: center;
+    margin-top: 5%;
+    color: #B8001F;
+}

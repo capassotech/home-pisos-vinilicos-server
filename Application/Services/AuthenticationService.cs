@@ -74,7 +74,7 @@ public class AuthenticationService : IAuthenticationService
             return new AuthResult
             {
                 IsSuccess = false,
-                Message = $"Error de autenticación: {errorResponse}"
+                Message = $"Error de autenticación"
             };
         }
     }
@@ -99,7 +99,6 @@ public class AuthenticationService : IAuthenticationService
         {
             var actionCodeSettings = new ActionCodeSettings()
             {
-                // URL a la que se redirigirá después de que el usuario restablezca su contraseña
                 Url = "https://tudominio.com/reset-password",
             };
 
@@ -129,7 +128,18 @@ public class AuthenticationService : IAuthenticationService
     }
 
 
-
+    public async Task<bool> IsUserAuthenticated(string idToken)
+    {
+        try
+        {
+            var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+            return decodedToken != null;
+        }
+        catch (FirebaseAuthException)
+        {
+            return false;
+        }
+    }
 
 }
 
