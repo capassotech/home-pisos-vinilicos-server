@@ -26,6 +26,7 @@ namespace home_pisos_vinilicos.Application.Services
             return logins;
         }
 
+
         public async Task<UserRecord> GetUserByEmailAsync(string email)
         {
             try

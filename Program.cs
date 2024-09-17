@@ -1,14 +1,40 @@
 using Blazored.Toast;
 using Firebase.Database;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using home_pisos_vinilicos.Application;
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
+using home_pisos_vinilicos.Application.Services.Firebase;
 using home_pisos_vinilicos.Data;
 using home_pisos_vinilicos.Data.Repositories;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 
+
+
+
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile("firebase.json")
+});
+
+
+
+//builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
+
+builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((sp, httpClient) =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    httpClient.BaseAddress = new Uri(configuration["Authentication: TokenUri"]!);
+
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();

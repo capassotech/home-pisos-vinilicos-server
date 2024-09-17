@@ -30,42 +30,37 @@ namespace home_pisos_vinilicos.Application.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.LoginAsync(request.Email, request.Password);
-            return Ok(result);
-        }
 
-
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto request)
-        {
-            var result = await _authenticationService.RegisterUserAsync(request.Email, request.Password);
-
-            if (result.StartsWith("Successfully"))
+            if (result.IsSuccess)
             {
                 return Ok(result);
             }
-            else
-            {
-                return BadRequest(result);
-            }
+
+            return Unauthorized(result.Message);
         }
-        
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            var result = await _authenticationService.RegisterAsync(request.Email, request.Password);
+            return Ok(result);
+        }
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
         {
-            var result = await _authenticationService.ForgotPasswordAsync(request.Email);
+            var resetLink = await _authenticationService.ForgotPasswordAsync(request.Email);
 
-            if (result)
+            if (resetLink != null)
             {
-                return Ok("Password recovery email sent successfully.");
+                return Ok(new { Link = resetLink });
             }
             else
             {
-                return BadRequest("Failed to send recovery email.");
+                return BadRequest("Failed to generate password reset link.");
             }
         }
 
@@ -76,21 +71,36 @@ namespace home_pisos_vinilicos.Application.Controllers
 
             if (idToken != null)
             {
-                try
+                var result = await _authenticationService.LogoutAsync(idToken);
+
+                if (result)
                 {
-                    var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
-                    await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(decodedToken.Uid);
                     return Ok("Logout successful.");
                 }
-                catch
+                else
                 {
-                    return Unauthorized("Invalid token");
+                    return Unauthorized("Invalid or expired token.");
                 }
             }
 
-            return Unauthorized("No token provided");
+            return Unauthorized("No token provided.");
         }
 
+
+
+        public class RegisterRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+        public class LoginRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+       
 
     }
 
