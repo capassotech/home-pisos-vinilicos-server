@@ -79,7 +79,30 @@ public class AuthenticationService : IAuthenticationService
             };
         }
     }
+    public async Task<string> ForgotPasswordAsync(string email)
+    {
+        try
+        {
+            var actionCodeSettings = new ActionCodeSettings()
+            {
+                // URL a la que se redirigirá después de que el usuario restablezca su contraseña
+                Url = "https://tudominio.com/reset-password",
+            };
+
+            var resetPasswordLink = await FirebaseAuth.DefaultInstance.GeneratePasswordResetLinkAsync(email, actionCodeSettings);
+            return resetPasswordLink;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+
+
+
 }
+
+
 
 public class AuthResult
 {

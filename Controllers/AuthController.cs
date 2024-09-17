@@ -49,6 +49,22 @@ namespace home_pisos_vinilicos.Application.Controllers
             return Ok(result);
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
+        {
+            var resetLink = await _authenticationService.ForgotPasswordAsync(request.Email);
+
+            if (resetLink != null)
+            {
+                return Ok(new { Link = resetLink });
+            }
+            else
+            {
+                return BadRequest("Failed to generate password reset link.");
+            }
+        }
+
+
         public class RegisterRequest
         {
             public string Email { get; set; }
