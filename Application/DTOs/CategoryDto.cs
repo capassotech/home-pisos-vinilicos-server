@@ -8,6 +8,6 @@ namespace home_pisos_vinilicos.Application.DTOs
         public string? IdSuperCategory { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public List<Category> SubCategories { get; set; }
+        //public List<Category> SubCategories { get; set; }
     }
 }

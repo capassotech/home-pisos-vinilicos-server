@@ -54,20 +54,20 @@ namespace home_pisos_vinilicos.Controllers
             return Ok(category);
         }
 
-        /*
         [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateCategoryById(string id, CategoryDto requestDto)
+        public async Task<ActionResult> UpdateCategoryById(string id, [FromBody] CategoryDto requestDto)
         {
-            requestDto.IdCategory = id;
-            Console.WriteLine(id);
+            requestDto.IdCategory = id;  // Asegura que el ID esté asignado
             var result = await categoryService.UpdateAsync(requestDto);
+
             if (result)
             {
-                return Ok("Product actualizado exitosamente.");
+                return Ok("Categoría actualizada exitosamente.");
             }
-            return BadRequest("No se pudo actualizar el Product.");
+
+            return BadRequest("No se pudo actualizar la categoría.");
         }
-        */
+
 
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteCategoryById(string id)
@@ -87,6 +87,23 @@ namespace home_pisos_vinilicos.Controllers
             }
         }
 
+        [HttpPut("{id}/feature")]
+        public async Task<ActionResult> SetFeaturedCategory(string id, [FromBody] bool isFeatured)
+        {
+            try
+            {
+                var result = await categoryService.SetFeaturedCategoryAsync(id, isFeatured);
+                if (result)
+                {
+                    return Ok("Categoría actualizada como destacada.");
+                }
+                return BadRequest("No se pudo actualizar la categoría.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); // Mensaje de error si ya hay 2 categorías destacadas
+            }
+        }
 
 
     }
