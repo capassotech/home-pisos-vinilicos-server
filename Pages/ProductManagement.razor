@@ -34,101 +34,122 @@
     @if (isModalOpen)
     {
         <div class="modal-overlay">
-
             <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct" class="edit-form">
                 <DataAnnotationsValidator />
-                <ValidationSummary />
-
                 <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
+
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="name">Nombre del producto</label>
                     <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
-                    <ValidationMessage For="@(() => editingProduct.Name)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
                 </div>
 
-              @*   <div class="form-group">
-                    <label for="category">Categoría</label>
-                    <InputSelect id="category" class="form-control" @bind-Value="editingProduct.Category">
-                        <option value="">Seleccione una categoría</option>
-                        @foreach (var category in categories)
-                        {
-                            <option value="@category">@category</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => editingProduct.Category)" />
-                </div> *@
-
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="price">Precio</label>
                     <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
-                    <ValidationMessage For="@(() => editingProduct.Price)" />
-                </div>
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
+                    </div>
+
 
                 <div class="form-group">
+                    <div class="error-text">
+
                     <label for="description">Descripción</label>
                     <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
-                    <ValidationMessage For="@(() => editingProduct.Description)" />
+                    </div>
+
+                    <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
+
                     <label for="size">Tamaño</label>
                     <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
-                    <ValidationMessage For="@(() => editingProduct.Size)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="color">Color</label>
                     <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
+                    </div>
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="quantity">Cantidad</label>
                     <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
-                    <ValidationMessage For="@(() => editingProduct.Quantity)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
                 </div>
 
                 <div class="form-group ckeckboxes">
+                    <div class="error-text">
                     <label for="isFeatured">Destacar producto</label>
                     <InputCheckbox id="isFeatured" @bind-Value="editingProduct.IsFeatured" />
+                    </div>
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="model">Modelo</label>
                     <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
-                    <ValidationMessage For="@(() => editingProduct.Model)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="dimensions">Dimensiones</label>
                     <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
-                    <ValidationMessage For="@(() => editingProduct.Dimensions)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="surfacePerBox">Superficie por Caja</label>
                     <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
-                    <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
                 </div>
 
                 <div class="form-group ckeckboxes">
+                    <div class="error-text">
                     <label for="requiresUnderlay">Requiere Manta</label>
                     <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
+                    </div>
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
                     <label for="pricePerSquareMeter">Precio por m²</label>
                     <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
-                    <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
+                    <div class="error-text">
+
                     <label for="technicalSheet">Ficha Técnica</label>
                     <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
+                    </div>
                 </div>
 
                 @if (isLoading)
                 {
-                    <div class="spinner">Cargando...</div>
+                    <div class="spinner">
+                        <svg viewBox="25 25 50 50">
+                            <circle r="20" cy="50" cx="50"></circle>
+                        </svg>
+                    </div>
                 }
 
                 @if (!string.IsNullOrEmpty(successMessage))
@@ -142,7 +163,7 @@
                 }
 
                 <div class="container-buttons">
-                    <button type="submit" class="btn btn-primary" >Guardar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
                     <button @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
                 </div>
             </EditForm>

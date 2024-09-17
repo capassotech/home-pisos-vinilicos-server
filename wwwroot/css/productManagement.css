@@ -132,10 +132,7 @@ tr {
 
 .form-group {
     width: 100%;
-    display:flex;
-    align-items: center;
-    justify-content: space-around;
-    flex-direction: column;
+
 }
 
 .form-group input {
@@ -165,6 +162,7 @@ tr {
     border: none;
     width: 45%;
     background-color: #BFCFE7;
+    margin-bottom: 1%;
 }
 
     .edit-form h4 {
@@ -259,20 +257,59 @@ tr {
     .form-control button{
         padding: 10px;
     }
-.buttons-edition {
- }
-
-.ckeckboxes {
+.error-text{
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-    width: 45%;
-    border-radius: 10px;
-    border: none;
-    background-color: #BFCFE7;
-    padding: 5px;
+    justify-content: space-between;
+    align-items:center;
 }
+
+.error-text label{
+    text-align: left;
+}
+
+svg {
+    width: 3.25em;
+    transform-origin: center;
+    animation: rotate4 2s linear infinite;
+}
+
+circle {
+    fill: none;
+    stroke: hsl(214, 97%, 59%);
+    stroke-width: 2;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash4 {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 200;
+        stroke-dashoffset: -35px;
+    }
+
+    100% {
+        stroke-dashoffset: -125px;
+    }
+}
+
+.spinner{
+    padding: 10%;
+}
+
 @media (max-width: 700px) {
     .container-buttons {
         flex-direction: column;
