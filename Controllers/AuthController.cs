@@ -64,6 +64,29 @@ namespace home_pisos_vinilicos.Application.Controllers
             }
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var idToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (idToken != null)
+            {
+                var result = await _authenticationService.LogoutAsync(idToken);
+
+                if (result)
+                {
+                    return Ok("Logout successful.");
+                }
+                else
+                {
+                    return Unauthorized("Invalid or expired token.");
+                }
+            }
+
+            return Unauthorized("No token provided.");
+        }
+
+
 
         public class RegisterRequest
         {
@@ -77,45 +100,7 @@ namespace home_pisos_vinilicos.Application.Controllers
             public string Password { get; set; }
         }
 
-        /*
-
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
-        {
-            var result = await _authenticationService.ForgotPasswordAsync(request.Email);
-
-            if (result)
-            {
-                return Ok("Password recovery email sent successfully.");
-            }
-            else
-            {
-                return BadRequest("Failed to send recovery email.");
-            }
-        }
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            var idToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-
-            if (idToken != null)
-            {
-                try
-                {
-                    var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
-                    await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(decodedToken.Uid);
-                    return Ok("Logout successful.");
-                }
-                catch
-                {
-                    return Unauthorized("Invalid token");
-                }
-            }
-
-            return Unauthorized("No token provided");
-        }
-        */
+       
 
     }
 
