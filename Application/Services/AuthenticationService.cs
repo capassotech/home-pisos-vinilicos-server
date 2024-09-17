@@ -8,19 +8,14 @@ using System.Net.Mail;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly ILoginRepository _loginRepository;  // Cambia a ILoginRepository
+    private readonly ILoginRepository _loginRepository; 
     private readonly HttpClient _httpClient;
-    private readonly string firebaseApiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM";
 
     public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient)
     {
         _loginRepository = loginRepository;
         _httpClient = httpClient;
     }
-
-
-
-
 
 
     public async Task<string> RegisterAsync(string email, string password)
@@ -49,25 +44,31 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            // Obtenemos el usuario por correo electrónico
             var user = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(email);
 
-            if (user != null)
+            if (user == null)
             {
-                var token = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Uid);
-
                 return new AuthResult
                 {
-                    IsSuccess = true,
-                    Message = "User logged in successfully.",
-                    Token = token
+                    IsSuccess = false,
+                    Message = "El usuario no fue encontrado."
                 };
             }
+            var token = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Uid);
 
             return new AuthResult
             {
+                IsSuccess = true,
+                Message = "Inicio de sesión exitoso.",
+                Token = token
+            };
+        }
+        catch (FirebaseAuthException ex)
+        {
+            return new AuthResult
+            {
                 IsSuccess = false,
-                Message = "User not found."
+                Message = $"Error de autenticación: {ex.Message}"
             };
         }
         catch (Exception ex)
@@ -75,10 +76,11 @@ public class AuthenticationService : IAuthenticationService
             return new AuthResult
             {
                 IsSuccess = false,
-                Message = $"Error: {ex.Message}"
+                Message = $"Error inesperado: {ex.Message}"
             };
         }
     }
+
     public async Task<string> ForgotPasswordAsync(string email)
     {
         try
