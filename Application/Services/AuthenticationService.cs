@@ -4,7 +4,9 @@ using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
 using home_pisos_vinilicos.Domain.Models;
+using Newtonsoft.Json;
 using System.Net.Mail;
+using System.Text;
 
 public class AuthenticationService : IAuthenticationService
 {
@@ -42,42 +44,52 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<AuthResult> LoginAsync(string email, string password)
     {
-        try
+        var apiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM"; 
+        var url = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}";
+
+        var requestBody = new
         {
-            var user = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(email);
+            email = email,
+            password = password,
+            returnSecureToken = true
+        };
 
-            if (user == null)
-            {
-                return new AuthResult
-                {
-                    IsSuccess = false,
-                    Message = "El usuario no fue encontrado."
-                };
-            }
-            var token = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Uid);
+        var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(url, content);
+        var responseString = await response.Content.ReadAsStringAsync();
 
+        if (response.IsSuccessStatusCode)
+        {
+            var authResponse = JsonConvert.DeserializeObject<AuthResponse>(responseString);
             return new AuthResult
             {
                 IsSuccess = true,
                 Message = "Inicio de sesión exitoso.",
-                Token = token
+                Token = authResponse.IdToken
             };
         }
-        catch (FirebaseAuthException ex)
+        else
         {
+            var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(responseString);
             return new AuthResult
             {
                 IsSuccess = false,
-                Message = $"Error de autenticación: {ex.Message}"
+                Message = $"Error de autenticación: {errorResponse}"
             };
         }
-        catch (Exception ex)
+    }
+
+    public class AuthResponse
+    {
+        [JsonProperty("idToken")]
+        public string IdToken { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public class Error
         {
-            return new AuthResult
-            {
-                IsSuccess = false,
-                Message = $"Error inesperado: {ex.Message}"
-            };
+            public string Message { get; set; }
         }
     }
 

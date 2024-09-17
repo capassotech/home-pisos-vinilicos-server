@@ -1,11 +1,13 @@
 ﻿@page "/product-management"
-@inject HttpClient Http
-@inject NavigationManager NavigationManager
 @using System.Net.Http.Json
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
+@using Blazored.Toast.Services
+@inject IToastService ToastService
 @inject ProductService productService
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -29,65 +31,125 @@
     </div>
 
     <!-- Formulario de Edición -->
-    <!-- Formulario de Edición -->
     @if (isModalOpen)
     {
         <div class="modal-overlay">
-            <div class="edit-form">
+            <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct" class="edit-form">
+                <DataAnnotationsValidator />
                 <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
 
-                <label for="name">Nombre del producto</label>
-                <input id="name" type="text" @bind="editingProduct.Name" placeholder="Nombre" required />
-
-               @*  <label for="category">Categoría</label>
-                <select id="category" @bind="editingProduct.Category">
-                    <option value="">Seleccione una categoría</option>
-                    <!-- Agrega aquí las opciones de categorías -->
-                </select>
- *@
-                <label for="price">Precio</label>
-                <input id="price" type="number" step="0.01" @bind="editingProduct.Price" placeholder="Precio" required />
-
-                <label for="description">Descripción</label>
-                <textarea id="description" @bind="editingProduct.Description" placeholder="Descripción" required></textarea>
-
-                <label for="size">Tamaño</label>
-                <input id="size" type="number" step="0.01" @bind="editingProduct.Size" placeholder="Tamaño" required />
-
-                <label for="color">Color</label>
-                <input id="color" type="text" @bind="editingProduct.Color" placeholder="Color" />
-
-                <label for="quantity">Cantidad</label>
-                <input id="quantity" type="number" @bind="editingProduct.Quantity" placeholder="Cantidad" required />
-
-                <div class="ckeckboxes">
-                <label for="isFeatured">Destacar producto</label>
-                <input id="isFeatured" type="checkbox" @bind="editingProduct.IsFeatured" />
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="name">Nombre del producto</label>
+                    <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
                 </div>
 
-                <label for="model">Modelo</label>
-                <input id="model" type="text" @bind="editingProduct.Model" placeholder="Modelo" required />
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="price">Precio</label>
+                    <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
+                    </div>
 
-                <label for="dimensions">Dimensiones</label>
-                <input id="dimensions" type="text" @bind="editingProduct.Dimensions" placeholder="Dimensiones (e.g., 2m x 3m)" required />
 
-                <label for="surfacePerBox">Superficie por Caja</label>
-                <input id="surfacePerBox" type="number" step="0.01" @bind="editingProduct.SurfacePerBox" placeholder="Superficie por Caja" required />
+                <div class="form-group">
+                    <div class="error-text">
 
-                <div class="ckeckboxes">
-                <label for="requiresUnderlay">Requiere Manta</label>
-                <input id="requiresUnderlay" type="checkbox" @bind="editingProduct.RequiresUnderlay" />
+                    <label for="description">Descripción</label>
+                    <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
+                    </div>
+
+                    <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
                 </div>
 
-                <label for="pricePerSquareMeter">Precio por m²</label>
-                <input id="pricePerSquareMeter" type="number" step="0.01" @bind="editingProduct.PricePerSquareMeter" placeholder="Precio por m²" required />
+                <div class="form-group">
+                    <div class="error-text">
 
-                <label for="technicalSheet">Ficha Técnica</label>
-                <textarea id="technicalSheet" @bind="editingProduct.TechnicalSheet" placeholder="Ficha Técnica"></textarea>
+                    <label for="size">Tamaño</label>
+                    <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="color">Color</label>
+                    <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="quantity">Cantidad</label>
+                    <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
+                </div>
+
+                <div class="form-group ckeckboxes">
+                    <div class="error-text">
+                    <label for="isFeatured">Destacar producto</label>
+                    <InputCheckbox id="isFeatured" @bind-Value="editingProduct.IsFeatured" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="model">Modelo</label>
+                    <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="dimensions">Dimensiones</label>
+                    <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="surfacePerBox">Superficie por Caja</label>
+                    <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
+                </div>
+
+                <div class="form-group ckeckboxes">
+                    <div class="error-text">
+                    <label for="requiresUnderlay">Requiere Manta</label>
+                    <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                    <label for="pricePerSquareMeter">Precio por m²</label>
+                    <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+
+                    <label for="technicalSheet">Ficha Técnica</label>
+                    <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
+                    </div>
+                </div>
 
                 @if (isLoading)
                 {
-                    <div class="spinner">Cargando...</div>
+                    <div class="spinner">
+                        <svg viewBox="25 25 50 50">
+                            <circle r="20" cy="50" cx="50"></circle>
+                        </svg>
+                    </div>
                 }
 
                 @if (!string.IsNullOrEmpty(successMessage))
@@ -101,12 +163,14 @@
                 }
 
                 <div class="container-buttons">
-                    <button @onclick="SaveProduct" disabled="@isLoading">Guardar</button>
-                    <button @onclick="CancelEdit">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
                 </div>
-            </div>
+            </EditForm>
         </div>
     }
+
+    
     
 
     <!-- Tabla de Productos -->
@@ -207,10 +271,13 @@
     private string successMessage = "";
     private string errorMessage = "";
     private bool isLoading = false;
+    private EditContext editForm;
 
 
     protected override async Task OnInitializedAsync()
     {
+        editForm = new EditContext(editingProduct);
+
         await LoadProducts();
         CalculateTotalPages();
     }
@@ -313,14 +380,18 @@
             {
                 Console.WriteLine($"Creando nuevo producto: {editingProduct.Name}");
                 var success = await productService.SaveAsync(editingProduct);
+
                 if (success)
                 {
+                    //await ToastService.ShowSuccess("Producto creado exitosamente.");
                     Console.WriteLine("Producto guardado exitosamente.");
                     products.Add(editingProduct);
                     successMessage = "Producto agregado exitosamente.";
                 }
                 else
                 {
+                    ToastService.ShowError("Error al crear el producto");
+
                     Console.WriteLine("Error: No se pudo guardar el producto.");
                     errorMessage = "Error al guardar el producto";
                 }

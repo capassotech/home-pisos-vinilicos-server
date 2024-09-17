@@ -130,15 +130,20 @@ tr {
     margin-bottom: 1%;
 }
 
-    .edit-form input {
-        display: block;
-        width: 45%;
-        border-radius: 10px;
-        border: none;
-        background-color: #BFCFE7;
-        padding: 5px;
-        margin-bottom: 5px;
-    }
+.form-group {
+    width: 100%;
+
+}
+
+.form-group input {
+    display: block;
+    width: 45%;
+    border-radius: 10px;
+    border: none;
+    background-color: #BFCFE7;
+    padding: 5px;
+    margin-bottom: 5px;
+}
 
     .edit-form button {
         background-color: #488aec;
@@ -152,12 +157,13 @@ tr {
         box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
     }
 
-    .edit-form textarea {
-        border-radius: 10px;
-        border: none;
-        width: 45%;
-        background-color: #BFCFE7;
-    }
+.form-group textarea {
+    border-radius: 10px;
+    border: none;
+    width: 45%;
+    background-color: #BFCFE7;
+    margin-bottom: 1%;
+}
 
     .edit-form h4 {
         color: #919ba3;
@@ -251,20 +257,59 @@ tr {
     .form-control button{
         padding: 10px;
     }
-.buttons-edition {
- }
-
-.ckeckboxes {
+.error-text{
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 45%;
-    border-radius: 10px;
-    border: none;
-    background-color: #BFCFE7;
-    padding: 5px;
+    justify-content: space-between;
+    align-items:center;
 }
+
+.error-text label{
+    text-align: left;
+}
+
+svg {
+    width: 3.25em;
+    transform-origin: center;
+    animation: rotate4 2s linear infinite;
+}
+
+circle {
+    fill: none;
+    stroke: hsl(214, 97%, 59%);
+    stroke-width: 2;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash4 {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 200;
+        stroke-dashoffset: -35px;
+    }
+
+    100% {
+        stroke-dashoffset: -125px;
+    }
+}
+
+.spinner{
+    padding: 10%;
+}
+
 @media (max-width: 700px) {
     .container-buttons {
         flex-direction: column;
