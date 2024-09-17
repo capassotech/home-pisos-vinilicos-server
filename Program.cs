@@ -30,12 +30,14 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
-builder.Services.AddScoped<ILoginRepository, LoginRepository>();  // Registrar ILoginRepository y LoginRepository
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();  
 builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));
 
+//toast
+builder.Services.AddBlazoredToast();
 
 // Firebase Client
 builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
