@@ -128,18 +128,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
 
-    public async Task<bool> IsUserAuthenticated(string idToken)
-    {
-        try
-        {
-            var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
-            return decodedToken != null;
-        }
-        catch (FirebaseAuthException)
-        {
-            return false;
-        }
-    }
+
 
 }
 

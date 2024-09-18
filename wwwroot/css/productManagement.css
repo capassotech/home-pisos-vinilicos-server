@@ -1,4 +1,7 @@
-﻿.container-management-products
+﻿@import "~blazored-toast/dist/Blazored.Toast.css";
+
+
+.container-management-products
 {
     display:flex;
     align-items: center;

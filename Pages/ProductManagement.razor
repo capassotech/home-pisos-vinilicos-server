@@ -3,11 +3,10 @@
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
-@using Blazored.Toast.Services
-@inject IToastService ToastService
 @inject ProductService productService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject SweetAlertService Swal
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -163,8 +162,8 @@
                 }
 
                 <div class="container-buttons">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <button @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
+                    <button type="button" @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
                 </div>
             </EditForm>
         </div>
@@ -271,16 +270,25 @@
     private string successMessage = "";
     private string errorMessage = "";
     private bool isLoading = false;
-    private EditContext editForm;
 
 
     protected override async Task OnInitializedAsync()
     {
-        editForm = new EditContext(editingProduct);
 
         await LoadProducts();
         CalculateTotalPages();
     }
+
+    private bool AreRequiredFieldsValid
+    {
+        get
+        {
+            return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
+                   editingProduct.Price > 0 &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Description);
+        }
+    }
+
 
     private async Task LoadProducts()
     {
@@ -374,41 +382,42 @@
         isLoading = true;
         successMessage = "";
         errorMessage = "";
+
+    
         try
         {
             if (isNewProduct)
             {
-                Console.WriteLine($"Creando nuevo producto: {editingProduct.Name}");
-                var success = await productService.SaveAsync(editingProduct);
-
-                if (success)
+                var result = await productService.SaveAsync(editingProduct);
+                if (result)
                 {
-                    //await ToastService.ShowSuccess("Producto creado exitosamente.");
-                    Console.WriteLine("Producto guardado exitosamente.");
-                    products.Add(editingProduct);
-                    successMessage = "Producto agregado exitosamente.";
+                    await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
                 }
                 else
                 {
-                    ToastService.ShowError("Error al crear el producto");
-
-                    Console.WriteLine("Error: No se pudo guardar el producto.");
-                    errorMessage = "Error al guardar el producto";
+                    await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
                 }
             }
             else
             {
-                Console.WriteLine($"Actualizando producto con ID: {editingProduct.IdProduct}");
-                await productService.UpdateAsync(editingProduct);
-                successMessage = "Producto actualizado exitosamente.";
+                // Actualizar producto existente
+                var result = await productService.UpdateAsync(editingProduct);
+                if (result)
+                {
+                    await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
+                }
+                else
+                {
+                    await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
+                }
             }
 
-            await LoadProducts();
             isModalOpen = false;
+            await LoadProducts();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al guardar el producto: {ex.Message}");
+            await Swal.FireAsync("Error", $"Hubo un error inesperado: {ex.Message}", SweetAlertIcon.Error);
         }
         finally
         {

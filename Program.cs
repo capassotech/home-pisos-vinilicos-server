@@ -1,4 +1,4 @@
-using Blazored.Toast;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Firebase.Database;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -10,10 +10,6 @@ using home_pisos_vinilicos.Application.Services.Firebase;
 using home_pisos_vinilicos.Data;
 using home_pisos_vinilicos.Data.Repositories;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
-
-
-
-
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,8 +58,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));
 
-//toast
-builder.Services.AddBlazoredToast();
+//sweet alert
+builder.Services.AddSweetAlert2();
 
 // Firebase Client
 builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
