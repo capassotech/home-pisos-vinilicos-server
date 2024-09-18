@@ -64,6 +64,19 @@ namespace home_pisos_vinilicos.Application.Controllers
             }
         }
 
+        [HttpGet("secure-endpoint")]
+        public IActionResult GetSecureData()
+        {
+            var decodedToken = HttpContext.Items["User"] as FirebaseToken;
+            if (decodedToken == null)
+            {
+                return Unauthorized(new { message = "User is not authenticated." });
+            }
+
+            var userId = decodedToken.Uid;
+            return Ok(new { message = "User is authenticated.", userId = userId });
+        }
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -86,8 +99,6 @@ namespace home_pisos_vinilicos.Application.Controllers
             return Unauthorized("No token provided.");
         }
 
-
-
         public class RegisterRequest
         {
             public string Email { get; set; }
@@ -99,10 +110,5 @@ namespace home_pisos_vinilicos.Application.Controllers
             public string Email { get; set; }
             public string Password { get; set; }
         }
-
-       
-
     }
-
-    
 }

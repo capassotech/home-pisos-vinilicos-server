@@ -53,7 +53,7 @@ namespace home_pisos_vinilicos.Controllers
 
             return Ok(category);
         }
-
+        /*
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateCategoryById(string id, [FromBody] CategoryDto requestDto)
         {
@@ -67,7 +67,7 @@ namespace home_pisos_vinilicos.Controllers
 
             return BadRequest("No se pudo actualizar la categoría.");
         }
-
+        */
 
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteCategoryById(string id)
@@ -87,6 +87,7 @@ namespace home_pisos_vinilicos.Controllers
             }
         }
 
+        /*
         [HttpPut("{id}/feature")]
         public async Task<ActionResult> SetFeaturedCategory(string id, [FromBody] bool isFeatured)
         {
@@ -105,6 +106,7 @@ namespace home_pisos_vinilicos.Controllers
             }
         }
 
+        */
 
     }
 }

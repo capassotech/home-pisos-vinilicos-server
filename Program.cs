@@ -79,6 +79,9 @@ builder.Services.AddHttpClient("MyApiClient", client =>
 
 var app = builder.Build();
 
+//middelware para verificar token de firebase
+app.UseMiddleware<FirebaseSessionMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
