@@ -2,12 +2,11 @@
 
 namespace home_pisos_vinilicos.Application.DTOs
 {
-    public class CategoryDto
+    public class SubCategoryDto
     {
-        public string? IdCategory { get; set; }
+        public string? IdSubCategory { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public bool IsFeatured { get; set; }
-        public string IdSubCategory { get; set; }
+
     }
 }

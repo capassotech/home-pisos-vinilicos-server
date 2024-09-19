@@ -11,15 +11,6 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public string? IdCategory { get; set; }
 
-
-        /*
-        [Required]
-        public string? IdSuperCategory { get; set; }
-        [ForeignKey("IdSuperCategory")]
-        public Category Supercategory { get; set; }
-
-        */
-
         [Required]
         [Column(TypeName = "VARCHAR(50)")]
         public string Name { get; set; }
@@ -32,6 +23,9 @@ namespace home_pisos_vinilicos.Domain.Entities
         public bool IsFeatured { get; set; }
 
 
-        //public List<Category> SubCategories { get; set; }
+        [Required]
+        [ForeignKey("IdSubCategory")]
+        public string IdSubCategory { get; set; }
+
     }
 }
