@@ -45,11 +45,9 @@ builder.Services.AddControllers();
 //builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ISecureDataService, SecureDataService>();
 
-
 // Servicios sin interfaz
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<LoginService>();
-builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
@@ -58,9 +56,8 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
-builder.Services.AddScoped<ILoginRepository, LoginRepository>();  
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));
@@ -78,9 +75,8 @@ builder.Services.AddHttpClient("MyApiClient", client =>
 });
 
 var app = builder.Build();
-
-//middelware para verificar token de firebase
-app.UseMiddleware<FirebaseSessionMiddleware>();
+// Middleware to check Firebase token
+//app.UseMiddleware<FirebaseSessionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -92,6 +88,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+//app.UseAuthorization(); // Ensure authorization is enabled
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

@@ -1,10 +1,17 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="~/" />
-</head>
-<body>
-</body>
-</html>
+﻿@page "/"
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        try
+        {
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            // Manejo de errores (puedes registrar el error en un servicio de logging si lo tienes)
+            Console.WriteLine($"Error en la redirección: {ex.Message}");
+        }
+    }
+}

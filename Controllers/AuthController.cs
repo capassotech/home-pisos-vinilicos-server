@@ -77,6 +77,24 @@ namespace home_pisos_vinilicos.Application.Controllers
             return Ok(new { message = "User is authenticated.", userId = userId });
         }
 
+
+        [HttpPost("verify-token")]
+        public async Task<IActionResult> VerifyToken([FromHeader] string authorization)
+        {
+            // Extraer el token de 'Authorization: Bearer {token}'
+            var token = authorization?.Split(" ").Last();
+
+            if (await _authenticationService.VerifyTokenAsync(token))
+            {
+                return Ok(new { message = "Token is valid." });
+            }
+            else
+            {
+                return Unauthorized(new { message = "Invalid or expired token." });
+            }
+        }
+
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {

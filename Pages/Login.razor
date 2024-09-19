@@ -6,6 +6,7 @@
 </head>
 
 @using home_pisos_vinilicos.Application.Interfaces
+@using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Models
 @using Microsoft.JSInterop
 @inject NavigationManager Navigation
@@ -84,6 +85,8 @@
         if (result.IsSuccess)
         {
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+
+            // Navegar al dashboard si está autenticado
             Navigation.NavigateTo("/product-management");
         }
         else

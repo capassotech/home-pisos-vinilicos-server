@@ -129,9 +129,45 @@ public class AuthenticationService : IAuthenticationService
     }
 
 
+    public async Task<bool> VerifyTokenAsync(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return false; // Si no hay token, no se autoriza
+        }
 
+        try
+        {
+            // Verificar el token con Firebase
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            return decodedToken != null; // Si el token es válido, retorna true
+        }
+        catch (FirebaseAuthException)
+        {
+            return false; // Token inválido o expirado
+        }
+    }
 
-}
+    public async Task<bool> IsUserAuthenticated(string idToken)
+    {
+        if (string.IsNullOrEmpty(idToken))
+        {
+            return false;
+        }
+
+        try
+        {
+            var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+            return decodedToken != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+   
+    }
 
 
 
