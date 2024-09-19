@@ -6,7 +6,8 @@
 @inject ProductService productService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
-@inject SweetAlertService Swal
+
+@* @inject CategoryService categoryService *@
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -39,106 +40,105 @@
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="name">Nombre del producto</label>
-                    <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
+                        <label for="name">Nombre del producto</label>
+                        <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="price">Precio</label>
-                    <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
+                        <label for="price">Precio</label>
+                        <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
-                    </div>
-
+                </div>
 
                 <div class="form-group">
                     <div class="error-text">
-
-                    <label for="description">Descripción</label>
-                    <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
+                        <label for="description">Descripción</label>
+                        <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
                     </div>
-
                     <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-
-                    <label for="size">Tamaño</label>
-                    <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
+                        <label for="size">Tamaño</label>
+                        <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="color">Color</label>
-                    <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
+                        <label for="color">Color</label>
+                        <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="quantity">Cantidad</label>
-                    <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
+                        <label for="quantity">Cantidad</label>
+                        <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
                 </div>
 
-                <div class="form-group ckeckboxes">
+                <div class="form-group">
                     <div class="error-text">
-                    <label for="isFeatured">Destacar producto</label>
-                    <InputCheckbox id="isFeatured" @bind-Value="editingProduct.IsFeatured" />
+                        <label for="isFeatured">Destacar producto</label>
+                        <InputCheckbox id="isFeatured" @bind-Value="editingProduct.IsFeatured" @onchange="OnFeaturedChange" />
                     </div>
+                    @if (errorFeaturedLimit)
+                    {
+                        <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
+                    }
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="model">Modelo</label>
-                    <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
+                        <label for="model">Modelo</label>
+                        <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="dimensions">Dimensiones</label>
-                    <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
+                        <label for="dimensions">Dimensiones</label>
+                        <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="surfacePerBox">Superficie por Caja</label>
-                    <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
+                        <label for="surfacePerBox">Superficie por Caja</label>
+                        <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
                 </div>
 
-                <div class="form-group ckeckboxes">
+                <div class="form-group">
                     <div class="error-text">
-                    <label for="requiresUnderlay">Requiere Manta</label>
-                    <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
+                        <label for="requiresUnderlay">Requiere Manta</label>
+                        <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-                    <label for="pricePerSquareMeter">Precio por m²</label>
-                    <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
+                        <label for="pricePerSquareMeter">Precio por m²</label>
+                        <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
                     <div class="error-text">
-
-                    <label for="technicalSheet">Ficha Técnica</label>
-                    <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
+                        <label for="technicalSheet">Ficha Técnica</label>
+                        <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
                     </div>
                 </div>
 
@@ -168,7 +168,6 @@
             </EditForm>
         </div>
     }
-
     
     
 
@@ -260,7 +259,9 @@
     private List<ProductDto> products = new List<ProductDto>();
     private List<ProductDto> filteredProducts = new List<ProductDto>();
     private List<ProductDto> featuredProducts = new List<ProductDto>();
+    private List<CategoryDto> categories = new List<CategoryDto>();
     private ProductDto editingProduct = new ProductDto();
+    private bool errorFeaturedLimit = false;
     private string searchText = "";
     private bool isNewProduct = true;
     private bool isModalOpen = false;
@@ -276,6 +277,7 @@
     {
 
         await LoadProducts();
+        // await LoadCategories();
         CalculateTotalPages();
     }
 
@@ -285,9 +287,16 @@
         {
             return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
                    editingProduct.Price > 0 &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Description);
+                   !string.IsNullOrWhiteSpace(editingProduct.Description) &&
+                   editingProduct.Size > 0 &&
+                   editingProduct.Quantity > 0 &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Model) &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Dimensions) &&
+                   editingProduct.SurfacePerBox > 0 &&
+                   editingProduct.PricePerSquareMeter > 0;
         }
     }
+
 
 
     private async Task LoadProducts()
@@ -315,6 +324,8 @@
 
             filteredProducts = products;
             featuredProducts = products.Where(p => p.IsFeatured).ToList();
+            Console.WriteLine($"Productos filtrados: {filteredProducts.Count}");
+
             CalculateTotalPages();
         }
         catch (Exception ex)
@@ -322,6 +333,23 @@
             Console.WriteLine($"Error al cargar productos: {ex.Message}");
         }
     }
+
+    // private async Task LoadCategories()
+    // {
+    //     try
+    //     {
+    //         var categoryEntities = await categoryService.GetAllAsync();
+    //         categories = categoryEntities.Select(c => new CategoryDto
+    //             {
+    //                 IdCategory = c.IdCategory,
+    //                 Name = c.Name
+    //             }).ToList();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         errorMessage = $"Error al cargar las categorías: {ex.Message}";
+    //     }
+    // }
 
     protected async void AddNewProduct()
     {
@@ -391,11 +419,11 @@
                 var result = await productService.SaveAsync(editingProduct);
                 if (result)
                 {
-                    await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
+                    // await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
                 }
                 else
                 {
-                    await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
+                    // await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
                 }
             }
             else
@@ -404,11 +432,11 @@
                 var result = await productService.UpdateAsync(editingProduct);
                 if (result)
                 {
-                    await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
+                    // await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
                 }
                 else
                 {
-                    await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
+                    // await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
                 }
             }
 
@@ -417,7 +445,7 @@
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error inesperado: {ex.Message}", SweetAlertIcon.Error);
+            // await Swal.FireAsync("Error", $"Hubo un error inesperado: {ex.Message}", SweetAlertIcon.Error);
         }
         finally
         {
@@ -510,5 +538,39 @@
             currentPage--;
         }
     }
+
+    private async Task CheckFeaturedLimit()
+    {
+        var allFeaturedProducts = products.Where(p => p.IsFeatured).ToList();
+        Console.WriteLine($"Total Featured Products: {allFeaturedProducts.Count}");
+
+        if (editingProduct.IsFeatured)
+        {
+            if (allFeaturedProducts.Count >= 6 && !allFeaturedProducts.Any(p => p.IdProduct == editingProduct.IdProduct))
+            {
+                Console.WriteLine("Featured limit exceeded");
+                errorFeaturedLimit = true;
+                editingProduct.IsFeatured = false;
+            }
+            else
+            {
+                Console.WriteLine("Within featured limit");
+                errorFeaturedLimit = false;
+            }
+        }
+        else
+        {
+            errorFeaturedLimit = false;
+        }
+
+    }
+    private void OnFeaturedChange(ChangeEventArgs e)
+    {
+        Console.WriteLine("OnFeaturedChange triggered");
+
+        editingProduct.IsFeatured = (bool)e.Value;
+        CheckFeaturedLimit();
+    }
+
 }
 

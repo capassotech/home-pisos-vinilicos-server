@@ -1,0 +1,315 @@
+﻿@* @page "/category-management"
+@using home_pisos_vinilicos.Application
+@using home_pisos_vinilicos.Application.DTOs
+@using home_pisos_vinilicos.Application.Services
+@inject CategoryService categoryService
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject SweetAlertService Swal
+
+<head>
+    <link href="css/categoryManagement.css" rel="stylesheet" />
+</head>
+
+<div class="container-management-categories">
+    <h3 class="title-categories">Categorías en la tienda</h3>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="container-buttons">
+        <button @onclick="AddNewCategory" class="button-add">
+            <i class="fas fa-plus"></i> AGREGAR NUEVA CATEGORÍA
+        </button>
+    </div>
+
+    <!-- Formulario de Edición -->
+    @if (isModalOpen)
+    {
+        <div class="modal-overlay">
+            <EditForm Model="@editingCategory" OnValidSubmit="SaveCategory" class="edit-form">
+                <DataAnnotationsValidator />
+                <h4>@(isNewCategory ? "Agregar Nueva Categoría" : "Editar Categoría")</h4>
+
+                <div class="form-group">
+                    <label for="name">Nombre de la categoría</label>
+                    <InputText id="name" class="form-control" @bind-Value="editingCategory.Name" />
+                    <ValidationMessage For="@(() => editingCategory.Name)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descripción</label>
+                    <InputTextArea id="description" class="form-control" @bind-Value="editingCategory.Description" />
+                    <ValidationMessage For="@(() => editingCategory.Description)" class="text-danger" />
+                </div>
+
+                @if (isLoading)
+                {
+                    <div class="spinner">
+                        <svg viewBox="25 25 50 50">
+                            <circle r="20" cy="50" cx="50"></circle>
+                        </svg>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success">@successMessage</div>
+                }
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="container-buttons">
+                    <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
+                    <button type="button" @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    <!-- Tabla de Categorías -->
+    @if (filteredCategories != null && filteredCategories.Any())
+    {
+        <table class="table table-categories">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Subcategorías</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in GetPaginatedCategories())
+                {
+                    <tr class="@GetHighlightClass(category)">
+                        <td>@category.Name</td>
+                        <td>@category.SubCategories.Count</td>
+                        <td class="buttons-edition">
+                            <button class="btn btn-sm" @onclick="() => StartEditCategory(category)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Botones de Paginación -->
+        <div class="pagination-controls">
+            <button @onclick="PreviousPage">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span>Página @currentPage de @totalPages</span>
+            <button @onclick="NextPage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    }
+    else
+    {
+        <p>No se encontraron categorías.</p>
+    }
+</div>
+
+@code {
+    private List<Category> categories = new List<Category>();
+    private List<CategoryDto> filteredCategories = new List<CategoryDto>();
+    private CategoryDto editingCategory = new CategoryDto();
+    private string searchText = "";
+    private bool isNewCategory = true;
+    private bool isModalOpen = false;
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private int totalPages = 1;
+    private string successMessage = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        CalculateTotalPages();
+    }
+
+    private bool AreRequiredFieldsValid
+    {
+        get
+        {
+            return !string.IsNullOrWhiteSpace(editingCategory.Name) &&
+                   !string.IsNullOrWhiteSpace(editingCategory.Description);
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            categories = await categoryService.GetAllAsync();
+            CalculateTotalPages();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar las categorías: {ex.Message}";
+        }
+    }
+
+    protected void AddNewCategory()
+    {
+        editingCategory = new CategoryDto
+            {
+                Name = "",
+                Description = "",
+                // SubCategories = new List<Category>()
+            };
+
+        isNewCategory = true;
+        isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    protected void StartEditCategory(CategoryDto category)
+    {
+        if (string.IsNullOrEmpty(category.IdCategory))
+        {
+            Console.WriteLine("Error: La categoría no tiene un IdCategory válido.");
+            return;
+        }
+
+        editingCategory = new CategoryDto
+            {
+                IdCategory = category.IdCategory,
+                Name = category.Name,
+                Description = category.Description,
+                SubCategories = category.SubCategories
+            };
+        isNewCategory = false;
+        isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    private async Task SaveCategory()
+    {
+        isLoading = true;
+        successMessage = "";
+        errorMessage = "";
+
+        try
+        {
+            if (isNewCategory)
+            {
+                var result = await categoryService.SaveAsync(editingCategory);
+                if (result)
+                {
+                    successMessage = "Categoría agregada correctamente.";
+                }
+                else
+                {
+                    errorMessage = "Hubo un problema al agregar la categoría.";
+                }
+            }
+            else
+            {
+                //  var result = await categoryService.UpdateAsync(editingCategory);
+                // if (result)
+                // {
+                //     successMessage = "Categoría actualizada correctamente.";
+                // }
+                // else
+                // {
+                //     errorMessage = "Hubo un problema al actualizar la categoría.";
+                // }
+            }
+
+            isModalOpen = false;
+            await LoadCategories();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al guardar la categoría: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isModalOpen = false;
+    }
+
+    private async Task DeleteCategory(string id)
+    {
+        var confirmResult = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Esta acción no se puede deshacer.",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                CancelButtonText = "Cancelar",
+                ConfirmButtonText = "Eliminar"
+            });
+
+        if (confirmResult.IsConfirmed)
+        {
+            try
+            {
+                var result = await categoryService.DeleteAsync(id);
+                if (result)
+                {
+                    successMessage = "Categoría eliminada correctamente.";
+                }
+                else
+                {
+                    errorMessage = "Hubo un problema al eliminar la categoría.";
+                }
+
+                await LoadCategories();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error al eliminar la categoría: {ex.Message}";
+            }
+        }
+    }
+
+    private IEnumerable<CategoryDto> GetPaginatedCategories()
+    {
+        return filteredCategories.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    }
+
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling(filteredCategories.Count / (double)pageSize);
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            StateHasChanged();
+        }
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            StateHasChanged();
+        }
+    }
+
+    private string GetHighlightClass(CategoryDto category)
+    {
+        return category.SubCategories.Count > 0 ? "highlight" : "";
+    }
+}
+ *@
