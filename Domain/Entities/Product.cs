@@ -77,12 +77,13 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public String TechnicalSheet { get; set; }
 
-        /*
-
+        
+        
         [Required]
-        public int IdCategory { get; set; }
         [ForeignKey("IdCategory")]
-        */
+        public string IdCategory { get; set; }
+        
+        
 
         //public SubCategory category { get; set; }
         
