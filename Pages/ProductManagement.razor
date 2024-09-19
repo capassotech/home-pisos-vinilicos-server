@@ -324,8 +324,6 @@
 
             filteredProducts = products;
             featuredProducts = products.Where(p => p.IsFeatured).ToList();
-            Console.WriteLine($"Productos filtrados: {filteredProducts.Count}");
-
             CalculateTotalPages();
         }
         catch (Exception ex)

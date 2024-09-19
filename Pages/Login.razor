@@ -8,8 +8,10 @@
 @using home_pisos_vinilicos.Application.Interfaces
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Models
+@using Microsoft.JSInterop
 @inject NavigationManager Navigation
 @inject IAuthenticationService AuthenticationService
+@inject IJSRuntime JSRuntime
 
 <div class="container">
     <div class="wrapper">
@@ -49,7 +51,6 @@
 @code {
     private string email;
     private string password;
-    private string name;
     private string loginResult;
     private string emailError;
     private string passwordError;
@@ -79,18 +80,18 @@
             return;
         }
 
-
         var result = await AuthenticationService.LoginAsync(email, password);
 
-        if (result.IsSuccess == true)
+        if (result.IsSuccess)
         {
-            Console.WriteLine(result.Message);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+
+            // Navegar al dashboard si está autenticado
             Navigation.NavigateTo("/product-management");
         }
         else
         {
-            Console.WriteLine(result.Message);
-            loginResult = result.Message; 
+            loginResult = result.Message;
         }
     }
 }

@@ -11,10 +11,14 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public string? IdCategory { get; set; }
 
+
+        /*
         [Required]
         public string? IdSuperCategory { get; set; }
         [ForeignKey("IdSuperCategory")]
         public Category Supercategory { get; set; }
+
+        */
 
         [Required]
         [Column(TypeName = "VARCHAR(50)")]
@@ -25,6 +29,6 @@ namespace home_pisos_vinilicos.Domain.Entities
         public string Description { get; set; }
 
 
-        public List<Category> SubCategories { get; set; }
+        //public List<Category> SubCategories { get; set; }
     }
 }

@@ -52,7 +52,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
-builder.Services.AddScoped<ILoginRepository, LoginRepository>();  
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
 
 // Automapper
@@ -71,6 +71,8 @@ builder.Services.AddHttpClient("MyApiClient", client =>
 });
 
 var app = builder.Build();
+// Middleware to check Firebase token
+//app.UseMiddleware<FirebaseSessionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -82,6 +84,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+//app.UseAuthorization(); // Ensure authorization is enabled
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
