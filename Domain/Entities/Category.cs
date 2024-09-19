@@ -28,6 +28,9 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public string Description { get; set; }
 
+        [Column(TypeName = "BIT")]
+        public bool IsFeatured { get; set; }
+
 
         //public List<Category> SubCategories { get; set; }
     }

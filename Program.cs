@@ -43,6 +43,7 @@ builder.Services.AddScoped<ISecureDataService, SecureDataService>();
 
 // Servicios sin interfaz
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<LoginService>();
 
 builder.Services.AddSingleton<WeatherForecastService>();
@@ -51,6 +52,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
