@@ -6,6 +6,7 @@
 @inject ProductService productService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
 @* @inject CategoryService categoryService *@
 
@@ -88,13 +89,14 @@
                 <div class="form-group">
                     <div class="error-text">
                         <label for="isFeatured">Destacar producto</label>
-                        <InputCheckbox id="isFeatured" @bind-Value="editingProduct.IsFeatured" @onchange="OnFeaturedChange" />
+                        <InputCheckbox id="isFeatured"  @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
                     </div>
                     @if (errorFeaturedLimit)
                     {
                         <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
                     }
                 </div>
+
 
                 <div class="form-group">
                     <div class="error-text">
@@ -271,6 +273,8 @@
     private string successMessage = "";
     private string errorMessage = "";
     private bool isLoading = false;
+    private const int MaxFeaturedProducts = 6;
+
 
 
     protected override async Task OnInitializedAsync()
@@ -409,7 +413,7 @@
         successMessage = "";
         errorMessage = "";
 
-    
+
         try
         {
             if (isNewProduct)
@@ -418,23 +422,27 @@
                 if (result)
                 {
                     // await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
+                    ShowAlert("Producto agregado correctamente.");
                 }
                 else
                 {
+                    ShowAlert("Hubo un problema al agregar el producto");
+
                     // await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
                 }
             }
             else
             {
-                // Actualizar producto existente
                 var result = await productService.UpdateAsync(editingProduct);
                 if (result)
                 {
                     // await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
+                    ShowAlert("Producto actualizado correctamente.");
                 }
                 else
                 {
                     // await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
+                    ShowAlert("Hubo un problema al actualizar el producto");
                 }
             }
 
@@ -482,16 +490,45 @@
     {
         try
         {
-            product.IsFeatured = !product.IsFeatured;
-            await productService.UpdateAsync(product);
-            await LoadProducts();
+            var featuredProductsCount = GetFeaturedProductsCount();
+
+            if (product.IsFeatured)
+            {
+                product.IsFeatured = false;
+                await productService.UpdateAsync(product);
+                await LoadProducts();
+            }
+            else
+            {
+                if (featuredProductsCount < MaxFeaturedProducts)
+                {
+                    product.IsFeatured = true;
+                    await productService.UpdateAsync(product);
+                    await LoadProducts();
+                }
+                else
+                {
+                    ShowAlert("Ya hay 6 productos destacados.");
+                }
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al destacar el producto: {ex.Message}");
+            ShowAlert($"Error al destacar el producto: {ex.Message}");
         }
     }
 
+    private int GetFeaturedProductsCount()
+    {
+        var products = GetPaginatedProducts(); 
+        return products.Count(p => p.IsFeatured);
+    }
+
+    private void ShowAlert(string message)
+    {
+        JSRuntime.InvokeVoidAsync("alert", message);
+    }
     private string GetHighlightClass(ProductDto product)
     {
         var recentProducts = products.OrderByDescending(p => p.IdProduct).Take(6).Select(p => p.IdProduct).ToList();
@@ -537,38 +574,23 @@
         }
     }
 
-    private async Task CheckFeaturedLimit()
-    {
-        var allFeaturedProducts = products.Where(p => p.IsFeatured).ToList();
-        Console.WriteLine($"Total Featured Products: {allFeaturedProducts.Count}");
 
-        if (editingProduct.IsFeatured)
-        {
-            if (allFeaturedProducts.Count >= 6 && !allFeaturedProducts.Any(p => p.IdProduct == editingProduct.IdProduct))
+    private void OnFeaturedChange()
+    {
+        
+            Console.WriteLine("checked");
+            if (featuredProducts.Count >= 6)
             {
-                Console.WriteLine("Featured limit exceeded");
-                errorFeaturedLimit = true;
                 editingProduct.IsFeatured = false;
+                errorFeaturedLimit = true;
+                JSRuntime.InvokeVoidAsync("alert", "No se pueden destacar más de 6 productos.");
             }
             else
             {
-                Console.WriteLine("Within featured limit");
                 errorFeaturedLimit = false;
+                editingProduct.IsFeatured = true;
             }
         }
-        else
-        {
-            errorFeaturedLimit = false;
-        }
-
-    }
-    private void OnFeaturedChange(ChangeEventArgs e)
-    {
-        Console.WriteLine("OnFeaturedChange triggered");
-
-        editingProduct.IsFeatured = (bool)e.Value;
-        CheckFeaturedLimit();
-    }
 
 }
 
