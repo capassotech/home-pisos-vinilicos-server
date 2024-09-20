@@ -46,6 +46,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<SubCategoryService>();
+builder.Services.AddScoped<FAQService>();
 
 
 builder.Services.AddSingleton<WeatherForecastService>();
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
+builder.Services.AddScoped<IFAQRepository, FAQRepository>();
 
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
