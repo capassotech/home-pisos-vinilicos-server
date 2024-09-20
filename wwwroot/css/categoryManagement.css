@@ -1,0 +1,45 @@
+﻿.container-management-categories {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.table-categories {
+    width: 80%;
+    margin-top: 4%;
+    padding: 20px;
+    border-radius: 10px;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title-categories {
+    text-transform: uppercase;
+    padding-top: 2%;
+    margin-bottom: 2%;
+    font-weight: bolder;
+}
+
+th, td {
+    padding: 12px;
+    text-transform: uppercase;
+}
+
+thead {
+    color: #ffff;
+}
+
+
+tr {
+    background-color: #919ba3;
+}
+
+featured-categories {
+    width: 80%;
+    margin-top: 2%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+

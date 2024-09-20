@@ -1,315 +1,233 @@
-﻿@* @page "/category-management"
+﻿@page "/category-management"
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
-@inject CategoryService categoryService
-@inject NavigationManager NavigationManager
-@inject HttpClient Http
-@inject SweetAlertService Swal
+@using home_pisos_vinilicos.Domain.Entities
+
+@inject CategoryService _categoryService
 
 <head>
     <link href="css/categoryManagement.css" rel="stylesheet" />
 </head>
 
 <div class="container-management-categories">
-    <h3 class="title-categories">Categorías en la tienda</h3>
+    <h3 class="title-categories">Gestión de Categorías</h3>
 
-    <!-- Filtros y Búsqueda -->
-    <div class="container-buttons">
-        <button @onclick="AddNewCategory" class="button-add">
-            <i class="fas fa-plus"></i> AGREGAR NUEVA CATEGORÍA
-        </button>
-    </div>
+<div>
+    <button @onclick="AddCategory">Añadir Categoría</button>
+</div>
 
-    <!-- Formulario de Edición -->
-    @if (isModalOpen)
-    {
-        <div class="modal-overlay">
-            <EditForm Model="@editingCategory" OnValidSubmit="SaveCategory" class="edit-form">
-                <DataAnnotationsValidator />
-                <h4>@(isNewCategory ? "Agregar Nueva Categoría" : "Editar Categoría")</h4>
+@if (isAddingCategory || isEditingCategory)
+{
+    <EditForm Model="currentCategory" OnValidSubmit="SaveCategory">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-                <div class="form-group">
-                    <label for="name">Nombre de la categoría</label>
-                    <InputText id="name" class="form-control" @bind-Value="editingCategory.Name" />
-                    <ValidationMessage For="@(() => editingCategory.Name)" class="text-danger" />
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Descripción</label>
-                    <InputTextArea id="description" class="form-control" @bind-Value="editingCategory.Description" />
-                    <ValidationMessage For="@(() => editingCategory.Description)" class="text-danger" />
-                </div>
-
-                @if (isLoading)
-                {
-                    <div class="spinner">
-                        <svg viewBox="25 25 50 50">
-                            <circle r="20" cy="50" cx="50"></circle>
-                        </svg>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(successMessage))
-                {
-                    <div class="alert alert-success">@successMessage</div>
-                }
-
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger">@errorMessage</div>
-                }
-
-                <div class="container-buttons">
-                    <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
-                    <button type="button" @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
-                </div>
-            </EditForm>
+        <div>
+            <label>Nombre</label>
+            <InputText @bind-Value="currentCategory.Name" />
         </div>
-    }
+        <div>
+            <label>Descripción</label>
+            <InputText @bind-Value="currentCategory.Description" />
+        </div>
+        <div>
+            <label>¿Destacado?</label>
+            <InputCheckbox @bind-Value="currentCategory.IsFeatured" />
+        </div>
 
-    <!-- Tabla de Categorías -->
-    @if (filteredCategories != null && filteredCategories.Any())
-    {
-        <table class="table table-categories">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Subcategorías</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var category in GetPaginatedCategories())
+        <button type="submit">Guardar</button>
+        <button type="button" @onclick="Cancel">Cancelar</button>
+    </EditForm>
+}
+
+<table class="table table-categories">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+                <th>Número de Subcategorías</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+        <tbody>
+            @if (categories != null)
+            {
+                @foreach (var category in categories)
                 {
-                    <tr class="@GetHighlightClass(category)">
+                    <tr>
                         <td>@category.Name</td>
-                        <td>@category.SubCategories.Count</td>
+                        <td>@category.Description</td>
+                        <td>@* @category.SubCategories.Count() *@ PROXIMAMENTE</td>
                         <td class="buttons-edition">
-                            <button class="btn btn-sm" @onclick="() => StartEditCategory(category)">
+                            <button class="btn btn-sm" @onclick="() => EditCategory(category)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
+
+
+                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(category)">
+                                @if (category.IsFeatured)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i> 
+                                }
+                            </button>
+
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
                 }
-            </tbody>
-        </table>
+            }
+        </tbody>
+    </table>
 
-        <!-- Botones de Paginación -->
-        <div class="pagination-controls">
-            <button @onclick="PreviousPage">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <span>Página @currentPage de @totalPages</span>
-            <button @onclick="NextPage">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    }
-    else
-    {
-        <p>No se encontraron categorías.</p>
-    }
+    <h3 class="title-categories">Categorías Destacadas</h3>
+    <div class="featured-categories">
+        @foreach (var category in categories.Where(c => c.IsFeatured))
+        {
+            <div class="featured-category">
+                @* <img src="@category.ImageUrl" alt="@category.Name" /> *@
+                <h4>@category.Name</h4>
+                <p>@category.Description</p>
+            </div>
+        }
+    </div>
 </div>
-
 @code {
-    private List<Category> categories = new List<Category>();
-    private List<CategoryDto> filteredCategories = new List<CategoryDto>();
-    private CategoryDto editingCategory = new CategoryDto();
-    private string searchText = "";
-    private bool isNewCategory = true;
-    private bool isModalOpen = false;
-    private int currentPage = 1;
-    private int pageSize = 5;
-    private int totalPages = 1;
-    private string successMessage = "";
-    private string errorMessage = "";
-    private bool isLoading = false;
+    private List<Category> categories = new();
+    private Category currentCategory = new();
+    private bool isAddingCategory = false;
+    private bool isEditingCategory = false;
+    private const int MaxFeaturedCategories = 2; 
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategories();
-        CalculateTotalPages();
-    }
-
-    private bool AreRequiredFieldsValid
-    {
-        get
-        {
-            return !string.IsNullOrWhiteSpace(editingCategory.Name) &&
-                   !string.IsNullOrWhiteSpace(editingCategory.Description);
-        }
     }
 
     private async Task LoadCategories()
     {
+        categories = await _categoryService.GetAllAsync(); 
+    }
+
+    protected async Task ToggleFeatured(Category category)
+    {
         try
         {
-            categories = await categoryService.GetAllAsync();
-            CalculateTotalPages();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error al cargar las categorías: {ex.Message}";
-        }
-    }
+            var featuredCategoriesCount = GetFeaturedCategoriesCount();
 
-    protected void AddNewCategory()
-    {
-        editingCategory = new CategoryDto
+            if (category.IsFeatured)
             {
-                Name = "",
-                Description = "",
-                // SubCategories = new List<Category>()
-            };
-
-        isNewCategory = true;
-        isModalOpen = true;
-        successMessage = "";
-        errorMessage = "";
-    }
-
-    protected void StartEditCategory(CategoryDto category)
-    {
-        if (string.IsNullOrEmpty(category.IdCategory))
-        {
-            Console.WriteLine("Error: La categoría no tiene un IdCategory válido.");
-            return;
-        }
-
-        editingCategory = new CategoryDto
-            {
-                IdCategory = category.IdCategory,
-                Name = category.Name,
-                Description = category.Description,
-                SubCategories = category.SubCategories
-            };
-        isNewCategory = false;
-        isModalOpen = true;
-        successMessage = "";
-        errorMessage = "";
-    }
-
-    private async Task SaveCategory()
-    {
-        isLoading = true;
-        successMessage = "";
-        errorMessage = "";
-
-        try
-        {
-            if (isNewCategory)
-            {
-                var result = await categoryService.SaveAsync(editingCategory);
-                if (result)
-                {
-                    successMessage = "Categoría agregada correctamente.";
-                }
-                else
-                {
-                    errorMessage = "Hubo un problema al agregar la categoría.";
-                }
+                category.IsFeatured = false;
             }
             else
             {
-                //  var result = await categoryService.UpdateAsync(editingCategory);
-                // if (result)
-                // {
-                //     successMessage = "Categoría actualizada correctamente.";
-                // }
-                // else
-                // {
-                //     errorMessage = "Hubo un problema al actualizar la categoría.";
-                // }
+                if (featuredCategoriesCount >= MaxFeaturedCategories)
+                {
+                    ShowAlert("Ya hay 2 categorías destacadas.");
+                    return;
+                }
+                category.IsFeatured = true;
             }
 
-            isModalOpen = false;
+            var categoryDto = new CategoryDto
+                {
+                    IdCategory = category.IdCategory,
+                    Name = category.Name,
+                    Description = category.Description,
+                    IsFeatured = category.IsFeatured,
+                    IdSubCategory = category.IdSubCategory
+                };
+
+            await _categoryService.UpdateAsync(categoryDto);
             await LoadCategories();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error al guardar la categoría: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
+            Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
+            ShowAlert($"Error al destacar la categoría: {ex.Message}");
         }
     }
 
-    private void CancelEdit()
+    private int GetFeaturedCategoriesCount()
     {
-        isModalOpen = false;
+        return categories.Count(c => c.IsFeatured);
     }
 
-    private async Task DeleteCategory(string id)
+    private void ShowAlert(string message)
     {
-        var confirmResult = await Swal.FireAsync(new SweetAlertOptions
+        Console.WriteLine(message);
+    }
+
+ 
+    private void AddCategory()
+    {
+        currentCategory = new Category();
+        isAddingCategory = true;
+        isEditingCategory = false;
+    }
+
+    private void EditCategory(Category category)
+    {
+        currentCategory = category;
+        isAddingCategory = false;
+        isEditingCategory = true;
+    }
+
+    private async Task SaveCategory()
+    {
+        var categoryDto = new CategoryDto
             {
-                Title = "¿Estás seguro?",
-                Text = "Esta acción no se puede deshacer.",
-                Icon = SweetAlertIcon.Warning,
-                ShowCancelButton = true,
-                CancelButtonText = "Cancelar",
-                ConfirmButtonText = "Eliminar"
-            });
+                IdCategory = currentCategory.IdCategory,
+                Name = currentCategory.Name,
+                Description = currentCategory.Description,
+                IsFeatured = currentCategory.IsFeatured,
+                IdSubCategory = currentCategory.IdSubCategory
+            };
 
-        if (confirmResult.IsConfirmed)
+        if (isAddingCategory)
         {
-            try
-            {
-                var result = await categoryService.DeleteAsync(id);
-                if (result)
-                {
-                    successMessage = "Categoría eliminada correctamente.";
-                }
-                else
-                {
-                    errorMessage = "Hubo un problema al eliminar la categoría.";
-                }
-
-                await LoadCategories();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = $"Error al eliminar la categoría: {ex.Message}";
-            }
+            await _categoryService.SaveAsync(categoryDto);
         }
-    }
-
-    private IEnumerable<CategoryDto> GetPaginatedCategories()
-    {
-        return filteredCategories.Skip((currentPage - 1) * pageSize).Take(pageSize);
-    }
-
-    private void CalculateTotalPages()
-    {
-        totalPages = (int)Math.Ceiling(filteredCategories.Count / (double)pageSize);
-    }
-
-    private void PreviousPage()
-    {
-        if (currentPage > 1)
+        else
         {
-            currentPage--;
-            StateHasChanged();
+            await _categoryService.UpdateAsync(categoryDto);
         }
+
+        await LoadCategories();
+        isAddingCategory = false;
+        isEditingCategory = false;
     }
 
-    private void NextPage()
+
+    private void Cancel()
     {
-        if (currentPage < totalPages)
+        isAddingCategory = false;
+        isEditingCategory = false;
+    }
+
+    private async Task DeleteCategory(string idCategory)
+    {
+        await _categoryService.DeleteAsync(idCategory);
+        await LoadCategories();
+    }
+
+    private async Task ToggleFeatured(CategoryDto category, bool isFeatured)
+    {
+        try
         {
-            currentPage++;
-            StateHasChanged();
+            category.IsFeatured = isFeatured;
+            await _categoryService.UpdateAsync(category);
         }
-    }
-
-    private string GetHighlightClass(CategoryDto category)
-    {
-        return category.SubCategories.Count > 0 ? "highlight" : "";
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
+        }
     }
 }
- *@
