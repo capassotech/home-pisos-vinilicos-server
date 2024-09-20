@@ -3,13 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_pisos_vinilicos.Domain.Entities
 {
-    [Table("Categorys")]
-    public class Category
+    [Table("SubCategory")]
+    public class SubCategory
     {
-
         [Key]
         [Column(TypeName = "VARCHAR(50)")]
-        public string? IdCategory { get; set; }
+        public string? IdSubCategory { get; set; }
 
         [Required]
         [Column(TypeName = "VARCHAR(50)")]
@@ -18,14 +17,5 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Required]
         [Column(TypeName = "VARCHAR(50)")]
         public string Description { get; set; }
-
-        [Column(TypeName = "BIT")]
-        public bool IsFeatured { get; set; }
-
-
-        [Required]
-        [ForeignKey("IdSubCategory")]
-        public string IdSubCategory { get; set; }
-
     }
 }
