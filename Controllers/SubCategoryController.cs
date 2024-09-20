@@ -87,7 +87,11 @@ namespace home_pisos_vinilicos.Controllers
             }
         }
 
-
-
+        [HttpGet("count/{categoryId}")]
+        public async Task<IActionResult> GetSubCategoryCount(string categoryId)
+        {
+            var count = await subCategoryService.CountSubCategoriesByCategoryIdAsync(categoryId);
+            return Ok(count);
+        }
     }
 }
