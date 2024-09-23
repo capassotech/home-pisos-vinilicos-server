@@ -71,7 +71,6 @@ namespace home_pisos_vinilicos.Application.Services
 
             var result = await _productRepository.Insert(product);
 
-            // Después de guardar, asegurar que haya hasta 6 productos destacados
             if (result)
             {
                 await EnsureFeaturedProductsAsync();
@@ -125,8 +124,8 @@ namespace home_pisos_vinilicos.Application.Services
 
             return allProducts
                 .OrderByDescending(p => p.CreatedDate)
-                .Where(p => !p.IsFeatured)  // Solo productos no destacados
-                .Take(6 - currentFeaturedCount)  // Seleccionar los necesarios para completar 6
+                .Where(p => !p.IsFeatured)  
+                .Take(6 - currentFeaturedCount)  
                 .ToList();
         }
 

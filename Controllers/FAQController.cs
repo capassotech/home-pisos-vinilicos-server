@@ -9,31 +9,31 @@ namespace home_pisos_vinilicos.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class SubCategoryController : ControllerBase
+    public class FAQController : ControllerBase
     {
 
 
-        private readonly SubCategoryService subCategoryService;
+        private readonly FAQService fAQService;
 
 
-        public SubCategoryController(SubCategoryService subCategoryService)
+        public FAQController(FAQService fAQService)
         {
-            this.subCategoryService = subCategoryService;
+            this.fAQService = fAQService;
 
         }
 
         [HttpGet("getAll")]
-        public async Task<ActionResult<List<SubCategoryDto>>> GetSubCategorys()
+        public async Task<ActionResult<List<FAQDto>>> GetFAQs()
         {
-            var subCategorys = await subCategoryService.GetAllAsync();
-            return Ok(subCategorys);
+            var fAQs = await fAQService.GetAllAsync();
+            return Ok(fAQs);
         }
 
 
         [HttpPost("new")]
-        public async Task<ActionResult> SaveSubCategory(SubCategoryDto subCategoryDto)
+        public async Task<ActionResult> SaveFAQ(FAQDto fAQDto)
         {
-            var result = await subCategoryService.SaveAsync(subCategoryDto);
+            var result = await fAQService.SaveAsync(fAQDto);
             if (result)
             {
                 return Ok("SubCategory guardado exitosamente.");
@@ -43,9 +43,9 @@ namespace home_pisos_vinilicos.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<SubCategoryDto>> GetSubCategoryById(string id)
+        public async Task<ActionResult<FAQDto>> GetFAQById(string id)
         {
-            var subCategory = await subCategoryService.GetByIdAsync(id);
+            var subCategory = await fAQService.GetByIdAsync(id);
             if (subCategory == null)
             {
                 return NotFound();
@@ -56,11 +56,11 @@ namespace home_pisos_vinilicos.Controllers
 
 
         [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateSubCategoryById(string id, SubCategoryDto requestDto)
+        public async Task<ActionResult> UpdateFAQById(string id, FAQDto requestDto)
         {
-            requestDto.IdSubCategory = id;
+            requestDto.IdFAQ = id;
             Console.WriteLine(id);
-            var result = await subCategoryService.UpdateAsync(requestDto);
+            var result = await fAQService.UpdateAsync(requestDto);
             if (result)
             {
                 return Ok("SubCategory actualizado exitosamente.");
@@ -70,11 +70,11 @@ namespace home_pisos_vinilicos.Controllers
 
 
         [HttpDelete("delete/{id}")]
-        public async Task<ActionResult> DeleteSubCategoryById(string id)
+        public async Task<ActionResult> DeleteFAQById(string id)
         {
             try
             {
-                var result = await subCategoryService.DeleteAsync(id);
+                var result = await fAQService.DeleteAsync(id);
                 if (result)
                 {
                     return Ok("Registro eliminado :)");
@@ -87,11 +87,5 @@ namespace home_pisos_vinilicos.Controllers
             }
         }
 
-        [HttpGet("count/{categoryId}")]
-        public async Task<IActionResult> GetSubCategoryCount(string categoryId)
-        {
-            var count = await subCategoryService.CountSubCategoriesByCategoryIdAsync(categoryId);
-            return Ok(count);
-        }
     }
 }

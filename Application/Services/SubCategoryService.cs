@@ -54,6 +54,10 @@ namespace home_pisos_vinilicos.Application.Services
             return result;
         }
 
-
+        public async Task<int> CountSubCategoriesByCategoryIdAsync(string categoryId)
+        {
+            var subCategories = await _subCategoryRepository.GetAll(); 
+            return subCategories.Count(sc => sc.IdSubCategory == categoryId); 
+        }
     }
 }
