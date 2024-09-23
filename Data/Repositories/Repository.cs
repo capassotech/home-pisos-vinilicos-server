@@ -33,7 +33,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                 var keyProperty = GetKeyProperty();
                 if (keyProperty != null && keyProperty.CanWrite)
                 {
-                    // Asignar el ID generado por Firebase (x.Key) a la propiedad marcada con [Key]
                     keyProperty.SetValue(entity, x.Key);
                 }
 
@@ -74,7 +73,6 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Inserta el objeto en Firebase y obtiene la respuesta con el ID generado
                 var firebaseResponse = await _firebaseClient
                     .Child(typeof(T).Name)
                     .PostAsync(entity);

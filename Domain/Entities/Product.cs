@@ -31,7 +31,6 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "DECIMAL(18, 2)")]
         public decimal Size { get; set; }
 
-
         
         [Column(TypeName = "VARCHAR(50)")]
         public String Color { get; set; }
@@ -54,6 +53,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public String Model { get; set; }
 
+
         [Required]
         [Column(TypeName = "VARCHAR(50)")]
         public String Dimensions { get; set; }
@@ -68,7 +68,6 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public bool RequiresUnderlay { get; set; }
 
 
-
         [Required]
         [Column(TypeName = "DECIMAL(18, 2)")]
         public decimal PricePerSquareMeter { get; set; }
@@ -78,14 +77,10 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public String TechnicalSheet { get; set; }
 
         
-        
         [Required]
         [ForeignKey("IdCategory")]
         public string IdCategory { get; set; }
         
-        
-
-        //public SubCategory category { get; set; }
         
     }
 
