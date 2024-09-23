@@ -1,0 +1,125 @@
+﻿@page "/faq-management"
+@using home_pisos_vinilicos.Application
+@using home_pisos_vinilicos.Application.DTOs
+@using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Domain.Entities
+@inject FAQService faqService
+
+<head>
+    <link href="css/faqManagement.css" rel="stylesheet" />
+</head>
+
+<div class="container-management-faq">
+
+<h3 class="title-faq">Gestión de Preguntas Frecuentes</h3>
+
+    <button class="button-add" @onclick="ShowAddFAQModal">Agregar Nueva Pregunta</button>
+
+<table class="table table-faq-questions">
+    <thead>
+        <tr>
+            <th>Pregunta</th>
+            <th>Respuesta</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var faq in faqs)
+        {
+            <tr>
+                <td>@faq.Question</td>
+                <td>@faq.Answer</td>
+                <td>
+                        <button class="btn btn" @onclick="() => ShowEditFAQModal(faq)">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => DeleteFAQ(faq.IdFAQ)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+    @if (isModalVisible)
+    {
+                    <div class="modal-overlay">
+                        <EditForm Model="@faqModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
+                            <div class="form-group">
+                                <label>Pregunta</label>
+                                <InputText class="form-control" @bind-Value="faqModel.Question" />
+                                <ValidationMessage For="() => faqModel.Question" />
+                            </div>
+                            <div class="form-group">
+                                <label>Respuesta</label>
+                                <InputTextArea class="form-control" @bind-Value="faqModel.Answer" />
+                                <ValidationMessage For="() => faqModel.Answer" />
+                            </div>
+
+                <div class="container-buttons">
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                            </div>
+                        </EditForm>
+                    </div>
+    }
+</div>
+
+@code {
+    private List<FAQ> faqs = new(); 
+    private FAQDto faqModel = new(); 
+    private bool isModalVisible = false;
+    private string modalTitle = "Agregar Pregunta";
+
+    protected override async Task OnInitializedAsync()
+    {
+        faqs = await faqService.GetAllAsync(); 
+    }
+
+    private void ShowAddFAQModal()
+    {
+        faqModel = new FAQDto();
+        modalTitle = "Agregar Pregunta";
+        isModalVisible = true;
+    }
+
+    private void ShowEditFAQModal(FAQ faq)
+    {
+        // Convertimos de FAQ a FAQDto antes de editar
+        faqModel = new FAQDto
+            {
+                IdFAQ = faq.IdFAQ,
+                Question = faq.Question,
+                Answer = faq.Answer
+            };
+        modalTitle = "Editar Pregunta";
+        isModalVisible = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(faqModel.IdFAQ))
+        {
+            await faqService.SaveAsync(faqModel); 
+        }
+        else
+        {
+            await faqService.UpdateAsync(faqModel);
+        }
+
+        faqs = await faqService.GetAllAsync(); 
+        isModalVisible = false;
+    }
+
+    private async Task DeleteFAQ(string idFAQ)
+    {
+        await faqService.DeleteAsync(idFAQ); 
+        faqs = await faqService.GetAllAsync(); 
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+}

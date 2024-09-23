@@ -14,7 +14,7 @@
     <h3 class="title-categories">Gestión de Categorías</h3>
 
 <div>
-    <button @onclick="AddCategory">Añadir Categoría</button>
+        <button @onclick="AddCategory" class="button-add">Añadir Categoría</button>
 </div>
 
 @if (isAddingCategory || isEditingCategory)
@@ -87,16 +87,38 @@
     </table>
 
     <h3 class="title-categories">Categorías Destacadas</h3>
-    <div class="featured-categories">
-        @foreach (var category in categories.Where(c => c.IsFeatured))
-        {
-            <div class="featured-category">
-                @* <img src="@category.ImageUrl" alt="@category.Name" /> *@
-                <h4>@category.Name</h4>
-                <p>@category.Description</p>
-            </div>
-        }
-    </div>
+    <table class="table table-featured-categories">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+               @*  <th>Número de Subcategorías</th>
+                <th>Acciones</th> *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (categories != null)
+            {
+                @foreach (var category in categories.Where(c => c.IsFeatured))
+                {
+                    <tr>
+                        <td>@category.Name</td>
+                        <td>@category.Description</td>
+@*                         <td>PROXIMAMENTE</td>
+ *@                       @*  <td class="buttons-edition">
+                            <button class="btn btn-sm" @onclick="() => EditCategory(category)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td> *@
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
 </div>
 @code {
     private List<Category> categories = new();
