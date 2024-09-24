@@ -16,6 +16,8 @@ namespace home_pisos_vinilicos.Application.Mapping
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<SubCategory, SubCategoryDto>().ReverseMap();
             CreateMap<FAQ, FAQDto>().ReverseMap();
+            CreateMap<Contact, ContactDto>().ReverseMap();
+            CreateMap<SocialNetwork, SocialNetworkDto>().ReverseMap();
             CreateMap<LoginDto, Login>().ReverseMap();
 
         }
