@@ -11,6 +11,8 @@ namespace home_pisos_vinilicos.Application.Services
     public class CategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ISubCategoryRepository _subCategoryRepository; 
+
         private readonly IMapper _mapper;
 
         public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
@@ -126,6 +128,22 @@ namespace home_pisos_vinilicos.Application.Services
                 await _categoryRepository.Update(category);
             }
         }
+
+        public async Task<List<CategoryDto>> GetAllCategoriesWithSubCategoryCountAsync(Expression<Func<Category, bool>>? filter = null)
+        {
+            var categories = await _categoryRepository.GetAll(filter); 
+            var categoryDtos = new List<CategoryDto>();
+
+            foreach (var category in categories)
+            {
+                var categoryDto = _mapper.Map<CategoryDto>(category);
+
+                categoryDtos.Add(categoryDto);
+            }
+
+            return categoryDtos;
+        }
+
 
 
     }

@@ -47,7 +47,5 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-
-
     }
 }

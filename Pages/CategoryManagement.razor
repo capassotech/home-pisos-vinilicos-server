@@ -5,6 +5,8 @@
 @using home_pisos_vinilicos.Domain.Entities
 
 @inject CategoryService _categoryService
+@inject SubCategoryService _subCategoryService
+
 
 <head>
     <link href="css/categoryManagement.css" rel="stylesheet" />
@@ -17,29 +19,32 @@
         <button @onclick="AddCategory" class="button-add">Añadir Categoría</button>
 </div>
 
-@if (isAddingCategory || isEditingCategory)
-{
-    <EditForm Model="currentCategory" OnValidSubmit="SaveCategory">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    @if (isModalVisible)
+    {
+        <div class="modal-overlay">
+            <EditForm Model="@categoryModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <InputText class="form-control" @bind-Value="categoryModel.Name" />
+                    <ValidationMessage For="() => categoryModel.Name" />
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <InputText class="form-control" @bind-Value="categoryModel.Description" />
+                    <ValidationMessage For="() => categoryModel.Description" />
+                </div>
+                <div class="">
+                    <label>¿Destacado?</label>
+                    <InputCheckbox  @bind-Value="categoryModel.IsFeatured" />
+                </div>
 
-        <div>
-            <label>Nombre</label>
-            <InputText @bind-Value="currentCategory.Name" />
+                <div class="container-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                </div>
+            </EditForm>
         </div>
-        <div>
-            <label>Descripción</label>
-            <InputText @bind-Value="currentCategory.Description" />
-        </div>
-        <div>
-            <label>¿Destacado?</label>
-            <InputCheckbox @bind-Value="currentCategory.IsFeatured" />
-        </div>
-
-        <button type="submit">Guardar</button>
-        <button type="button" @onclick="Cancel">Cancelar</button>
-    </EditForm>
-}
+    }
 
 <table class="table table-categories">
     <thead>
@@ -55,16 +60,16 @@
             {
                 @foreach (var category in categories)
                 {
+                    var subCategoryCount = subCategoryCounts.ElementAtOrDefault(categories.IndexOf(category));
+
                     <tr>
                         <td>@category.Name</td>
                         <td>@category.Description</td>
-                        <td>@* @category.SubCategories.Count() *@ PROXIMAMENTE</td>
+                        <td>@subCategoryCount</td>
                         <td class="buttons-edition">
                             <button class="btn btn-sm" @onclick="() => EditCategory(category)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
-
-
                             <button class="btn btn-sm" @onclick="() => ToggleFeatured(category)">
                                 @if (category.IsFeatured)
                                 {
@@ -72,10 +77,9 @@
                                 }
                                 else
                                 {
-                                    <i class="far fa-star"></i> 
+                                    <i class="far fa-star"></i>
                                 }
                             </button>
-
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -123,19 +127,37 @@
 @code {
     private List<Category> categories = new();
     private Category currentCategory = new();
+    private CategoryDto categoryModel = new();
     private bool isAddingCategory = false;
     private bool isEditingCategory = false;
     private const int MaxFeaturedCategories = 2; 
+    private List<int> subCategoryCounts = new();
+    private bool isModalVisible = false;
+
 
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategories();
+        await LoadSubCategoryCounts();
     }
 
     private async Task LoadCategories()
     {
         categories = await _categoryService.GetAllAsync(); 
+    }
+
+    private async Task LoadSubCategoryCounts()
+    {
+        subCategoryCounts.Clear();
+        if (categories != null)
+        {
+            foreach (var category in categories)
+            {
+                var count = await GetSubCategoryCount(category.IdCategory);
+                subCategoryCounts.Add(count);
+            }
+        }
     }
 
     protected async Task ToggleFeatured(Category category)
@@ -176,6 +198,43 @@
             ShowAlert($"Error al destacar la categoría: {ex.Message}");
         }
     }
+    private void ShowEditCategoryModal(Category category)
+    {
+        categoryModel = new CategoryDto
+            {
+                IdCategory = category.IdCategory,
+                Name = category.Name,
+                Description = category.Description,
+                IsFeatured = category.IsFeatured
+            };
+        isModalVisible = true;
+    }
+
+    private void ShowAddCategoryModal()
+    {
+        categoryModel = new CategoryDto();
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(categoryModel.IdCategory))
+        {
+            await _categoryService.SaveAsync(categoryModel);
+        }
+        else
+        {
+            await _categoryService.UpdateAsync(categoryModel);
+        }
+
+        await LoadCategories();
+        isModalVisible = false;
+    }
 
     private int GetFeaturedCategoriesCount()
     {
@@ -193,6 +252,7 @@
         currentCategory = new Category();
         isAddingCategory = true;
         isEditingCategory = false;
+        ShowAddCategoryModal(); 
     }
 
     private void EditCategory(Category category)
@@ -200,6 +260,8 @@
         currentCategory = category;
         isAddingCategory = false;
         isEditingCategory = true;
+        ShowAddCategoryModal();
+
     }
 
     private async Task SaveCategory()
@@ -252,4 +314,10 @@
             Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
         }
     }
+
+    private async Task<int> GetSubCategoryCount(string categoryId)
+    {
+        return await _subCategoryService.CountSubCategoriesByCategoryIdAsync(categoryId);
+    }
 }
+
