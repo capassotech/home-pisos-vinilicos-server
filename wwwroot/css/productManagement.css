@@ -84,7 +84,7 @@
         box-shadow: none;
     }
 .table-products {
-    width: 80%;
+    width: 90%;
     margin-top: 4%;
     padding: 20px;
     border-radius: 10px;
@@ -330,10 +330,11 @@ circle {
         width: 90%;
     }
     .table-products {
-        width: 90%;
+        width: 80%;
+        padding: 20px;
     }
     .table-featured-products {
-        width: 90%;
+        width: 100%;
         padding:0;
     }
 
