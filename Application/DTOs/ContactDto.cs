@@ -7,6 +7,6 @@
         public string Email { get; set; }
         public decimal Phone { get; set; }
         public string GoogleMapsUrl { get; set; }
-        public string IdSocialNetwork { get; set; }
+        public string? IdSocialNetwork { get; set; }
     }
 }

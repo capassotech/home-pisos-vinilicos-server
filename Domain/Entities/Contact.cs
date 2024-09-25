@@ -27,10 +27,8 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public string GoogleMapsUrl { get; set; }
 
-
-        [Required]
         [ForeignKey("IdSocialNetwork")]
-        public string IdSocialNetwork { get; set; }
+        public string? IdSocialNetwork { get; set; }
         
     }
 }
