@@ -23,13 +23,9 @@ namespace home_pisos_vinilicos.Application.Services
         {
             var products = await _productRepository.GetAllWithCategories();
             var productDtos = _mapper.Map<List<ProductDto>>(products);
-            foreach (var productDto in productDtos)
-            {
-                var category = await _categoryRepository.GetById(productDto.IdCategory);
-                productDto.Category = _mapper.Map<CategoryDto>(category);
-            }
             return productDtos;
         }
+
 
 
         public async Task<ProductDto> GetByIdAsync(string id)
