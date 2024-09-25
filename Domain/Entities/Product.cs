@@ -80,6 +80,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Required]
         [ForeignKey("IdCategory")]
         public string IdCategory { get; set; }
+        public Category? Category { get; set; }
         
         
     }

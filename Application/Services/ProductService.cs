@@ -9,27 +9,40 @@ namespace home_pisos_vinilicos.Application.Services
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IMapper mapper, ICategoryRepository categoryRepository)
         {
             _productRepository = productRepository;
             _mapper = mapper;
+            _categoryRepository = categoryRepository;
         }
 
-        public async Task<Product> GetByIdAsync(string id)
+        public async Task<List<ProductDto>> GetAllAsync(Expression<Func<Product, bool>>? filter = null)
         {
-            var productDto = await _productRepository.GetById(id);
-            var product = _mapper.Map<Product>(productDto);
-            return product;
+            var products = await _productRepository.GetAllWithCategories();
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+            foreach (var productDto in productDtos)
+            {
+                var category = await _categoryRepository.GetById(productDto.IdCategory);
+                productDto.Category = _mapper.Map<CategoryDto>(category);
+            }
+            return productDtos;
         }
 
-        public async Task<List<Product>> GetAllAsync(Expression<Func<Product, bool>>? filter = null)
+
+        public async Task<ProductDto> GetByIdAsync(string id)
         {
-            var productDto = await _productRepository.GetAll(filter);
-            var products = _mapper.Map<List<Product>>(productDto);
-            return products;
+            var product = await _productRepository.GetByIdWithCategory(id);
+            if (product != null && !string.IsNullOrEmpty(product.IdCategory))
+            {
+                product.Category = await _categoryRepository.GetById(product.IdCategory);
+            }
+            var productDto = _mapper.Map<ProductDto>(product);
+            return productDto;
         }
+
 
         public async Task<bool> DeleteAsync(string idProduct)
         {

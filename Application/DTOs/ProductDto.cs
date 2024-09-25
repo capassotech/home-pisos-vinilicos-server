@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using home_pisos_vinilicos.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace home_pisos_vinilicos.Application.DTOs
 {
@@ -46,5 +47,6 @@ namespace home_pisos_vinilicos.Application.DTOs
 
         public string TechnicalSheet { get; set; }
         public string IdCategory { get; set; }
+        public CategoryDto? Category { get; set; }
     }
 }
