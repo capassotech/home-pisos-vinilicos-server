@@ -1,0 +1,96 @@
+﻿@page "/contact-management"
+@using home_pisos_vinilicos.Application
+@using home_pisos_vinilicos.Application.DTOs
+@using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Domain.Entities
+@inject ContactService contactService
+@inject SocialNetworkService socialNetworkService
+
+<h3>Gestión de Contacto y Redes Sociales</h3>
+
+<div>
+    <h4>Gestión de Dirección</h4>
+    <input type="text" @bind="@contactDto.Address" placeholder="Actualizar dirección" />
+    <p><a href="@contactDto.GoogleMapsUrl" target="_blank">Ver en Google Maps</a></p>
+    <button @onclick="UpdateAddress">Actualizar Dirección</button>
+</div>
+
+<div>
+    <h4>Gestión de Correo Electrónico</h4>
+    <input type="email" @bind="@contactDto.Email" placeholder="Actualizar correo electrónico" />
+    <button @onclick="UpdateEmail">Actualizar Correo Electrónico</button>
+</div>
+
+<div>
+    <h4>Gestión de WhatsApp</h4>
+    <input type="text" @bind="@phoneNumber" placeholder="Actualizar número de WhatsApp" />
+    <button @onclick="UpdatePhoneNumber">Actualizar WhatsApp</button>
+</div>
+
+<div>
+    <h4>Gestión de Redes Sociales</h4>
+    @foreach (var socialNetwork in socialNetworks)
+    {
+        <div>
+            <input type="text" @bind="@socialNetwork.Name" placeholder="Nombre de la red social" />
+            <input type="text" @bind="@socialNetwork.Link" placeholder="Enlace a la red social" />
+            <button @onclick="() => UpdateSocialNetwork(socialNetwork)">Actualizar Red Social</button>
+        </div>
+    }
+</div>
+
+@code {
+    private ContactDto contactDto = new ContactDto();
+    private List<SocialNetworkDto> socialNetworks = new List<SocialNetworkDto>();
+    private string phoneNumber;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var contact = await contactService.GetByIdAsync("1");
+
+        if (contact != null)
+        {
+            contactDto = new ContactDto
+                {
+                    IdContact = contact.IdContact,
+                    Address = contact.Address,
+                    Email = contact.Email,
+                    Phone = contact.Phone,
+                    GoogleMapsUrl = contact.GoogleMapsUrl
+                };
+            phoneNumber = contact.Phone.ToString();
+        }
+        else
+        {
+            contactDto = new ContactDto();
+        }
+
+        var socialNetworkEntities = await socialNetworkService.GetAllAsync();
+        socialNetworks = socialNetworkEntities.Select(sn => new SocialNetworkDto
+            {
+                Name = sn.Name,
+                Link = sn.Link
+            }).ToList();
+    }
+
+    private async Task UpdateAddress()
+    {
+        await contactService.UpdateAsync(new ContactDto { Address = contactDto.Address });
+    }
+
+    private async Task UpdateEmail()
+    {
+        await contactService.UpdateAsync(new ContactDto { Email = contactDto.Email });
+    }
+
+    private async Task UpdatePhoneNumber()
+    {
+        contactDto.Phone = Convert.ToDecimal(phoneNumber);
+        await contactService.UpdateAsync(new ContactDto { Phone = contactDto.Phone });
+    }
+
+    private async Task UpdateSocialNetwork(SocialNetworkDto socialNetwork)
+    {
+        await socialNetworkService.UpdateAsync(socialNetwork);
+    }
+}
