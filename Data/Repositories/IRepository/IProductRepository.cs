@@ -8,5 +8,7 @@ namespace home_pisos_vinilicos.Data.Repositories.IRepository
     public interface IProductRepository : IRepository<Product>
     {
         Task<List<Product>> GetAll(Expression<Func<Product, bool>>? filter = null);
+        Task<Product> GetByIdWithCategory(string id);
+        Task<List<Product>> GetAllWithCategories();
     }
 }
