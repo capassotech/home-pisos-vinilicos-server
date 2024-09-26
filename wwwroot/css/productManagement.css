@@ -147,7 +147,15 @@ tr {
     padding: 5px;
     margin-bottom: 5px;
 }
-
+    .form-group select {
+        display: block;
+        width: 45%;
+        border-radius: 10px;
+        border: none;
+        background-color: #BFCFE7;
+        padding: 5px;
+        margin-bottom: 5px;
+    }
     .edit-form button {
         background-color: #488aec;
         color: #ffffff;

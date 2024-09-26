@@ -7,8 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
-
-@* @inject CategoryService categoryService *@
+@inject CategoryService categoryService
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -61,6 +60,7 @@
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
                 </div>
+
 
                 <div class="form-group">
                     <div class="error-text">
@@ -143,6 +143,19 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="category">Categoría</label>
+                        <select id="category" class="form-control" @bind="editingProduct.IdCategory">
+                            <option  value="">Selecciona una categoría</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.IdCategory">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
+                </div>
                 @if (isLoading)
                 {
                     <div class="spinner">
@@ -280,7 +293,7 @@
     {
 
         await LoadProducts();
-        // await LoadCategories();
+        categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
         CalculateTotalPages();
     }
 
@@ -334,23 +347,6 @@
             Console.WriteLine($"Error al cargar productos: {ex.Message}");
         }
     }
-
-    // private async Task LoadCategories()
-    // {
-    //     try
-    //     {
-    //         var categoryEntities = await categoryService.GetAllAsync();
-    //         categories = categoryEntities.Select(c => new CategoryDto
-    //             {
-    //                 IdCategory = c.IdCategory,
-    //                 Name = c.Name
-    //             }).ToList();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         errorMessage = $"Error al cargar las categorías: {ex.Message}";
-    //     }
-    // }
 
     protected async void AddNewProduct()
     {
