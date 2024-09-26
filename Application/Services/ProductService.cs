@@ -26,11 +26,10 @@ namespace home_pisos_vinilicos.Application.Services
             return productDtos;
         }
 
-
-
         public async Task<ProductDto> GetByIdAsync(string id)
         {
             var product = await _productRepository.GetByIdWithCategory(id);
+            
             if (product != null && !string.IsNullOrEmpty(product.IdCategory))
             {
                 product.Category = await _categoryRepository.GetById(product.IdCategory);
@@ -39,14 +38,10 @@ namespace home_pisos_vinilicos.Application.Services
             return productDto;
         }
 
-
         public async Task<bool> DeleteAsync(string idProduct)
         {
             return await _productRepository.Delete(idProduct);
         }
-
-        
-
 
         public async Task<bool> UpdateAsync(ProductDto productDto)
         {
@@ -100,7 +95,6 @@ namespace home_pisos_vinilicos.Application.Services
 
             return productDtos;
         }
-
 
         private async Task EnsureFeaturedProductsAsync()
         {

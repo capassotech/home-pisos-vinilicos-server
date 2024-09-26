@@ -9,5 +9,6 @@ namespace home_pisos_vinilicos.Application.DTOs
         public string Description { get; set; }
         public bool IsFeatured { get; set; }
         public string IdSubCategory { get; set; }
+        public SubCategoryDto? SubCategory { get; set; }
     }
 }

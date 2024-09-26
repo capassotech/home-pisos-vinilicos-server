@@ -22,10 +22,11 @@ namespace home_pisos_vinilicos.Domain.Entities
         [Column(TypeName = "BIT")]
         public bool IsFeatured { get; set; }
 
-
         [Required]
         [ForeignKey("IdSubCategory")]
         public string IdSubCategory { get; set; }
+        public SubCategory SubCategory { get; set; }
+
 
     }
 }

@@ -11,26 +11,32 @@ namespace home_pisos_vinilicos.Application.Services
     public class CategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ISubCategoryRepository _subCategoryRepository;
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper, ISubCategoryRepository subCategoryRepository)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
+            _subCategoryRepository = subCategoryRepository;
+        }
+        public async Task<List<CategoryDto>> GetAllAsync(Expression<Func<Category, bool>>? filter = null)
+        {
+            var categories = await _categoryRepository.GetAllWithSubCategories();
+            var categoryDtos = _mapper.Map<List<CategoryDto>>(categories);
+            return categoryDtos;
         }
 
-        public async Task<Category> GetByIdAsync(string id)
+        public async Task<CategoryDto> GetByIdAsync(string id)
         {
-            var categoryDto = await _categoryRepository.GetById(id);
-            var category = _mapper.Map<Category>(categoryDto);
-            return category;
-        }
+            var category = await _categoryRepository.GetByIdWithSubCategory(id);
 
-        public async Task<List<Category>> GetAllAsync(Expression<Func<Category, bool>>? filter = null)
-        {
-            var categoryDto = await _categoryRepository.GetAll(filter);
-            var categorys = _mapper.Map<List<Category>>(categoryDto);
-            return categorys;
+            if (category != null && !string.IsNullOrEmpty(category.IdSubCategory))
+            {
+                category.SubCategory = await _subCategoryRepository.GetById(category.IdSubCategory);
+            }
+            var categoryDto = _mapper.Map<CategoryDto>(category);
+            return categoryDto;
         }
 
         public async Task<bool> DeleteAsync(string idCategory)
