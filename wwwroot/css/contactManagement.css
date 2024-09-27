@@ -14,9 +14,9 @@
 
 .edit-form {
     background-color: #919ba3;
-    padding: 2rem;
+    padding: 3rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    margin-top: 1%;
+    margin-top: 2%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,12 +31,12 @@
 }
 
     .form-group input {
-        width: 90%;
+        width: 100%;
         border-radius: 10px;
         border: none;
         background-color: #ffff;
-        padding: 5px;
-        margin-bottom: 5px;
+        padding: 8px;
+        margin-bottom: 8px;
     }
 
 .edit-form button {
@@ -47,7 +47,7 @@
     padding: 0.5rem 1rem;
     cursor: pointer;
     margin: 0.5rem 0;
-    width: 150px;
+    width: 250px;
     box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
 }
 

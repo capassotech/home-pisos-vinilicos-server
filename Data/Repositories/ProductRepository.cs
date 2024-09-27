@@ -51,56 +51,54 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-
+        
         public async Task<Product?> GetByIdWithCategory(string id)
         {
-            var product = await _firebaseClient
-                .Child("Product")
-                .Child(id)
-                .OnceSingleAsync<Product>();
+            var product = await GetProductById(id);
             if (product == null)
             {
                 return null;
             }
-            var category = await _firebaseClient
-                .Child("Category")
-                .Child(product.IdCategory)
-                .OnceSingleAsync<Category>();
+
+            var category = await GetCategoryById(product.IdCategory);
             if (category != null)
             {
-                product.Category = category; 
+                product.Category = category;
             }
+
             return product;
         }
 
+        private async Task<Product?> GetProductById(string id)
+        {
+            return await _firebaseClient
+                .Child("Product")
+                .Child(id)
+                .OnceSingleAsync<Product>();
+        }
+
+        private async Task<Category?> GetCategoryById(string? Idcategory)
+        {
+            if (string.IsNullOrEmpty(Idcategory))
+            {
+                return null;
+            }
+
+            return await _firebaseClient
+                .Child("Category")
+                .Child(Idcategory)
+                .OnceSingleAsync<Category>();
+        }
 
         public async Task<List<Product>> GetAllWithCategories()
         {
             try
             {
-                var products = await _firebaseClient
-                    .Child("Product")
-                    .OnceAsync<Product>();
+                var productList = await GetAllProducts();
+                var categoryDictionary = await GetCategoryDictionary();
 
-                var productList = products.Select(p =>
-                {
-                    var product = p.Object;
-                    product.IdProduct = p.Key;
-                    return product;
-                }).ToList();
-                var categories = await _firebaseClient
-                    .Child("Category")
-                    .OnceAsync<Category>();
-                var categoryDictionary = categories
-                    .ToDictionary(c => c.Key, c => c.Object); 
-                // Recorre los productos para asignarles su categoría usando el diccionario
-                foreach (var product in productList)
-                {
-                    if (!string.IsNullOrEmpty(product.IdCategory) && categoryDictionary.ContainsKey(product.IdCategory))
-                    {
-                        product.Category = categoryDictionary[product.IdCategory];
-                    }
-                }
+                AssignCategoriesToProducts(productList, categoryDictionary);
+
                 return productList;
             }
             catch (Exception ex)
@@ -110,8 +108,34 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
+        private async Task<List<Product>> GetAllProducts()
+        {
+            var products = await _firebaseClient.Child("Product").OnceAsync<Product>();
 
+            return products.Select(p =>
+            {
+                var product = p.Object;
+                product.IdProduct = p.Key;
+                return product;
+            }).ToList();
+        }
 
+        private async Task<Dictionary<string, Category>> GetCategoryDictionary()
+        {
+            var categories = await _firebaseClient.Child("Category").OnceAsync<Category>();
+            return categories.ToDictionary(c => c.Key, c => c.Object);
+        }
 
+        private void AssignCategoriesToProducts(List<Product> products, Dictionary<string, Category> categoryDictionary)
+        {
+            foreach (var product in products)
+            {
+                if (!string.IsNullOrEmpty(product.IdCategory) && categoryDictionary.ContainsKey(product.IdCategory))
+                {
+                    product.Category = categoryDictionary[product.IdCategory];
+                }
+            }
+        }
+        
     }
 }

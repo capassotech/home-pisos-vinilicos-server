@@ -8,5 +8,7 @@
         public decimal Phone { get; set; }
         public string GoogleMapsUrl { get; set; }
         public string? IdSocialNetwork { get; set; }
+        public List<SocialNetworkDto> SocialNetworks { get; set; } = new List<SocialNetworkDto>(); 
+
     }
 }

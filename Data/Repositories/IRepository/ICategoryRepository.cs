@@ -8,5 +8,7 @@ namespace home_pisos_vinilicos.Data.Repositories.IRepository
     public interface ICategoryRepository : IRepository<Category>
     {
         Task<List<Category>> GetAll(Expression<Func<Category, bool>>? filter = null);
+        Task<Category?> GetByIdWithSubCategories(string id);
+        Task<List<Category>> GetAllWithSubCategories();
     }
 }

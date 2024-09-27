@@ -4,9 +4,7 @@
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Entities
 @using System.Net.Http.Json
-@using System.Net.Http.Json
 @inject IJSRuntime JSRuntime
-
 @inject ContactService ContactService
 @inject SocialNetworkService SocialNetworkService
 
@@ -15,49 +13,56 @@
 </head>
 
 <div class="container-management-contact">
-    <h3 class="title-contact">Contact and Social Media Management</h3>
+    <h3 class="title-contact">Gestión de Contacto y Redes Sociales</h3>
     <EditForm Model="@contactModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="form-group">
-        <label for="address">Address:</label>
-        <InputText id="address" @bind-Value="contactModel.Address" />
-    </div>
+            <label for="address">Dirección:</label>
+            <InputText id="address" @bind-Value="contactModel.Address" />
+            <ValidationMessage For="() => contactModel.Address" />
+        </div>
 
         <div class="form-group">
-        <label for="email">Email:</label>
-        <InputText id="email" @bind-Value="contactModel.Email" />
-    </div>
+            <label for="email">Correo Electrónico:</label>
+            <InputText id="email" @bind-Value="contactModel.Email" />
+            <ValidationMessage For="() => contactModel.Email" />
+        </div>
 
         <div class="form-group">
-        <label for="phone">Phone:</label>
-     <InputNumber id="phone" type=number @bind-Value="contactModel.Phone" />
-   </div>
+            <label for="phone">Teléfono:</label>
+            <InputNumber id="phone" @bind-Value="contactModel.Phone" />
+            <ValidationMessage For="() => contactModel.Phone" />
+        </div>
 
         <div class="form-group">
-        <label for="googleMapsUrl">Google Maps URL:</label>
-        <InputText id="googleMapsUrl" @bind-Value="googleMapsUrl" />
-    </div>
+            <label for="googleMapsUrl">URL de Google Maps:</label>
+            <InputText id="googleMapsUrl" @bind-Value="googleMapsUrl" />
+            <ValidationMessage For="() => googleMapsUrl" />
+        </div>
 
         <div class="form-group">
-        <label for="socialNetworkName">Social Network Name:</label>
-        <InputText id="socialNetworkName" @bind-Value="socialNetwork.Name" />
-    </div>
-
-        <div class="form-group">
-        <label for="socialNetworkLink">Social Network Link:</label>
-        <InputText id="socialNetworkLink" @bind-Value="socialNetwork.Link" />
-    </div>
-
-    <button type="submit">Update Contact</button>
-</EditForm>
+            <h4>Redes Sociales:</h4>
+            @foreach (var socialNetwork in contactModel.SocialNetworks)
+            {
+                <div class="social-network">
+                    <label>@socialNetwork.Name:</label>
+                    <InputText @bind-Value="socialNetwork.Link" />
+                    <ValidationMessage For="() => socialNetwork.Link" />
+                </div>
+            }
+        </div>
+        <button type="submit">Actualizar Contacto</button>
+    </EditForm>
 </div>
+
 @code {
     private ContactDto contactModel = new();
     private List<Contact> contacts = new();
-    private Contact contactE = new();
     private SocialNetworkDto socialNetwork = new SocialNetworkDto();
+
+
     private string googleMapsUrl;
 
     protected override async Task OnInitializedAsync()
@@ -73,14 +78,14 @@
                 contactModel.Address = firstContact.Address;
                 contactModel.Email = firstContact.Email;
                 contactModel.Phone = firstContact.Phone;
-                googleMapsUrl = GenerateGoogleMapsUrl(firstContact.Address); 
-
-                socialNetwork.Name = "Nombre de Red Social"; 
-                socialNetwork.Link = "https://enlace-red-social.com"; 
+                googleMapsUrl = GenerateGoogleMapsUrl(firstContact.Address);
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Instagram", Link = "https://instagram.com/ejemplo" });
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Facebook", Link = "https://facebook.com/ejemplo" });
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Twitter", Link = "https://twitter.com/ejemplo" });
             }
             else
             {
-                Console.WriteLine("No contacts found.");
+                Console.WriteLine("No se encontraron contactos.");
             }
         }
         catch (Exception ex)
@@ -93,7 +98,6 @@
     {
         JSRuntime.InvokeVoidAsync("alert", message);
     }
-   
 
     private async Task HandleValidSubmit()
     {
@@ -101,12 +105,11 @@
         {
             await ContactService.UpdateAsync(contactModel);
             ShowAlert("Contacto actualizado correctamente.");
-
         }
         catch (Exception ex)
         {
             ShowAlert("Hubo un problema al actualizar el Contacto");
-            Console.WriteLine($"Error updating contact: {ex.Message}");
+            Console.WriteLine($"Error actualizando contacto: {ex.Message}");
         }
     }
 

@@ -45,7 +45,6 @@ builder.Services.AddScoped<ISecureDataService, SecureDataService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<LoginService>();
-builder.Services.AddScoped<SubCategoryService>();
 builder.Services.AddScoped<FAQService>();
 builder.Services.AddScoped<ContactService>();
 builder.Services.AddScoped<SocialNetworkService>();
@@ -58,7 +57,6 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Repositorios
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddScoped<IFAQRepository, FAQRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>();

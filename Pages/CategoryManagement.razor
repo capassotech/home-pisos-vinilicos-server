@@ -3,9 +3,9 @@
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Entities
-
+@using System.Net.Http.Json
+@inject IJSRuntime JSRuntime
 @inject CategoryService _categoryService
-@inject SubCategoryService _subCategoryService
 
 
 <head>
@@ -23,19 +23,26 @@
     {
         <div class="modal-overlay">
             <EditForm Model="@categoryModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
                 <div class="form-group">
                     <label>Nombre</label>
-                    <InputText class="form-control" @bind-Value="categoryModel.Name" />
+                    <InputText class="form-control" @bind-Value="categoryModel.Name" required />
                     <ValidationMessage For="() => categoryModel.Name" />
                 </div>
                 <div class="form-group">
                     <label>Descripción</label>
-                    <InputText class="form-control" @bind-Value="categoryModel.Description" />
+                    <InputText class="form-control" @bind-Value="categoryModel.Description" required />
                     <ValidationMessage For="() => categoryModel.Description" />
                 </div>
-                <div class="">
+                <div>
                     <label>¿Destacado?</label>
-                    <InputCheckbox  @bind-Value="categoryModel.IsFeatured" />
+                    <InputCheckbox id="isFeatured" @bind-Value="categoryModel.IsFeatured" @onchange="OnFeaturedChange" />
+                    @if (errorFeaturedLimit)
+                    {
+                        <div class="text-danger mt-2">No se pueden destacar más de 2 categorías.</div>
+                    }
                 </div>
 
                 <div class="container-buttons">
@@ -51,8 +58,8 @@
         <tr>
             <th>Nombre</th>
             <th>Descripción</th>
-            <th>Subcategorías</th>
-            <th>Acciones</th>
+@*             <th>Subcategorías</th>
+ *@            <th>Acciones</th>
         </tr>
     </thead>
         <tbody>
@@ -60,13 +67,11 @@
             {
                 @foreach (var category in categories)
                 {
-                    var subCategoryCount = subCategoryCounts.ElementAtOrDefault(categories.IndexOf(category));
-
                     <tr>
                         <td>@category.Name</td>
                         <td>@category.Description</td>
-                        <td>@subCategoryCount</td>
-                        <td class="buttons-edition">
+@*                         <td>@(category.SubCategories?.FirstOrDefault()?.Name ?? "Sin Subcategoría")</td>
+ *@                        <td class="buttons-edition">
                             <button class="btn btn-sm" @onclick="() => EditCategory(category)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
@@ -90,14 +95,22 @@
         </tbody>
     </table>
 
+    <div class="pagination-controls">
+        <button @onclick="PreviousPage">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <span>Página @CurrentPage de @TotalPages</span>
+        <button @onclick="NextPage">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
     <h3 class="title-categories">Categorías Destacadas</h3>
     <table class="table table-featured-categories">
         <thead>
             <tr>
                 <th>Nombre</th>
                 <th>Descripción</th>
-               @*  <th>Número de Subcategorías</th>
-                <th>Acciones</th> *@
             </tr>
         </thead>
         <tbody>
@@ -108,16 +121,6 @@
                     <tr>
                         <td>@category.Name</td>
                         <td>@category.Description</td>
-@*                         <td>PROXIMAMENTE</td>
- *@                       @*  <td class="buttons-edition">
-                            <button class="btn btn-sm" @onclick="() => EditCategory(category)">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-
-                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td> *@
                     </tr>
                 }
             }
@@ -125,7 +128,6 @@
     </table>
 </div>
 @code {
-    private List<Category> categories = new();
     private Category currentCategory = new();
     private CategoryDto categoryModel = new();
     private bool isAddingCategory = false;
@@ -133,34 +135,46 @@
     private const int MaxFeaturedCategories = 2; 
     private List<int> subCategoryCounts = new();
     private bool isModalVisible = false;
+    private List<CategoryDto> categories = new();
+    private bool errorFeaturedLimit = false;
 
-
+    // Paginación
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 10; 
+    private int TotalCategories { get; set; } = 0; 
+    private int TotalPages => (int)Math.Ceiling((double)TotalCategories / PageSize);
+    private bool HasPreviousPage => CurrentPage > 1;
+    private bool HasNextPage => CurrentPage < TotalPages;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategories();
-        await LoadSubCategoryCounts();
     }
 
     private async Task LoadCategories()
     {
-        categories = await _categoryService.GetAllAsync(); 
+        var allCategories = await _categoryService.GetAllAsync();
+        TotalCategories = allCategories.Count;
+        categories = allCategories.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
     }
-
-    private async Task LoadSubCategoryCounts()
+    private async Task PreviousPage()
     {
-        subCategoryCounts.Clear();
-        if (categories != null)
+        if (HasPreviousPage)
         {
-            foreach (var category in categories)
-            {
-                var count = await GetSubCategoryCount(category.IdCategory);
-                subCategoryCounts.Add(count);
-            }
+            CurrentPage--;
+            await LoadCategories();
         }
     }
 
-    protected async Task ToggleFeatured(Category category)
+    private async Task NextPage()
+    {
+        if (HasNextPage)
+        {
+            CurrentPage++;
+            await LoadCategories();
+        }
+    }
+    protected async Task ToggleFeatured(CategoryDto category)
     {
         try
         {
@@ -169,6 +183,7 @@
             if (category.IsFeatured)
             {
                 category.IsFeatured = false;
+                ShowAlert("La categoría ha sido removida de destacados.");
             }
             else
             {
@@ -178,26 +193,18 @@
                     return;
                 }
                 category.IsFeatured = true;
+                ShowAlert("La categoría ha sido añadida a destacados.");
             }
 
-            var categoryDto = new CategoryDto
-                {
-                    IdCategory = category.IdCategory,
-                    Name = category.Name,
-                    Description = category.Description,
-                    IsFeatured = category.IsFeatured,
-                    IdSubCategory = category.IdSubCategory
-                };
-
-            await _categoryService.UpdateAsync(categoryDto);
+            await _categoryService.UpdateAsync(category);
             await LoadCategories();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
-            ShowAlert($"Error al destacar la categoría: {ex.Message}");
+            ShowAlert($"Error al actualizar la categoría: {ex.Message}");
         }
     }
+
     private void ShowEditCategoryModal(Category category)
     {
         categoryModel = new CategoryDto
@@ -223,17 +230,26 @@
 
     private async Task HandleValidSubmit()
     {
-        if (string.IsNullOrEmpty(categoryModel.IdCategory))
+        try
         {
-            await _categoryService.SaveAsync(categoryModel);
-        }
-        else
-        {
-            await _categoryService.UpdateAsync(categoryModel);
-        }
+            if (string.IsNullOrEmpty(categoryModel.IdCategory))
+            {
+                await _categoryService.SaveAsync(categoryModel);
+                ShowAlert("Categoría añadida correctamente.");
+            }
+            else
+            {
+                await _categoryService.UpdateAsync(categoryModel);
+                ShowAlert("Categoría actualizada correctamente.");
+            }
 
-        await LoadCategories();
-        isModalVisible = false;
+            await LoadCategories();
+            isModalVisible = false;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error al guardar la categoría: {ex.Message}");
+        }
     }
 
     private int GetFeaturedCategoriesCount()
@@ -244,6 +260,8 @@
     private void ShowAlert(string message)
     {
         Console.WriteLine(message);
+        JSRuntime.InvokeVoidAsync("alert", message);
+
     }
 
  
@@ -255,15 +273,17 @@
         ShowAddCategoryModal(); 
     }
 
-    private void EditCategory(Category category)
+  private void EditCategory(CategoryDto category)
+{
+    categoryModel = new CategoryDto
     {
-        currentCategory = category;
-        isAddingCategory = false;
-        isEditingCategory = true;
-        ShowAddCategoryModal();
-
-    }
-
+        IdCategory = category.IdCategory,
+        Name = category.Name,
+        Description = category.Description,
+        IsFeatured = category.IsFeatured
+    };
+    isModalVisible = true;
+}
     private async Task SaveCategory()
     {
         var categoryDto = new CategoryDto
@@ -278,10 +298,12 @@
         if (isAddingCategory)
         {
             await _categoryService.SaveAsync(categoryDto);
+
         }
         else
         {
             await _categoryService.UpdateAsync(categoryDto);
+
         }
 
         await LoadCategories();
@@ -298,9 +320,18 @@
 
     private async Task DeleteCategory(string idCategory)
     {
-        await _categoryService.DeleteAsync(idCategory);
-        await LoadCategories();
+        try
+        {
+            await _categoryService.DeleteAsync(idCategory);
+            ShowAlert("Categoría eliminada correctamente.");
+            await LoadCategories();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error al eliminar la categoría: {ex.Message}");
+        }
     }
+
 
     private async Task ToggleFeatured(CategoryDto category, bool isFeatured)
     {
@@ -314,10 +345,19 @@
             Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
         }
     }
-
-    private async Task<int> GetSubCategoryCount(string categoryId)
+    private async Task OnFeaturedChange()
     {
-        return await _subCategoryService.CountSubCategoriesByCategoryIdAsync(categoryId);
+        var featuredCategoriesCount = GetFeaturedCategoriesCount();
+
+        if (featuredCategoriesCount >= MaxFeaturedCategories && categoryModel.IsFeatured)
+        {
+            errorFeaturedLimit = true;
+            categoryModel.IsFeatured = false;
+        }
+        else
+        {
+            errorFeaturedLimit = false;
+        }
     }
 }
 

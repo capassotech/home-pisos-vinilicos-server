@@ -24,28 +24,23 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Obtener todos los registros desde Firebase
                 var firebaseResult = await _firebaseClient
                     .Child(typeof(T).Name)
                     .OnceAsync<T>();
 
-                // Transformar los resultados en una lista de entidades con el ID correspondiente
                 var entities = firebaseResult.Select(x =>
                 {
                     var entity = x.Object;
 
-                    // Obtener la propiedad marcada con [Key] (si existe)
                     var keyProperty = GetKeyProperty();
                     if (keyProperty != null && keyProperty.CanWrite)
                     {
-                        // Establecer el ID (x.Key) en la propiedad marcada con [Key]
                         keyProperty.SetValue(entity, x.Key);
                     }
 
                     return entity;
                 }).ToList();
 
-                // Aplicar el filtro si es proporcionado
                 if (filter != null)
                 {
                     var filtered = entities.AsQueryable().Where(filter).ToList();
@@ -53,18 +48,14 @@ namespace home_pisos_vinilicos.Data.Repositories
                     return filtered;
                 }
 
-                // Devolver la lista de entidades
                 return entities;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener los registros en Firebase: {ex.Message}");
-                return new List<T>(); // Devolver una lista vacía en caso de error
+                return new List<T>(); 
             }
         }
-
-
-
 
         public async Task<T> GetById(string id)
         {
