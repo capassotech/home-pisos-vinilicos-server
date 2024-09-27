@@ -3,7 +3,8 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using home_pisos_vinilicos.Application.DTOs;
-using home_pisos_vinilicos.Data.Repositories;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using home_pisos_vinilicos.Domain.Entities;
 
 namespace home_pisos_vinilicos.Application.Services
@@ -11,15 +12,14 @@ namespace home_pisos_vinilicos.Application.Services
     public class CategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly ISubCategoryRepository _subCategoryRepository;
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper, ISubCategoryRepository subCategoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
-            _subCategoryRepository = subCategoryRepository;
         }
+
         public async Task<List<CategoryDto>> GetAllAsync(Expression<Func<Category, bool>>? filter = null)
         {
             var categories = await _categoryRepository.GetAllWithSubCategories();
@@ -27,14 +27,12 @@ namespace home_pisos_vinilicos.Application.Services
             return categoryDtos;
         }
 
-        public async Task<CategoryDto> GetByIdAsync(string id)
+        public async Task<CategoryDto?> GetByIdAsync(string id)
         {
-            var category = await _categoryRepository.GetByIdWithSubCategory(id);
+            var category = await _categoryRepository.GetByIdWithSubCategories(id);
+            if (category == null)
+                return null;
 
-            if (category != null && !string.IsNullOrEmpty(category.IdSubCategory))
-            {
-                category.SubCategory = await _subCategoryRepository.GetById(category.IdSubCategory);
-            }
             var categoryDto = _mapper.Map<CategoryDto>(category);
             return categoryDto;
         }
@@ -44,95 +42,76 @@ namespace home_pisos_vinilicos.Application.Services
             return await _categoryRepository.Delete(idCategory);
         }
 
-
-
         public async Task<bool> UpdateAsync(CategoryDto categoryDto)
         {
-            if (categoryDto.IsFeatured)
-            {
-                var featuredCategorys = await _categoryRepository.GetAll(c => c.IsFeatured && c.IdCategory != categoryDto.IdCategory);
-                if (featuredCategorys.Count >= 2)
-                {
-                    throw new InvalidOperationException("No se pueden destacar más de 2 categorias.");
-                }
-            }
-
+            await ValidateFeaturedCategoriesAsync(categoryDto.IdCategory, categoryDto.IsFeatured);
             var category = _mapper.Map<Category>(categoryDto);
             return await _categoryRepository.Update(category);
         }
 
-
         public async Task<bool> SaveAsync(CategoryDto categoryDto)
         {
-            if (categoryDto.IsFeatured)
-            {
-                var featureCategorys = await _categoryRepository.GetAll(c => c.IsFeatured);
-                if (featureCategorys.Count >= 2)
-                {
-                    throw new InvalidOperationException("No se pueden destacar más de 2 categorías");
-                }
-            }
-
+            await ValidateFeaturedCategoriesAsync(null, categoryDto.IsFeatured);
             var category = _mapper.Map<Category>(categoryDto);
-
-
             var result = await _categoryRepository.Insert(category);
 
             if (result)
             {
-                await EnsureFeaturedCategorysAsync();
+                await EnsureFeaturedCategoriesAsync();
             }
 
             return result;
         }
 
-
-        private async Task EnsureFeaturedCategorysAsync()
+        private async Task ValidateFeaturedCategoriesAsync(string? currentCategoryId, bool isFeatured)
         {
-            var featuredCategorys = await GetFeaturedCategorysAsync();
-
-            if (NeedMoreFeaturedCategorys(featuredCategorys))
+            if (isFeatured)
             {
-                var productsToFeature = await GetCategorysToFeatureAsync(featuredCategorys.Count);
-                await FeatureCategorysAsync(productsToFeature);
+                var featuredCategories = await _categoryRepository.GetAll(c => c.IsFeatured && (currentCategoryId == null || c.IdCategory != currentCategoryId));
+                if (featuredCategories.Count >= 2)
+                {
+                    throw new InvalidOperationException("No se pueden destacar más de 2 categorías.");
+                }
             }
         }
 
-
-        private async Task<List<Category>> GetFeaturedCategorysAsync()
+        private async Task EnsureFeaturedCategoriesAsync()
         {
-            var allCategorys = await _categoryRepository.GetAll();
-            return allCategorys
-                .Where(c => c.IsFeatured)
+            var featuredCategories = await GetFeaturedCategoriesAsync();
+            if (NeedMoreFeaturedCategories(featuredCategories))
+            {
+                var categoriesToFeature = await GetCategoriesToFeatureAsync(featuredCategories.Count);
+                await FeatureCategoriesAsync(categoriesToFeature);
+            }
+        }
+
+        private async Task<List<Category>> GetFeaturedCategoriesAsync()
+        {
+            var allCategories = await _categoryRepository.GetAll();
+            return allCategories.Where(c => c.IsFeatured).ToList();
+        }
+
+        private async Task<List<Category>> GetCategoriesToFeatureAsync(int currentFeaturedCount)
+        {
+            var allCategories = await _categoryRepository.GetAll();
+            return allCategories
+                .Where(c => !c.IsFeatured)
+                .Take(2 - currentFeaturedCount)
                 .ToList();
         }
 
-
-        private async Task<List<Category>> GetCategorysToFeatureAsync(int currentFeaturedCount)
+        private bool NeedMoreFeaturedCategories(List<Category> featuredCategories)
         {
-            var allCategorys = await _categoryRepository.GetAll();
-
-            return allCategorys
-                .Where(c => !c.IsFeatured)  
-                .Take(2 - currentFeaturedCount) 
-                .ToList();
+            return featuredCategories.Count < 2;
         }
 
-
-        private bool NeedMoreFeaturedCategorys(List<Category> featuredCategorys)
+        private async Task FeatureCategoriesAsync(List<Category> categoriesToFeature)
         {
-            return featuredCategorys.Count < 2;
-        }
-
-        private async Task FeatureCategorysAsync(List<Category> categorysToFeature)
-        {
-            foreach (var category in categorysToFeature)
+            foreach (var category in categoriesToFeature)
             {
                 category.IsFeatured = true;
                 await _categoryRepository.Update(category);
             }
         }
-
-
     }
 }
