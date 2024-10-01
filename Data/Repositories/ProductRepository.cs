@@ -4,7 +4,13 @@ using Firebase.Storage;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
 using home_pisos_vinilicos_admin.Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Linq.Expressions;
+using System.Net.Http;
+using System.Text;
+using static AuthenticationService;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -16,7 +22,12 @@ namespace home_pisos_vinilicos.Data.Repositories
         public ProductRepository() : base()
         {
             _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
-            _firebaseStorage = new FirebaseStorage("home-pisos-vinilicos.appspot.com"); // Bucket de Firebase Storage
+
+            _firebaseStorage = new FirebaseStorage("gs://home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
+            {
+                AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken), // Usa la propiedad estática
+                ThrowOnCancel = true
+            });
         }
 
         public async Task<string> UploadProductImageAsync(Stream imageStream, string IdProduct)

@@ -4,14 +4,23 @@ using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
 using home_pisos_vinilicos.Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net.Mail;
 using System.Text;
+using static AuthenticationService;
 
 public class AuthenticationService : IAuthenticationService
 {
     private readonly ILoginRepository _loginRepository; 
     private readonly HttpClient _httpClient;
+    private readonly AuthResponse _authResponse;
+
+    private static string _idToken; // Variable estática para el token
+    public static string IdToken => _idToken; // Propiedad para acceder al token
+    private string _token;
+
 
     public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient)
     {
@@ -77,6 +86,15 @@ public class AuthenticationService : IAuthenticationService
                 Message = $"Error de autenticación"
             };
         }
+    }
+    public string GetIdToken()
+    {
+        if (_authResponse != null && !string.IsNullOrEmpty(_authResponse.IdToken))
+        {
+            _token = _authResponse.IdToken; // Asigna el valor a _token
+            return _token; // Devuelve el token
+        }
+        throw new Exception("El usuario no está autenticado o el token no está disponible.");
     }
 
     public class AuthResponse

@@ -434,16 +434,20 @@
     private async Task<string> UploadImage(IBrowserFile file)
     {
         var maxAllowedSize = 1024 * 1024; // 1MB
-        var resizedImageFile = await file.RequestImageFileAsync("image/jpeg", 800, 600);
+        using var stream = file.OpenReadStream(maxAllowedSize);
 
-        using var stream = resizedImageFile.OpenReadStream(maxAllowedSize);
-        var buffer = new byte[resizedImageFile.Size];
-        await stream.ReadAsync(buffer);
+        // Crear el contenido del formulario
+        var content = new MultipartFormDataContent();
+        content.Add(new StreamContent(stream), "productImage", file.Name);
 
-        var base64Image = Convert.ToBase64String(buffer);
-        var imageUrl = await JSRuntime.InvokeAsync<string>("uploadImageToFirebase", base64Image, editingProduct.Name);
+        var response = await Http.PostAsync("api/products/new", content);
+        if (response.IsSuccessStatusCode)
+        {
+            var imageUrl = await response.Content.ReadAsStringAsync(); // Suponiendo que el backend devuelve la URL
+            return imageUrl;
+        }
 
-        return imageUrl;
+        throw new Exception("Error al subir la imagen");
     }
 
 
