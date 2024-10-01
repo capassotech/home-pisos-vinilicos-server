@@ -3,6 +3,7 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using home_pisos_vinilicos.Application.DTOs;
+using System.IO;
 
 namespace home_pisos_vinilicos.Application.Services
 {
@@ -29,7 +30,7 @@ namespace home_pisos_vinilicos.Application.Services
         public async Task<ProductDto> GetByIdAsync(string id)
         {
             var product = await _productRepository.GetByIdWithCategory(id);
-            
+
             if (product != null && !string.IsNullOrEmpty(product.IdCategory))
             {
                 product.Category = await _categoryRepository.GetById(product.IdCategory);
@@ -43,7 +44,7 @@ namespace home_pisos_vinilicos.Application.Services
             return await _productRepository.Delete(idProduct);
         }
 
-        public async Task<bool> UpdateAsync(ProductDto productDto)
+        public async Task<bool> UpdateAsync(ProductDto productDto, Stream? imageStream = null)
         {
             if (productDto.IsFeatured)
             {
@@ -55,10 +56,10 @@ namespace home_pisos_vinilicos.Application.Services
             }
 
             var product = _mapper.Map<Product>(productDto);
-            return await _productRepository.Update(product);
+            return await _productRepository.Update(product, imageStream);
         }
 
-        public async Task<bool> SaveAsync(ProductDto productDto)
+        public async Task<bool> SaveAsync(ProductDto productDto, Stream? imageStream = null)
         {
             if (productDto.IsFeatured)
             {
@@ -70,10 +71,9 @@ namespace home_pisos_vinilicos.Application.Services
             }
 
             var product = _mapper.Map<Product>(productDto);
-
             product.CreatedDate = DateTime.UtcNow;
 
-            var result = await _productRepository.Insert(product);
+            var result = await _productRepository.Insert(product, imageStream); // Llama al repositorio con la imagen
 
             if (result)
             {
@@ -90,9 +90,7 @@ namespace home_pisos_vinilicos.Application.Services
                 p.Description.Contains(query, StringComparison.OrdinalIgnoreCase);
 
             var products = await _productRepository.GetAll(filter);
-
             var productDtos = _mapper.Map<List<ProductDto>>(products);
-
             return productDtos;
         }
 
@@ -127,8 +125,8 @@ namespace home_pisos_vinilicos.Application.Services
 
             return allProducts
                 .OrderByDescending(p => p.CreatedDate)
-                .Where(p => !p.IsFeatured)  
-                .Take(6 - currentFeaturedCount)  
+                .Where(p => !p.IsFeatured)
+                .Take(6 - currentFeaturedCount)
                 .ToList();
         }
 

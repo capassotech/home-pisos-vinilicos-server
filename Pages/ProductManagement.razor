@@ -145,6 +145,18 @@
 
                 <div class="form-group">
                     <div class="error-text">
+                        <label>Imagen:</label>
+                        <InputFile OnChange="HandleFileChange" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Image))
+                {
+                    <div>
+                        <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                }
+                </div>
+                </div>
+                <div class="form-group">
+                    <div class="error-text">
                         <label for="category">Categoría</label>
                         <select id="category" class="form-control" @bind="editingProduct.IdCategory">
                             <option  value="">Selecciona una categoría</option>
@@ -286,6 +298,8 @@
     private string errorMessage = "";
     private bool isLoading = false;
     private const int MaxFeaturedProducts = 6;
+    private IBrowserFile selectedFile;
+    private string Image;
 
 
 
@@ -335,7 +349,8 @@
                     SurfacePerBox = p.SurfacePerBox,
                     RequiresUnderlay = p.RequiresUnderlay,
                     PricePerSquareMeter = p.PricePerSquareMeter,
-                    TechnicalSheet = p.TechnicalSheet
+                    TechnicalSheet = p.TechnicalSheet,
+                    Image = p.Image
                 }).ToList();
 
             filteredProducts = products;
@@ -362,7 +377,8 @@
                 Dimensions = "",
                 SurfacePerBox = 0,
                 PricePerSquareMeter = 0,
-                TechnicalSheet = ""
+                TechnicalSheet = "",
+                Image = ""
             };
 
         isNewProduct = true;
@@ -394,13 +410,43 @@
                 PricePerSquareMeter = product.PricePerSquareMeter,
                 TechnicalSheet = product.TechnicalSheet,
                 IsFeatured = product.IsFeatured,
-                RequiresUnderlay = product.RequiresUnderlay
+                RequiresUnderlay = product.RequiresUnderlay,
+                Image = product.Image
             };
         isNewProduct = false;
         isModalOpen = true;
         successMessage = "";
         errorMessage = "";
     }
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        await LoadImage(selectedFile);
+    }
+    private async Task LoadImage(IBrowserFile file)
+    {
+        var buffers = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffers);
+        string imageType = file.ContentType;
+        Image = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+        StateHasChanged();
+    }
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        var maxAllowedSize = 1024 * 1024; // 1MB
+        var resizedImageFile = await file.RequestImageFileAsync("image/jpeg", 800, 600);
+
+        using var stream = resizedImageFile.OpenReadStream(maxAllowedSize);
+        var buffer = new byte[resizedImageFile.Size];
+        await stream.ReadAsync(buffer);
+
+        var base64Image = Convert.ToBase64String(buffer);
+        var imageUrl = await JSRuntime.InvokeAsync<string>("uploadImageToFirebase", base64Image, editingProduct.Name);
+
+        return imageUrl;
+    }
+
+
 
     private async Task SaveProduct()
     {
@@ -413,6 +459,12 @@
         {
             if (isNewProduct)
             {
+                if (selectedFile != null)
+                {
+                    var imageUrl = await UploadImage(selectedFile);
+                    editingProduct.Image = imageUrl;
+                }
+
                 var result = await productService.SaveAsync(editingProduct);
                 if (result)
                 {

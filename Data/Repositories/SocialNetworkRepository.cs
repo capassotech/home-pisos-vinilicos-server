@@ -11,7 +11,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
         }
 
-        public override async Task<bool> Insert(SocialNetwork newSocialNetwork)
+        public override async Task<bool> Insert(SocialNetwork newSocialNetwork, Stream? imageStream = null)
         {
             try
             {
@@ -23,7 +23,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(SocialNetwork updateSocialNetwork)
+        public override async Task<bool> Update(SocialNetwork updateSocialNetwork, Stream? imageStream = null)
         {
             try
             {

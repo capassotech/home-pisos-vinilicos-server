@@ -15,7 +15,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
         }
 
-        public override async Task<bool> Insert(Category newCategory)
+        public override async Task<bool> Insert(Category newCategory, Stream? imageStream = null)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(Category updateCategory)
+        public override async Task<bool> Update(Category updateCategory, Stream? imageStream = null)
         {
             try
             {

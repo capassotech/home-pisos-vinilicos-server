@@ -1,4 +1,5 @@
 ﻿using home_pisos_vinilicos.Domain.Entities;
+using Microsoft.AspNetCore.Components.Forms;
 using System.ComponentModel.DataAnnotations;
 
 namespace home_pisos_vinilicos.Application.DTOs
@@ -46,6 +47,8 @@ namespace home_pisos_vinilicos.Application.DTOs
         public decimal PricePerSquareMeter { get; set; }
 
         public string TechnicalSheet { get; set; }
+        public string? Image { get; set; }
+        public IBrowserFile? ImageFile { get; set; }
         public string IdCategory { get; set; }
         public CategoryDto? Category { get; set; }
     }
