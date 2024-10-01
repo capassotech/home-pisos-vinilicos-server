@@ -50,6 +50,7 @@ builder.Services.AddScoped<ContactService>();
 builder.Services.AddScoped<SocialNetworkService>();
 
 
+
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

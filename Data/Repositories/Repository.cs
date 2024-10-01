@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using home_pisos_vinilicos_admin.Domain.Entities;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -86,7 +87,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         }
 
 
-        public virtual async Task<bool> Insert(T entity)
+        public virtual async Task<bool> Insert(T entity, Stream? imageStream = null)
         {
             try
             {
@@ -115,7 +116,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         }
 
 
-        public virtual async Task<bool> Update(T entity)
+        public virtual async Task<bool> Update(T entity, Stream? imageStream = null)
         {
             try
             {
