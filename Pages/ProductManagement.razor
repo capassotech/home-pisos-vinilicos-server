@@ -3,11 +3,13 @@
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Data.Repositories.IRepository
 @inject ProductService productService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject CategoryService categoryService
+@inject IProductRepository fs
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -146,7 +148,7 @@
                 <div class="form-group">
                     <div class="error-text">
                         <label>Imagen:</label>
-                        <InputFile OnChange="HandleFileChange" accept="image/*" />
+                        <InputFile OnChange="OnFileSelected" accept="image/*" />
                     @if (!string.IsNullOrEmpty(Image))
                 {
                     <div>
@@ -418,39 +420,52 @@
         successMessage = "";
         errorMessage = "";
     }
-    private async Task HandleFileChange(InputFileChangeEventArgs e)
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
-        await LoadImage(selectedFile);
+
+        if (selectedFile != null)
+        {
+            await PreviewImage(selectedFile);
+        }
     }
-    private async Task LoadImage(IBrowserFile file)
+
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        string uploadImageUrl = null!;
+        if (file != null)
+        {
+            try
+            {
+                var stream = file.OpenReadStream();
+                var fileName = file.Name;
+                await fs.UploadProductImageAsync(stream, fileName);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        return uploadImageUrl;
+    }
+
+    private async Task PreviewImage(IBrowserFile file)
     {
         var buffers = new byte[file.Size];
         await file.OpenReadStream().ReadAsync(buffers);
         string imageType = file.ContentType;
         Image = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
-        StateHasChanged();
+        StateHasChanged(); 
     }
-    private async Task<string> UploadImage(IBrowserFile file)
+
+    private async Task SaveImage()
     {
-        var maxAllowedSize = 1024 * 1024; // 1MB
-        using var stream = file.OpenReadStream(maxAllowedSize);
-
-        // Crear el contenido del formulario
-        var content = new MultipartFormDataContent();
-        content.Add(new StreamContent(stream), "productImage", file.Name);
-
-        var response = await Http.PostAsync("api/products/new", content);
-        if (response.IsSuccessStatusCode)
+        if (selectedFile != null)
         {
-            var imageUrl = await response.Content.ReadAsStringAsync(); // Suponiendo que el backend devuelve la URL
-            return imageUrl;
+            await UploadImage(selectedFile); 
         }
-
-        throw new Exception("Error al subir la imagen");
     }
-
-
 
     private async Task SaveProduct()
     {
@@ -463,12 +478,17 @@
         {
             if (isNewProduct)
             {
+                /*
                 if (selectedFile != null)
-                {
+                    {
                     var imageUrl = await UploadImage(selectedFile);
                     editingProduct.Image = imageUrl;
                 }
+                */
 
+                var imageUrl = await UploadImage(selectedFile);
+                editingProduct.Image = imageUrl;
+                editingProduct.ImageUrl = imageUrl;
                 var result = await productService.SaveAsync(editingProduct);
                 if (result)
                 {

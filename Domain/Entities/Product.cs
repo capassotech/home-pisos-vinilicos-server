@@ -77,7 +77,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public String TechnicalSheet { get; set; }
 
         [Column(TypeName = "VARCHAR(50)")]
-        public string? Image { get; set; }
+        public string? ImageUrl { get; set; }
 
         [Required]
         [ForeignKey("IdCategory")]

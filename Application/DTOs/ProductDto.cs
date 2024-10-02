@@ -48,6 +48,7 @@ namespace home_pisos_vinilicos.Application.DTOs
 
         public string TechnicalSheet { get; set; }
         public string? Image { get; set; }
+        public string? ImageUrl { get; set; }
         public IBrowserFile? ImageFile { get; set; }
         public string IdCategory { get; set; }
         public CategoryDto? Category { get; set; }

@@ -3,6 +3,7 @@ using Firebase.Database.Query;
 using Firebase.Storage;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
+using home_pisos_vinilicos.Pages;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -23,49 +24,65 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
 
-            _firebaseStorage = new FirebaseStorage("gs://home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
+            _firebaseStorage = new FirebaseStorage("home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
             {
-                AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken), // Usa la propiedad estática
+                AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken),
                 ThrowOnCancel = true
             });
         }
 
-        public async Task<string> UploadProductImageAsync(Stream imageStream, string IdProduct)
+        public async Task<string> UploadProductImageAsync(Stream imageStream, string idProduct)
         {
             try
             {
-                var imagePath = $"products/{IdProduct}/{Guid.NewGuid()}.jpg"; // Ruta de la imagen
-                await _firebaseStorage.Child(imagePath).PutAsync(imageStream); // Subir la imagen
+                
+                var imagePath = $"products/{idProduct}/{Guid.NewGuid()}.jpg";
 
-                // Devuelve la URL de descarga
-                return await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
+                await _firebaseStorage.Child(imagePath).PutAsync(imageStream);
+
+                var imageUrl = await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    throw new Exception("No se pudo obtener la URL de la imagen.");
+                }
+
+                await _firebaseClient
+                    .Child("Product")
+                    .Child(idProduct) 
+                    .Child("ImageUrl") 
+                    .PutAsync(imageUrl); 
+
+                return imageUrl; 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al subir imagen: {ex.Message}");
-                return string.Empty; // Devuelve cadena vacía en caso de error
+                return string.Empty; 
             }
         }
+
+
 
         public override async Task<bool> Insert(Product newProduct, Stream? imageStream = null)
         {
             try
             {
-                // Si se proporciona una imagen, sube la imagen a Firebase Storage
                 if (imageStream != null)
                 {
                     string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct.ToString());
+
                     if (!string.IsNullOrEmpty(imageUrl))
                     {
-                        newProduct.Image = imageUrl; // Asigna la URL de la imagen al producto
+                        newProduct.ImageUrl = imageUrl; 
                     }
                     else
                     {
-                        throw new Exception("No se pudo subir la imagen."); // Lanza una excepción si falla la subida de imagen
+                        throw new Exception("No se pudo subir la imagen.");
                     }
                 }
 
-                // Inserta el producto en Firebase Realtime Database
+                // Insertar el producto en Firebase Realtime Database
                 return await base.Insert(newProduct);
             }
             catch (Exception ex)
@@ -85,7 +102,7 @@ namespace home_pisos_vinilicos.Data.Repositories
                     string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct.ToString());
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
-                        updateProduct.Image = newImageUrl; // Actualiza la URL de la imagen
+                        updateProduct.ImageUrl = newImageUrl; // Actualiza la URL de la imagen
                     }
                     else
                     {
