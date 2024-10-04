@@ -12,7 +12,9 @@ namespace home_pisos_vinilicos.Application.Mapping
         public Mapping()
         {
 
-            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<ProductDto, Product>()
+                .ForMember(dest => dest.IdProduct, opt => opt.MapFrom(src => src.ImageUrl));
+            CreateMap<Product, ProductDto>();
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<FAQ, FAQDto>().ReverseMap();
             CreateMap<Contact, ContactDto>().ReverseMap();

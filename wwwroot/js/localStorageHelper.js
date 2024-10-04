@@ -9,3 +9,8 @@
         localStorage.removeItem(key);
     }
 };
+/*
+window.yourJavaScriptFunction = function () {
+    return window.localStorageHelper.getItem("authToken");
+};
+*/

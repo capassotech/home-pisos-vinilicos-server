@@ -87,6 +87,12 @@ public class AuthenticationService : IAuthenticationService
             };
         }
     }
+    public async Task<bool> IsAuthenticated()
+    {
+        var token = IdToken; 
+        return await IsUserAuthenticated(token);
+    }
+
     public string GetIdToken()
     {
         if (_authResponse != null && !string.IsNullOrEmpty(_authResponse.IdToken))
@@ -194,13 +200,5 @@ public class AuthResult
     public string Message { get; set; }
     public string Token { get; set; }
 }
-
-
-
-
-
-
-
-
 
 

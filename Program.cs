@@ -10,6 +10,9 @@ using home_pisos_vinilicos.Application.Services.Firebase;
 using home_pisos_vinilicos.Data;
 using home_pisos_vinilicos.Data.Repositories;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,6 +68,8 @@ builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>();
 builder.Services.AddScoped<ISecureDataRepository, SecureDataRepository>();
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(FirebaseRepository<>));
+builder.Services.AddScoped<ITokenService, TokenService>();
+//builder.Services.AddScoped<CircuitHandler, TokenCircuitHandler>();
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Mapping));
@@ -75,11 +80,27 @@ builder.Services.AddSweetAlert2();
 // Firebase Client
 builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
 
+
 // Configure HttpClient
+builder.Services.AddScoped(sp =>
+{
+    var tokenService = sp.GetRequiredService<ITokenService>();
+    var handler = new AuthMessageHandler(tokenService)
+    {
+        InnerHandler = new HttpClientHandler()
+    };
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri("https://localhost:7223/") // Cambia por la URL de tu API
+    };
+});
+
+/*
 builder.Services.AddHttpClient("MyApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7223/");
 });
+*/
 
 var app = builder.Build();
 // Middleware to check Firebase token

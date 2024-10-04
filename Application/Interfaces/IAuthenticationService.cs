@@ -12,6 +12,7 @@ namespace home_pisos_vinilicos.Application.Interfaces
         Task<bool> LogoutAsync(string idToken);
         Task<bool> IsUserAuthenticated(string idToken);
         Task<bool> VerifyTokenAsync(string token);
+        Task<bool> IsAuthenticated();
         //Task<bool> ValidateTokenAsync(string token);
     }
 }

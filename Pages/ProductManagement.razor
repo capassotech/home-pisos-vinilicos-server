@@ -10,6 +10,8 @@
 @inject IJSRuntime JSRuntime
 @inject CategoryService categoryService
 @inject IProductRepository fs
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -304,14 +306,14 @@
     private string Image;
 
 
-
     protected override async Task OnInitializedAsync()
     {
-
         await LoadProducts();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
+
         CalculateTotalPages();
     }
+
 
     private bool AreRequiredFieldsValid
     {
@@ -478,41 +480,30 @@
         {
             if (isNewProduct)
             {
-                /*
-                if (selectedFile != null)
-                    {
-                    var imageUrl = await UploadImage(selectedFile);
-                    editingProduct.Image = imageUrl;
-                }
-                */
-
                 var imageUrl = await UploadImage(selectedFile);
                 editingProduct.Image = imageUrl;
                 editingProduct.ImageUrl = imageUrl;
-                var result = await productService.SaveAsync(editingProduct);
-                if (result)
+                var savedProduct = await productService.SaveAsync(editingProduct);
+                if (savedProduct != null)
                 {
-                    // await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
                     ShowAlert("Producto agregado correctamente.");
+                    editingProduct = savedProduct; // Actualiza el producto editado con los datos devueltos
                 }
                 else
                 {
                     ShowAlert("Hubo un problema al agregar el producto");
-
-                    // await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
                 }
             }
             else
             {
-                var result = await productService.UpdateAsync(editingProduct);
-                if (result)
+                var updatedProduct = await productService.UpdateAsync(editingProduct);
+                if (updatedProduct != null)
                 {
-                    // await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
                     ShowAlert("Producto actualizado correctamente.");
+                    editingProduct = updatedProduct; // Actualiza el producto editado con los datos devueltos
                 }
                 else
                 {
-                    // await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
                     ShowAlert("Hubo un problema al actualizar el producto");
                 }
             }
@@ -522,8 +513,9 @@
         }
         catch (Exception ex)
         {
-            // await Swal.FireAsync("Error", $"Hubo un error inesperado: {ex.Message}", SweetAlertIcon.Error);
+            ShowAlert($"Error: {ex.Message}");
         }
+        
         finally
         {
             isLoading = false;
