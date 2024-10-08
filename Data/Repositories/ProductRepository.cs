@@ -3,15 +3,7 @@ using Firebase.Database.Query;
 using Firebase.Storage;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
-using home_pisos_vinilicos.Pages;
 using home_pisos_vinilicos_admin.Domain.Entities;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Linq.Expressions;
-using System.Net.Http;
-using System.Text;
-using static AuthenticationService;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -55,20 +47,16 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-
         public override async Task<bool> Insert(Product newProduct, Stream? imageStream = null)
         {
             try
             {
-                // Primero, insertamos el producto para obtener su ID
                 var firebaseResult = await _firebaseClient
                     .Child("Product")
                     .PostAsync(newProduct);
 
-                // Asignamos el ID generado a la propiedad IdProduct
                 newProduct.IdProduct = firebaseResult.Key;
 
-                // Si hay un Stream de imagen, subimos la imagen y actualizamos el producto
                 if (imageStream != null)
                 {
                     string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct);
@@ -77,7 +65,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                     {
                         newProduct.ImageUrl = imageUrl;
 
-                        // Actualizamos el producto completo, incluyendo la URL de la imagen
                         await _firebaseClient
                             .Child("Product")
                             .Child(newProduct.IdProduct)
@@ -102,13 +89,12 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Si se proporciona una nueva imagen, actualiza la imagen en Firebase Storage
                 if (imageStream != null)
                 {
                     string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct);
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
-                        updateProduct.ImageUrl = newImageUrl; // Actualiza la URL de la imagen
+                        updateProduct.ImageUrl = newImageUrl;
                     }
                     else
                     {
@@ -116,7 +102,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                     }
                 }
 
-                // Actualiza el producto completo en Firebase
                 await _firebaseClient
                     .Child("Product")
                     .Child(updateProduct.IdProduct)
@@ -136,7 +121,6 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Aquí podrías manejar la eliminación de la imagen en Firebase Storage si lo deseas
                 return await base.Delete(id);
             }
             catch (Exception ex)
@@ -173,10 +157,8 @@ namespace home_pisos_vinilicos.Data.Repositories
             if (product != null)
             {
                 product.IdProduct = id;
-                // Asegúrate de que ImageUrl se incluya aquí si no está ya
                 if (string.IsNullOrEmpty(product.ImageUrl))
                 {
-                    // Intenta obtener ImageUrl específicamente si no está incluido
                     var imageUrl = await _firebaseClient
                         .Child("Product")
                         .Child(id)
@@ -227,8 +209,8 @@ namespace home_pisos_vinilicos.Data.Repositories
             return products.Select(p =>
             {
                 var product = p.Object;
-                product.IdProduct = p.Key; // Asigna el ID del producto
-                                           // Asegúrate de que ImageUrl se incluya aquí si no está ya
+                product.IdProduct = p.Key;
+
                 if (p.Object.ImageUrl != null)
                 {
                     product.ImageUrl = p.Object.ImageUrl;

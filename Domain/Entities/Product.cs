@@ -2,19 +2,18 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace home_pisos_vinilicos_admin.Domain.Entities
 {
     [Table("Products")]
     public class Product
     {
         [Key]
-        [Column(TypeName = "VARCHAR(50)")]
-        public string? IdProduct { get; set; }
+        [Column(TypeName = "VARCHAR(100)")]
+        public string IdProduct { get; set; }
 
 
         [Required]
-        [Column(TypeName = "VARCHAR(50)")]
+        [Column(TypeName = "VARCHAR(100)")]
         public string Name { get; set; }
 
 
@@ -23,7 +22,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public decimal Price { get; set; }
 
         [Required]
-        [Column(TypeName = "VARCHAR(50)")]
+        [Column(TypeName = "VARCHAR(100)")]
         public String Description { get; set; }
 
 
@@ -32,7 +31,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public decimal Size { get; set; }
 
         
-        [Column(TypeName = "VARCHAR(50)")]
+        [Column(TypeName = "VARCHAR(100)")]
         public String Color { get; set; }
 
 
@@ -83,9 +82,5 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [ForeignKey("IdCategory")]
         public string IdCategory { get; set; }
         public Category? Category { get; set; }
-        
-        
     }
-
 }
-

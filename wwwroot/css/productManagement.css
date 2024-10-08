@@ -1,5 +1,4 @@
-﻿@import "~blazored-toast/dist/Blazored.Toast.css";
-
+﻿@import url('https://cdn.jsdelivr.net/npm/blazored-toast@latest/dist/Blazored.Toast.css');
 
 .container-management-products
 {

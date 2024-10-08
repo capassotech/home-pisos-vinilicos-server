@@ -1,12 +1,10 @@
-﻿using home_pisos_vinilicos.Domain.Entities;
-using Microsoft.AspNetCore.Components.Forms;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace home_pisos_vinilicos.Application.DTOs
 {
     public class ProductDto
     {
-        public string? IdProduct { get; set; }
+        public string IdProduct { get; set; }
 
         [Required(ErrorMessage = "El nombre del producto es requerido.")]
         public string Name { get; set; }
@@ -47,9 +45,7 @@ namespace home_pisos_vinilicos.Application.DTOs
         public decimal PricePerSquareMeter { get; set; }
 
         public string TechnicalSheet { get; set; }
-        public string? Image { get; set; }
         public string? ImageUrl { get; set; }
-        public IBrowserFile? ImageFile { get; set; }
         public string IdCategory { get; set; }
         public CategoryDto? Category { get; set; }
     }

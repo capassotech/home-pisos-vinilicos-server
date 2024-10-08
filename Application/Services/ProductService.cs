@@ -3,7 +3,6 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using home_pisos_vinilicos.Application.DTOs;
-using System.IO;
 
 namespace home_pisos_vinilicos.Application.Services
 {
@@ -55,7 +54,6 @@ namespace home_pisos_vinilicos.Application.Services
                 throw new Exception("Failed to update product");
             }
 
-            // Retrieve the updated product to get the new ImageUrl
             var updatedProduct = await _productRepository.GetByIdWithCategory(product.IdProduct);
             return _mapper.Map<ProductDto>(updatedProduct);
         }
@@ -76,7 +74,6 @@ namespace home_pisos_vinilicos.Application.Services
 
             await EnsureFeaturedProductsAsync();
 
-            // Retrieve the saved product to get the generated ID and ImageUrl
             var savedProduct = await _productRepository.GetByIdWithCategory(product.IdProduct);
             return _mapper.Map<ProductDto>(savedProduct);
         }

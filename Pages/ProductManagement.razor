@@ -152,11 +152,11 @@
                         <label>Imagen:</label>
                         <InputFile OnChange="OnFileSelected" accept="image/*" />
                     @if (!string.IsNullOrEmpty(Image))
-                {
-                    <div>
-                        <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
-                    </div>
-                }
+                    {
+                        <div>
+                            <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                    }
                 </div>
                 </div>
                 <div class="form-group">
@@ -199,8 +199,6 @@
         </div>
     }
     
-    
-
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {
@@ -354,7 +352,7 @@
                     RequiresUnderlay = p.RequiresUnderlay,
                     PricePerSquareMeter = p.PricePerSquareMeter,
                     TechnicalSheet = p.TechnicalSheet,
-                    Image = p.Image
+                    ImageUrl = p.ImageUrl
                 }).ToList();
 
             filteredProducts = products;
@@ -382,7 +380,7 @@
                 SurfacePerBox = 0,
                 PricePerSquareMeter = 0,
                 TechnicalSheet = "",
-                Image = ""
+                ImageUrl = ""
             };
 
         isNewProduct = true;
@@ -415,8 +413,10 @@
                 TechnicalSheet = product.TechnicalSheet,
                 IsFeatured = product.IsFeatured,
                 RequiresUnderlay = product.RequiresUnderlay,
-                Image = product.Image
+                ImageUrl = product.ImageUrl
             };
+
+        Image = product.ImageUrl!;
         isNewProduct = false;
         isModalOpen = true;
         successMessage = "";
@@ -442,7 +442,7 @@
             {
                 var stream = file.OpenReadStream();
                 var fileName = file.Name;
-                await fs.UploadProductImageAsync(stream, fileName);
+                uploadImageUrl = await fs.UploadProductImageAsync(stream, fileName);
             }
             catch (Exception ex)
             {
@@ -481,7 +481,6 @@
             if (isNewProduct)
             {
                 var imageUrl = await UploadImage(selectedFile);
-                editingProduct.Image = imageUrl;
                 editingProduct.ImageUrl = imageUrl;
                 var savedProduct = await productService.SaveAsync(editingProduct);
                 if (savedProduct != null)
@@ -496,6 +495,8 @@
             }
             else
             {
+                var imageUrl = await UploadImage(selectedFile);
+                editingProduct.ImageUrl = imageUrl;
                 var updatedProduct = await productService.UpdateAsync(editingProduct);
                 if (updatedProduct != null)
                 {
