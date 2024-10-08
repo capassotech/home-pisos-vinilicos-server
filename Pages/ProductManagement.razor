@@ -1,0 +1,659 @@
+﻿@page "/product-management"
+@using System.Net.Http.Json
+@using home_pisos_vinilicos.Application
+@using home_pisos_vinilicos.Application.DTOs
+@using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Data.Repositories.IRepository
+@inject ProductService productService
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject CategoryService categoryService
+@inject IProductRepository fs
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<head>
+    <link href="css/productManagement.css" rel="stylesheet" />
+</head>
+
+<div class="container-management-products">
+    <h3 class="title-products">Gestión de Productos</h3>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="container-buttons">
+        <div class="container-search">
+            <div class="search">
+                <input type="text" @bind="searchText" placeholder="Nombre" class="form-control" />
+                <button @onclick="FilterProducts">Buscar</button>
+            </div>
+        <button type="submit" @onclick="AddNewProduct" class="button-add" aria-label="Click me">
+            <i class="fas fa-plus"></i> AGREGAR NUEVO PRODUCTO
+        </button>
+        </div>
+
+    </div>
+
+    @if (isModalOpen)
+    {
+        <div class="modal-overlay">
+            <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct" class="edit-form">
+                <DataAnnotationsValidator />
+                <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="name">Nombre del producto</label>
+                        <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="price">Precio</label>
+                        <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="description">Descripción</label>
+                        <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
+                </div>
+
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="size">Tamaño</label>
+                        <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="color">Color</label>
+                        <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="quantity">Cantidad</label>
+                        <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="isFeatured">Destacar producto</label>
+                        <InputCheckbox id="isFeatured"  @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
+                    </div>
+                    @if (errorFeaturedLimit)
+                    {
+                        <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
+                    }
+                </div>
+
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="model">Modelo</label>
+                        <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="dimensions">Dimensiones</label>
+                        <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="surfacePerBox">Superficie por Caja</label>
+                        <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="requiresUnderlay">Requiere Manta</label>
+                        <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="pricePerSquareMeter">Precio por m²</label>
+                        <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="technicalSheet">Ficha Técnica</label>
+                        <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="error-text">
+                        <label>Imagen:</label>
+                        <InputFile OnChange="OnFileSelected" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Image))
+                {
+                    <div>
+                        <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                }
+                </div>
+                </div>
+                <div class="form-group">
+                    <div class="error-text">
+                        <label for="category">Categoría</label>
+                        <select id="category" class="form-control" @bind="editingProduct.IdCategory">
+                            <option  value="">Selecciona una categoría</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.IdCategory">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
+                </div>
+                @if (isLoading)
+                {
+                    <div class="spinner">
+                        <svg viewBox="25 25 50 50">
+                            <circle r="20" cy="50" cx="50"></circle>
+                        </svg>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success">@successMessage</div>
+                }
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="container-buttons">
+                    <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
+                    <button type="button" @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    }
+    
+    
+
+    <!-- Tabla de Productos -->
+    @if (filteredProducts != null && filteredProducts.Any())
+    {
+        <table class="table table-products">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in GetPaginatedProducts())
+                {
+                    <tr class="@GetHighlightClass(product)">
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>$@product.Price</td>
+                        <td class="buttons-edition">
+                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(product)">
+                                @if (product.IsFeatured)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Botones de Paginación -->
+        <div class="pagination-controls">
+            <button @onclick="PreviousPage">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span>Página @currentPage de @totalPages</span>
+            <button @onclick="NextPage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    }
+    else
+    {
+        <p>No se encontraron productos.</p>
+    }
+
+    <!-- Tabla de Productos Destacados -->
+    @if (featuredProducts != null && featuredProducts.Any())
+    {
+        <h4 class="title-featured">PRODUCTOS DESTACADOS</h4>
+
+        <table class="table table-featured-products">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in featuredProducts)
+                {
+                    <tr>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>$@product.Price</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+@code {
+    private List<ProductDto> products = new List<ProductDto>();
+    private List<ProductDto> filteredProducts = new List<ProductDto>();
+    private List<ProductDto> featuredProducts = new List<ProductDto>();
+    private List<CategoryDto> categories = new List<CategoryDto>();
+    private ProductDto editingProduct = new ProductDto();
+    private bool errorFeaturedLimit = false;
+    private string searchText = "";
+    private bool isNewProduct = true;
+    private bool isModalOpen = false;
+    private int currentPage = 1;
+    private int pageSize = 5; 
+    private int totalPages = 1;
+    private string successMessage = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+    private const int MaxFeaturedProducts = 6;
+    private IBrowserFile selectedFile;
+    private string Image;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+        categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
+
+        CalculateTotalPages();
+    }
+
+
+    private bool AreRequiredFieldsValid
+    {
+        get
+        {
+            return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
+                   editingProduct.Price > 0 &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Description) &&
+                   editingProduct.Size > 0 &&
+                   editingProduct.Quantity > 0 &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Model) &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Dimensions) &&
+                   editingProduct.SurfacePerBox > 0 &&
+                   editingProduct.PricePerSquareMeter > 0;
+        }
+    }
+
+
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            var productEntities = await productService.GetAllAsync();
+            products = productEntities.Select(p => new ProductDto
+                {
+                    IdProduct = p.IdProduct,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Size = p.Size,
+                    Color = p.Color,
+                    Quantity = p.Quantity,
+                    IsFeatured = p.IsFeatured,
+                    Model = p.Model,
+                    Dimensions = p.Dimensions,
+                    SurfacePerBox = p.SurfacePerBox,
+                    RequiresUnderlay = p.RequiresUnderlay,
+                    PricePerSquareMeter = p.PricePerSquareMeter,
+                    TechnicalSheet = p.TechnicalSheet,
+                    Image = p.Image
+                }).ToList();
+
+            filteredProducts = products;
+            featuredProducts = products.Where(p => p.IsFeatured).ToList();
+            CalculateTotalPages();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar productos: {ex.Message}");
+        }
+    }
+
+    protected async void AddNewProduct()
+    {
+        editingProduct = new ProductDto
+            {
+                Name = "",
+                Description = "",
+                Price = 0,
+                Size = 0,
+                Color = "",
+                Quantity = 0,
+                Model = "",
+                Dimensions = "",
+                SurfacePerBox = 0,
+                PricePerSquareMeter = 0,
+                TechnicalSheet = "",
+                Image = ""
+            };
+
+        isNewProduct = true;
+        isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    protected void StartEditProduct(ProductDto product)
+    {
+        if (string.IsNullOrEmpty(product.IdProduct))
+        {
+            Console.WriteLine("Error: El producto no tiene un IdProduct válido.");
+            return;
+        }
+
+        editingProduct = new ProductDto
+            {
+                IdProduct = product.IdProduct,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Size = product.Size,
+                Color = product.Color,
+                Quantity = product.Quantity,
+                Model = product.Model,
+                Dimensions = product.Dimensions,
+                SurfacePerBox = product.SurfacePerBox,
+                PricePerSquareMeter = product.PricePerSquareMeter,
+                TechnicalSheet = product.TechnicalSheet,
+                IsFeatured = product.IsFeatured,
+                RequiresUnderlay = product.RequiresUnderlay,
+                Image = product.Image
+            };
+        isNewProduct = false;
+        isModalOpen = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+
+        if (selectedFile != null)
+        {
+            await PreviewImage(selectedFile);
+        }
+    }
+
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        string uploadImageUrl = null!;
+        if (file != null)
+        {
+            try
+            {
+                var stream = file.OpenReadStream();
+                var fileName = file.Name;
+                await fs.UploadProductImageAsync(stream, fileName);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        return uploadImageUrl;
+    }
+
+    private async Task PreviewImage(IBrowserFile file)
+    {
+        var buffers = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffers);
+        string imageType = file.ContentType;
+        Image = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+        StateHasChanged(); 
+    }
+
+    private async Task SaveImage()
+    {
+        if (selectedFile != null)
+        {
+            await UploadImage(selectedFile); 
+        }
+    }
+
+    private async Task SaveProduct()
+    {
+        isLoading = true;
+        successMessage = "";
+        errorMessage = "";
+
+
+        try
+        {
+            if (isNewProduct)
+            {
+                var imageUrl = await UploadImage(selectedFile);
+                editingProduct.Image = imageUrl;
+                editingProduct.ImageUrl = imageUrl;
+                var savedProduct = await productService.SaveAsync(editingProduct);
+                if (savedProduct != null)
+                {
+                    ShowAlert("Producto agregado correctamente.");
+                    editingProduct = savedProduct; // Actualiza el producto editado con los datos devueltos
+                }
+                else
+                {
+                    ShowAlert("Hubo un problema al agregar el producto");
+                }
+            }
+            else
+            {
+                var updatedProduct = await productService.UpdateAsync(editingProduct);
+                if (updatedProduct != null)
+                {
+                    ShowAlert("Producto actualizado correctamente.");
+                    editingProduct = updatedProduct; // Actualiza el producto editado con los datos devueltos
+                }
+                else
+                {
+                    ShowAlert("Hubo un problema al actualizar el producto");
+                }
+            }
+
+            isModalOpen = false;
+            await LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}");
+        }
+        
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    protected void CancelEdit()
+    {
+        isModalOpen = false;
+    }
+
+    protected async Task DeleteProduct(string id)
+    {
+        try
+        {
+            var success = await productService.DeleteAsync(id);
+            if (success)
+            {
+                products.Remove(products.First(p => p.IdProduct == id));
+                FilterProducts();
+                Console.WriteLine("Producto eliminado exitosamente.");
+            }
+            else
+            {
+                Console.WriteLine("No se pudo eliminar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar el producto: {ex.Message}");
+        }
+    }
+
+    protected async Task ToggleFeatured(ProductDto product)
+    {
+        try
+        {
+            var featuredProductsCount = GetFeaturedProductsCount();
+
+            if (product.IsFeatured)
+            {
+                product.IsFeatured = false;
+                await productService.UpdateAsync(product);
+                await LoadProducts();
+            }
+            else
+            {
+                if (featuredProductsCount < MaxFeaturedProducts)
+                {
+                    product.IsFeatured = true;
+                    await productService.UpdateAsync(product);
+                    await LoadProducts();
+                }
+                else
+                {
+                    ShowAlert("Ya hay 6 productos destacados.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al destacar el producto: {ex.Message}");
+            ShowAlert($"Error al destacar el producto: {ex.Message}");
+        }
+    }
+
+    private int GetFeaturedProductsCount()
+    {
+        var products = GetPaginatedProducts(); 
+        return products.Count(p => p.IsFeatured);
+    }
+
+    private void ShowAlert(string message)
+    {
+        JSRuntime.InvokeVoidAsync("alert", message);
+    }
+    private string GetHighlightClass(ProductDto product)
+    {
+        var recentProducts = products.OrderByDescending(p => p.IdProduct).Take(6).Select(p => p.IdProduct).ToList();
+        return recentProducts.Contains(product.IdProduct) ? "highlight" : "";
+    }
+
+    protected void FilterProducts()
+    {
+        filteredProducts = products
+            .Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        CalculateTotalPages(); 
+        currentPage = 1; 
+    }
+
+    private List<ProductDto> GetPaginatedProducts()
+    {
+        return filteredProducts
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling(filteredProducts.Count / (double)pageSize);
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+        }
+    }
+
+
+    private void OnFeaturedChange()
+    {
+        
+            Console.WriteLine("checked");
+            if (featuredProducts.Count >= 6)
+            {
+                editingProduct.IsFeatured = false;
+                errorFeaturedLimit = true;
+                JSRuntime.InvokeVoidAsync("alert", "No se pueden destacar más de 6 productos.");
+            }
+            else
+            {
+                errorFeaturedLimit = false;
+                editingProduct.IsFeatured = true;
+            }
+        }
+
+}
+

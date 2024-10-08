@@ -1,4 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components
+@using home_pisos_vinilicos.Application.Interfaces
+@using home_pisos_vinilicos.Application.Services
+@inject IAuthenticationService AuthenticationService
+
 
 <PageTitle>home-pisos-vinilicos</PageTitle>
 
@@ -9,7 +14,9 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <a href="login" class="login-icon">
+                <i class="fas fa-sign-in-alt"></i>
+            </a>
         </div>
 
         <article class="content px-4">
@@ -17,3 +24,5 @@
         </article>
     </main>
 </div>
+
+

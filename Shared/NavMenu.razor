@@ -1,27 +1,37 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">home-pisos-vinilicos</a>
+﻿<div class="top-row navbar">
+    <div class="flex-column justify-content-center align-content-center">
+        <a class="navbar-brand" href=""><img src="/css/images/logo.png" alt="Logo de la Empresa"/></a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
+            <i class="fa-solid fa-bars"></i> 
         </button>
     </div>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div class="@NavMenuCssClass sidebar" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <i class="fa-solid fa-home" aria-hidden="true"></i> Home 
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="product-management">
+                <i class="fa-solid fa-box" aria-hidden="true"></i> Product Management
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+            <NavLink class="nav-link" href="category-management">
+                <i class="fa-solid fa-box" aria-hidden="true"></i> Category Management
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="faq-management">
+                <i class="fa-solid fa-box" aria-hidden="true"></i> Frequent Questions
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="contact-management">
+                <i class="fa-solid fa-box" aria-hidden="true"></i> Contact and Social Media
             </NavLink>
         </div>
     </nav>

@@ -1,34 +1,97 @@
 ﻿@page "/login"
+@layout LoginLayout
+
+<head>
+    <link href="css/login.css" rel="stylesheet" />
+</head>
 
 @using home_pisos_vinilicos.Application.Interfaces
 @using home_pisos_vinilicos.Application.Services
 @using home_pisos_vinilicos.Domain.Models
+@using Microsoft.JSInterop
+@inject NavigationManager Navigation
 @inject IAuthenticationService AuthenticationService
+@inject IJSRuntime JSRuntime
 
-<h3>Login</h3>
+<div class="container">
+    <div class="wrapper">
+        <EditForm Model="@this" OnValidSubmit="HandleLogin">
+            <p class="form-login">Login</p>
 
-<div>
-    <label>Email: </label>
-    <input @bind="email" />
+            <div class="input-box">
+                <InputText @bind-Value="email" required placeholder="Email" type="email" />
+                @if (!string.IsNullOrEmpty(emailError))
+                {
+                    <p class="error-message">@emailError</p>
+                }
+            </div>
+
+            <div class="input-box">
+                <InputText @bind-Value="password" required placeholder="Password" type="password" />
+                @if (!string.IsNullOrEmpty(passwordError))
+                {
+                    <p class="error-message">@passwordError</p>
+                }
+            </div>
+
+            <div class="remember-forgot">
+                <a href="/recuperar-password">Forgot Password</a>
+            </div>
+
+            <button class="btn" type="submit">Login</button>
+
+            @if (!string.IsNullOrEmpty(loginResult))
+            {
+                <p class="login-result">@loginResult</p>
+            }
+        </EditForm>
+    </div>
 </div>
-<div>
-    <label>Password: </label>
-    <input type="password" @bind="password" />
-</div>
-<button @onclick="HandleLogin">Login</button>
-
-@if (!string.IsNullOrEmpty(loginResult))
-{
-    <p>@loginResult</p>
-}
 
 @code {
     private string email;
     private string password;
     private string loginResult;
+    private string emailError;
+    private string passwordError;
 
     private async Task HandleLogin()
     {
-        loginResult = await AuthenticationService.LoginAsync(email, password);
+        if (string.IsNullOrEmpty(email))
+        {
+            emailError = "El campo de email es requerido.";
+        }
+        else
+        {
+            emailError = null;
+        }
+
+        if (string.IsNullOrEmpty(password))
+        {
+            passwordError = "El campo de contraseña es requerido.";
+        }
+        else
+        {
+            passwordError = null;
+        }
+
+        if (!string.IsNullOrEmpty(emailError) || !string.IsNullOrEmpty(passwordError))
+        {
+            return;
+        }
+
+        var result = await AuthenticationService.LoginAsync(email, password);
+
+        if (result.IsSuccess)
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+
+            // Navegar al dashboard si está autenticado
+            Navigation.NavigateTo("/product-management");
+        }
+        else
+        {
+            loginResult = result.Message;
+        }
     }
 }

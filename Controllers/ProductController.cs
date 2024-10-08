@@ -1,86 +1,130 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using home_pisos_vinilicos.Application;
-using home_pisos_vinilicos.Shared.DTOs;
+using home_pisos_vinilicos.Application.Services;
+using home_pisos_vinilicos.Application.DTOs;
+using System.IO;
 
 namespace home_pisos_vinilicos.Controllers
 {
-    
     [Route("api/[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
     {
-
-
-        private readonly ProductService productService;
-
+        private readonly ProductService _productService;
 
         public ProductController(ProductService productService)
         {
-            this.productService = productService;
-
+            _productService = productService;
         }
 
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetProducts()
         {
-            var products = await productService.GetAllAsync();
-            return Ok(products);
+            try
+            {
+                var products = await _productService.GetAllAsync();
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
-
 
         [HttpPost("new")]
-        public async Task<ActionResult> SaveProduct(ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> SaveProduct([FromForm] ProductDto productDto, IFormFile? productImage)
         {
-            var result = await productService.SaveAsync(productDto);
-            if (result)
+            try
             {
-                return Ok("Product guardado exitosamente.");
+                using var imageStream = productImage?.OpenReadStream();
+                var savedProduct = await _productService.SaveAsync(productDto, imageStream);
+                return CreatedAtAction(nameof(GetProductById), new { id = savedProduct.IdProduct }, savedProduct);
             }
-            return BadRequest("No se pudo guardar el Product.");
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
-
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(string id)
         {
-            var product = await productService.GetByIdAsync(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound($"No se encontró el producto con ID {id}");
+                }
+                return Ok(product);
             }
-
-            return Ok(product);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
-
 
         [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateProductById(string id, ProductDto requestDto)
+        public async Task<ActionResult<ProductDto>> UpdateProductById(string id, [FromForm] ProductDto productDto, IFormFile? productImage)
         {
-            requestDto.IdProduct = id; 
-            var result = await productService.UpdateAsync(requestDto);
-            if (result)
+            if (id != productDto.IdProduct)
             {
-                return Ok("Product actualizado exitosamente.");
+                return BadRequest("El ID en la URL no coincide con el ID del producto");
             }
-            return BadRequest("No se pudo actualizar el Product.");
-        }
 
+            try
+            {
+                using var imageStream = productImage?.OpenReadStream();
+                var updatedProduct = await _productService.UpdateAsync(productDto, imageStream);
+                return Ok(updatedProduct);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
 
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProductById(string id)
         {
             try
             {
-                var result = await productService.DeleteAsync(id);
+                var result = await _productService.DeleteAsync(id);
                 if (result)
                 {
-                    return Ok("Registro eliminado :)");
+                    return Ok("Producto eliminado exitosamente");
                 }
-                return BadRequest("No se pudo eliminar el registro.");
+                return NotFound($"No se encontró el producto con ID {id}");
             }
             catch (Exception ex)
             {
-                return BadRequest($"No se pudo eliminar el registro. El error es: {ex.Message}");
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ProductDto>>> SearchProducts([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("El término de búsqueda no puede estar vacío.");
+            }
+
+            try
+            {
+                var products = await _productService.SearchAsync(query);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
     }

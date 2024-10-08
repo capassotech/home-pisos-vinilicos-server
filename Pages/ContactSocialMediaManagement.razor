@@ -1,0 +1,120 @@
+﻿@page "/contact-management"
+@using home_pisos_vinilicos.Application
+@using home_pisos_vinilicos.Application.DTOs
+@using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Domain.Entities
+@using System.Net.Http.Json
+@inject IJSRuntime JSRuntime
+@inject ContactService ContactService
+@inject SocialNetworkService SocialNetworkService
+
+<head>
+    <link href="css/contactManagement.css" rel="stylesheet" />
+</head>
+
+<div class="container-management-contact">
+    <h3 class="title-contact">Gestión de Contacto y Redes Sociales</h3>
+    <EditForm Model="@contactModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="address">Dirección:</label>
+            <InputText id="address" @bind-Value="contactModel.Address" />
+            <ValidationMessage For="() => contactModel.Address" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Correo Electrónico:</label>
+            <InputText id="email" @bind-Value="contactModel.Email" />
+            <ValidationMessage For="() => contactModel.Email" />
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Teléfono:</label>
+            <InputNumber id="phone" @bind-Value="contactModel.Phone" />
+            <ValidationMessage For="() => contactModel.Phone" />
+        </div>
+
+        <div class="form-group">
+            <label for="googleMapsUrl">URL de Google Maps:</label>
+            <InputText id="googleMapsUrl" @bind-Value="googleMapsUrl" />
+            <ValidationMessage For="() => googleMapsUrl" />
+        </div>
+
+        <div class="form-group">
+            <h4>Redes Sociales:</h4>
+            @foreach (var socialNetwork in contactModel.SocialNetworks)
+            {
+                <div class="social-network">
+                    <label>@socialNetwork.Name:</label>
+                    <InputText @bind-Value="socialNetwork.Link" />
+                    <ValidationMessage For="() => socialNetwork.Link" />
+                </div>
+            }
+        </div>
+        <button type="submit">Actualizar Contacto</button>
+    </EditForm>
+</div>
+
+@code {
+    private ContactDto contactModel = new();
+    private List<Contact> contacts = new();
+    private SocialNetworkDto socialNetwork = new SocialNetworkDto();
+
+
+    private string googleMapsUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            contacts = await ContactService.GetAllAsync();
+
+            if (contacts != null && contacts.Count > 0)
+            {
+                var firstContact = contacts.First();
+                contactModel.IdContact = firstContact.IdContact;
+                contactModel.Address = firstContact.Address;
+                contactModel.Email = firstContact.Email;
+                contactModel.Phone = firstContact.Phone;
+                googleMapsUrl = GenerateGoogleMapsUrl(firstContact.Address);
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Instagram", Link = "https://instagram.com/ejemplo" });
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Facebook", Link = "https://facebook.com/ejemplo" });
+                contactModel.SocialNetworks.Add(new SocialNetworkDto { Name = "Twitter", Link = "https://twitter.com/ejemplo" });
+            }
+            else
+            {
+                Console.WriteLine("No se encontraron contactos.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar contactos: {ex.Message}");
+        }
+    }
+
+    private void ShowAlert(string message)
+    {
+        JSRuntime.InvokeVoidAsync("alert", message);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await ContactService.UpdateAsync(contactModel);
+            ShowAlert("Contacto actualizado correctamente.");
+        }
+        catch (Exception ex)
+        {
+            ShowAlert("Hubo un problema al actualizar el Contacto");
+            Console.WriteLine($"Error actualizando contacto: {ex.Message}");
+        }
+    }
+
+    private string GenerateGoogleMapsUrl(string address)
+    {
+        return $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(address)}";
+    }
+}

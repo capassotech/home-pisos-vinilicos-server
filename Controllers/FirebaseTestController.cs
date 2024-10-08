@@ -1,6 +1,7 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
 using home_pisos_vinilicos.Domain;
+using home_pisos_vinilicos_admin.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace home_pisos_vinilicos.Controllers
