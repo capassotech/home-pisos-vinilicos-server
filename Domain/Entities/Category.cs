@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace home_pisos_vinilicos.Domain.Entities
 {
-    [Table("Categorys")]
+    [Table("Categories")]
     public class Category
     {
 
@@ -26,9 +26,5 @@ namespace home_pisos_vinilicos.Domain.Entities
         public string? ParentCategoryId { get; set; }
 
         public List<Category>? SubCategories { get; set; }
-
-        [Key]
-        [Column(TypeName = "VARCHAR(50)")]
-        public string? IdSubCategory { get; set; }
     }
 }

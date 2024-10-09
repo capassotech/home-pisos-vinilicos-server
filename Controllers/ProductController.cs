@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using home_pisos_vinilicos.Application;
 using home_pisos_vinilicos.Application.Services;
 using home_pisos_vinilicos.Application.DTOs;
-using System.IO;
 
 namespace home_pisos_vinilicos.Controllers
 {
@@ -10,76 +8,86 @@ namespace home_pisos_vinilicos.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductService productService;
+        private readonly ProductService _productService;
 
         public ProductController(ProductService productService)
         {
-            this.productService = productService;
+            _productService = productService;
         }
 
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetProducts()
         {
-            var products = await productService.GetAllAsync();
-            return Ok(products);
+            try
+            {
+                var products = await _productService.GetAllAsync();
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
+
         [HttpPost("new")]
-        public async Task<ActionResult> SaveProduct([FromForm] ProductDto productDto, [FromForm] IFormFile productImage)
+        public async Task<ActionResult<ProductDto>> SaveProduct([FromForm] ProductDto productDto, IFormFile? productImage)
         {
-            Stream imageStream = null;
-
-            // Verificar si se ha proporcionado una imagen
-            if (productImage != null && productImage.Length > 0)
+            try
             {
-                var memoryStream = new MemoryStream();
-                await productImage.CopyToAsync(memoryStream);
-                memoryStream.Position = 0; // Reiniciar la posición del Stream
-                imageStream = memoryStream;
+                using var imageStream = productImage?.OpenReadStream();
+                var savedProduct = await _productService.SaveAsync(productDto, imageStream);
+                return CreatedAtAction(nameof(GetProductById), new { id = savedProduct.IdProduct }, savedProduct);
             }
-
-            var result = await productService.SaveAsync(productDto, imageStream);
-            if (result)
+            catch (InvalidOperationException ex)
             {
-                return Ok("Producto guardado exitosamente.");
+                return BadRequest(ex.Message);
             }
-
-            return BadRequest("No se pudo guardar el producto.");
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(string id)
         {
-            var product = await productService.GetByIdAsync(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound($"No se encontró el producto con ID {id}");
+                }
+                return Ok(product);
             }
-
-            return Ok(product);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
 
         [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateProductById(string id, ProductDto requestDto, IFormFile productImage)
+        public async Task<ActionResult<ProductDto>> UpdateProductById(string id, [FromForm] ProductDto productDto, IFormFile? productImage)
         {
-            requestDto.IdProduct = id;
-
-            // Manejar la carga de la imagen, si se proporciona
-            Stream imageStream = null;
-            if (productImage != null && productImage.Length > 0)
+            if (id != productDto.IdProduct)
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await productImage.CopyToAsync(memoryStream);
-                    imageStream = memoryStream; // Asignar el stream a la variable
-                }
+                return BadRequest("El ID en la URL no coincide con el ID del producto");
             }
 
-            var result = await productService.UpdateAsync(requestDto, imageStream);
-            if (result)
+            try
             {
-                return Ok("Producto actualizado exitosamente.");
+                using var imageStream = productImage?.OpenReadStream();
+                var updatedProduct = await _productService.UpdateAsync(productDto, imageStream);
+                return Ok(updatedProduct);
             }
-            return BadRequest("No se pudo actualizar el producto.");
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
 
         [HttpDelete("delete/{id}")]
@@ -87,21 +95,21 @@ namespace home_pisos_vinilicos.Controllers
         {
             try
             {
-                var result = await productService.DeleteAsync(id);
+                var result = await _productService.DeleteAsync(id);
                 if (result)
                 {
-                    return Ok("Registro eliminado :)");
+                    return Ok("Producto eliminado exitosamente");
                 }
-                return BadRequest("No se pudo eliminar el registro.");
+                return NotFound($"No se encontró el producto con ID {id}");
             }
             catch (Exception ex)
             {
-                return BadRequest($"No se pudo eliminar el registro. El error es: {ex.Message}");
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<List<ProductDto>>> SearchProducts(string query)
+        public async Task<ActionResult<List<ProductDto>>> SearchProducts([FromQuery] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -110,7 +118,7 @@ namespace home_pisos_vinilicos.Controllers
 
             try
             {
-                var products = await productService.SearchAsync(query);
+                var products = await _productService.SearchAsync(query);
                 return Ok(products);
             }
             catch (Exception ex)

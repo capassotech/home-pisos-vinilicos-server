@@ -3,11 +3,15 @@
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
 @using home_pisos_vinilicos.Application.Services
+@using home_pisos_vinilicos.Data.Repositories.IRepository
 @inject ProductService productService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject CategoryService categoryService
+@inject IProductRepository fs
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -146,13 +150,13 @@
                 <div class="form-group">
                     <div class="error-text">
                         <label>Imagen:</label>
-                        <InputFile OnChange="HandleFileChange" accept="image/*" />
+                        <InputFile OnChange="OnFileSelected" accept="image/*" />
                     @if (!string.IsNullOrEmpty(Image))
-                {
-                    <div>
-                        <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
-                    </div>
-                }
+                    {
+                        <div>
+                            <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                    }
                 </div>
                 </div>
                 <div class="form-group">
@@ -195,8 +199,6 @@
         </div>
     }
     
-    
-
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {
@@ -302,14 +304,14 @@
     private string Image;
 
 
-
     protected override async Task OnInitializedAsync()
     {
-
         await LoadProducts();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
+
         CalculateTotalPages();
     }
+
 
     private bool AreRequiredFieldsValid
     {
@@ -350,7 +352,7 @@
                     RequiresUnderlay = p.RequiresUnderlay,
                     PricePerSquareMeter = p.PricePerSquareMeter,
                     TechnicalSheet = p.TechnicalSheet,
-                    Image = p.Image
+                    ImageUrl = p.ImageUrl
                 }).ToList();
 
             filteredProducts = products;
@@ -378,7 +380,7 @@
                 SurfacePerBox = 0,
                 PricePerSquareMeter = 0,
                 TechnicalSheet = "",
-                Image = ""
+                ImageUrl = ""
             };
 
         isNewProduct = true;
@@ -411,46 +413,61 @@
                 TechnicalSheet = product.TechnicalSheet,
                 IsFeatured = product.IsFeatured,
                 RequiresUnderlay = product.RequiresUnderlay,
-                Image = product.Image
+                ImageUrl = product.ImageUrl
             };
+
+        Image = product.ImageUrl!;
         isNewProduct = false;
         isModalOpen = true;
         successMessage = "";
         errorMessage = "";
     }
-    private async Task HandleFileChange(InputFileChangeEventArgs e)
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
-        await LoadImage(selectedFile);
+
+        if (selectedFile != null)
+        {
+            await PreviewImage(selectedFile);
+        }
     }
-    private async Task LoadImage(IBrowserFile file)
+
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        string uploadImageUrl = null!;
+        if (file != null)
+        {
+            try
+            {
+                var stream = file.OpenReadStream();
+                var fileName = file.Name;
+                uploadImageUrl = await fs.UploadProductImageAsync(stream, fileName);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        return uploadImageUrl;
+    }
+
+    private async Task PreviewImage(IBrowserFile file)
     {
         var buffers = new byte[file.Size];
         await file.OpenReadStream().ReadAsync(buffers);
         string imageType = file.ContentType;
         Image = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
-        StateHasChanged();
+        StateHasChanged(); 
     }
-    private async Task<string> UploadImage(IBrowserFile file)
+
+    private async Task SaveImage()
     {
-        var maxAllowedSize = 1024 * 1024; // 1MB
-        using var stream = file.OpenReadStream(maxAllowedSize);
-
-        // Crear el contenido del formulario
-        var content = new MultipartFormDataContent();
-        content.Add(new StreamContent(stream), "productImage", file.Name);
-
-        var response = await Http.PostAsync("api/products/new", content);
-        if (response.IsSuccessStatusCode)
+        if (selectedFile != null)
         {
-            var imageUrl = await response.Content.ReadAsStringAsync(); // Suponiendo que el backend devuelve la URL
-            return imageUrl;
+            await UploadImage(selectedFile); 
         }
-
-        throw new Exception("Error al subir la imagen");
     }
-
-
 
     private async Task SaveProduct()
     {
@@ -463,36 +480,31 @@
         {
             if (isNewProduct)
             {
-                if (selectedFile != null)
+                var imageUrl = await UploadImage(selectedFile);
+                editingProduct.ImageUrl = imageUrl;
+                var savedProduct = await productService.SaveAsync(editingProduct);
+                if (savedProduct != null)
                 {
-                    var imageUrl = await UploadImage(selectedFile);
-                    editingProduct.Image = imageUrl;
-                }
-
-                var result = await productService.SaveAsync(editingProduct);
-                if (result)
-                {
-                    // await Swal.FireAsync("Éxito", "Producto agregado correctamente.", SweetAlertIcon.Success);
                     ShowAlert("Producto agregado correctamente.");
+                    editingProduct = savedProduct; // Actualiza el producto editado con los datos devueltos
                 }
                 else
                 {
                     ShowAlert("Hubo un problema al agregar el producto");
-
-                    // await Swal.FireAsync("Error", "Hubo un problema al agregar el producto.", SweetAlertIcon.Error);
                 }
             }
             else
             {
-                var result = await productService.UpdateAsync(editingProduct);
-                if (result)
+                var imageUrl = await UploadImage(selectedFile);
+                editingProduct.ImageUrl = imageUrl;
+                var updatedProduct = await productService.UpdateAsync(editingProduct);
+                if (updatedProduct != null)
                 {
-                    // await Swal.FireAsync("Éxito", "Producto actualizado correctamente.", SweetAlertIcon.Success);
                     ShowAlert("Producto actualizado correctamente.");
+                    editingProduct = updatedProduct; // Actualiza el producto editado con los datos devueltos
                 }
                 else
                 {
-                    // await Swal.FireAsync("Error", "Hubo un problema al actualizar el producto.", SweetAlertIcon.Error);
                     ShowAlert("Hubo un problema al actualizar el producto");
                 }
             }
@@ -502,8 +514,9 @@
         }
         catch (Exception ex)
         {
-            // await Swal.FireAsync("Error", $"Hubo un error inesperado: {ex.Message}", SweetAlertIcon.Error);
+            ShowAlert($"Error: {ex.Message}");
         }
+        
         finally
         {
             isLoading = false;

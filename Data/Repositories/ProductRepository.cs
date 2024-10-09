@@ -4,13 +4,6 @@ using Firebase.Storage;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
 using home_pisos_vinilicos_admin.Domain.Entities;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Linq.Expressions;
-using System.Net.Http;
-using System.Text;
-using static AuthenticationService;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -23,27 +16,34 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
 
-            _firebaseStorage = new FirebaseStorage("gs://home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
+            _firebaseStorage = new FirebaseStorage("home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
             {
-                AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken), // Usa la propiedad estática
+                AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken),
                 ThrowOnCancel = true
             });
         }
 
-        public async Task<string> UploadProductImageAsync(Stream imageStream, string IdProduct)
+        public async Task<string> UploadProductImageAsync(Stream imageStream, string idProduct)
         {
             try
             {
-                var imagePath = $"products/{IdProduct}/{Guid.NewGuid()}.jpg"; // Ruta de la imagen
-                await _firebaseStorage.Child(imagePath).PutAsync(imageStream); // Subir la imagen
+                var imagePath = $"products/{idProduct}/{Guid.NewGuid()}.jpg";
 
-                // Devuelve la URL de descarga
-                return await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
+                await _firebaseStorage.Child(imagePath).PutAsync(imageStream);
+
+                var imageUrl = await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    throw new Exception("No se pudo obtener la URL de la imagen.");
+                }
+
+                return imageUrl;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al subir imagen: {ex.Message}");
-                return string.Empty; // Devuelve cadena vacía en caso de error
+                return string.Empty;
             }
         }
 
@@ -51,22 +51,32 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Si se proporciona una imagen, sube la imagen a Firebase Storage
+                var firebaseResult = await _firebaseClient
+                    .Child("Product")
+                    .PostAsync(newProduct);
+
+                newProduct.IdProduct = firebaseResult.Key;
+
                 if (imageStream != null)
                 {
-                    string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct.ToString());
+                    string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct);
+
                     if (!string.IsNullOrEmpty(imageUrl))
                     {
-                        newProduct.Image = imageUrl; // Asigna la URL de la imagen al producto
+                        newProduct.ImageUrl = imageUrl;
+
+                        await _firebaseClient
+                            .Child("Product")
+                            .Child(newProduct.IdProduct)
+                            .PutAsync(newProduct);
                     }
                     else
                     {
-                        throw new Exception("No se pudo subir la imagen."); // Lanza una excepción si falla la subida de imagen
+                        Console.WriteLine("No se pudo subir la imagen.");
                     }
                 }
 
-                // Inserta el producto en Firebase Realtime Database
-                return await base.Insert(newProduct);
+                return true;
             }
             catch (Exception ex)
             {
@@ -79,21 +89,25 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Si se proporciona una nueva imagen, actualiza la imagen en Firebase Storage
                 if (imageStream != null)
                 {
-                    string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct.ToString());
+                    string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct);
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
-                        updateProduct.Image = newImageUrl; // Actualiza la URL de la imagen
+                        updateProduct.ImageUrl = newImageUrl;
                     }
                     else
                     {
-                        throw new Exception("No se pudo actualizar la imagen."); // Lanza una excepción si falla la subida de imagen
+                        throw new Exception("No se pudo actualizar la imagen.");
                     }
                 }
 
-                return await base.Update(updateProduct);
+                await _firebaseClient
+                    .Child("Product")
+                    .Child(updateProduct.IdProduct)
+                    .PutAsync(updateProduct);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -107,7 +121,6 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Aquí podrías manejar la eliminación de la imagen en Firebase Storage si lo deseas
                 return await base.Delete(id);
             }
             catch (Exception ex)
@@ -136,10 +149,26 @@ namespace home_pisos_vinilicos.Data.Repositories
 
         private async Task<Product?> GetProductById(string id)
         {
-            return await _firebaseClient
+            var product = await _firebaseClient
                 .Child("Product")
                 .Child(id)
                 .OnceSingleAsync<Product>();
+
+            if (product != null)
+            {
+                product.IdProduct = id;
+                if (string.IsNullOrEmpty(product.ImageUrl))
+                {
+                    var imageUrl = await _firebaseClient
+                        .Child("Product")
+                        .Child(id)
+                        .Child("ImageUrl")
+                        .OnceSingleAsync<string>();
+                    product.ImageUrl = imageUrl;
+                }
+            }
+
+            return product;
         }
 
         private async Task<Category?> GetCategoryById(string? Idcategory)
@@ -180,7 +209,12 @@ namespace home_pisos_vinilicos.Data.Repositories
             return products.Select(p =>
             {
                 var product = p.Object;
-                product.IdProduct = p.Key; // Asigna el ID del producto
+                product.IdProduct = p.Key;
+
+                if (p.Object.ImageUrl != null)
+                {
+                    product.ImageUrl = p.Object.ImageUrl;
+                }
                 return product;
             }).ToList();
         }

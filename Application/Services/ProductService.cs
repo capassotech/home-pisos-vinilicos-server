@@ -3,7 +3,6 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using home_pisos_vinilicos.Application.DTOs;
-using System.IO;
 
 namespace home_pisos_vinilicos.Application.Services
 {
@@ -23,20 +22,19 @@ namespace home_pisos_vinilicos.Application.Services
         public async Task<List<ProductDto>> GetAllAsync(Expression<Func<Product, bool>>? filter = null)
         {
             var products = await _productRepository.GetAllWithCategories();
-            var productDtos = _mapper.Map<List<ProductDto>>(products);
-            return productDtos;
+            return _mapper.Map<List<ProductDto>>(products);
         }
 
-        public async Task<ProductDto> GetByIdAsync(string id)
+        public async Task<ProductDto?> GetByIdAsync(string id)
         {
             var product = await _productRepository.GetByIdWithCategory(id);
+            if (product == null) return null;
 
-            if (product != null && !string.IsNullOrEmpty(product.IdCategory))
+            if (!string.IsNullOrEmpty(product.IdCategory))
             {
                 product.Category = await _categoryRepository.GetById(product.IdCategory);
             }
-            var productDto = _mapper.Map<ProductDto>(product);
-            return productDto;
+            return _mapper.Map<ProductDto>(product);
         }
 
         public async Task<bool> DeleteAsync(string idProduct)
@@ -44,43 +42,40 @@ namespace home_pisos_vinilicos.Application.Services
             return await _productRepository.Delete(idProduct);
         }
 
-        public async Task<bool> UpdateAsync(ProductDto productDto, Stream? imageStream = null)
+        public async Task<ProductDto> UpdateAsync(ProductDto productDto, Stream? imageStream = null)
         {
-            if (productDto.IsFeatured)
-            {
-                var featuredProducts = await _productRepository.GetAll(p => p.IsFeatured && p.IdProduct != productDto.IdProduct);
-                if (featuredProducts.Count >= 6)
-                {
-                    throw new InvalidOperationException("No se pueden destacar más de 6 productos.");
-                }
-            }
+            await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
-            return await _productRepository.Update(product, imageStream);
+            var success = await _productRepository.Update(product, imageStream);
+
+            if (!success)
+            {
+                throw new Exception("Failed to update product");
+            }
+
+            var updatedProduct = await _productRepository.GetByIdWithCategory(product.IdProduct);
+            return _mapper.Map<ProductDto>(updatedProduct);
         }
 
-        public async Task<bool> SaveAsync(ProductDto productDto, Stream? imageStream = null)
+        public async Task<ProductDto> SaveAsync(ProductDto productDto, Stream? imageStream = null)
         {
-            if (productDto.IsFeatured)
-            {
-                var featuredProducts = await _productRepository.GetAll(p => p.IsFeatured);
-                if (featuredProducts.Count >= 6)
-                {
-                    throw new InvalidOperationException("No se pueden destacar más de 6 productos.");
-                }
-            }
+            await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
             product.CreatedDate = DateTime.UtcNow;
 
-            var result = await _productRepository.Insert(product, imageStream); // Llama al repositorio con la imagen
+            var success = await _productRepository.Insert(product, imageStream);
 
-            if (result)
+            if (!success)
             {
-                await EnsureFeaturedProductsAsync();
+                throw new Exception("Failed to save product");
             }
 
-            return result;
+            await EnsureFeaturedProductsAsync();
+
+            var savedProduct = await _productRepository.GetByIdWithCategory(product.IdProduct);
+            return _mapper.Map<ProductDto>(savedProduct);
         }
 
         public async Task<List<ProductDto>> SearchAsync(string query)
@@ -90,8 +85,19 @@ namespace home_pisos_vinilicos.Application.Services
                 p.Description.Contains(query, StringComparison.OrdinalIgnoreCase);
 
             var products = await _productRepository.GetAll(filter);
-            var productDtos = _mapper.Map<List<ProductDto>>(products);
-            return productDtos;
+            return _mapper.Map<List<ProductDto>>(products);
+        }
+
+        private async Task EnsureFeaturedProductLimitNotExceeded(ProductDto productDto)
+        {
+            if (productDto.IsFeatured)
+            {
+                var featuredProducts = await _productRepository.GetAll(p => p.IsFeatured && p.IdProduct != productDto.IdProduct);
+                if (featuredProducts.Count >= 6)
+                {
+                    throw new InvalidOperationException("No se pueden destacar más de 6 productos.");
+                }
+            }
         }
 
         private async Task EnsureFeaturedProductsAsync()

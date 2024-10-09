@@ -65,3 +65,4 @@ obj/
 local.settings.json
 firebase.json
 
+/firebase.json
