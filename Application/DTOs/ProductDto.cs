@@ -20,7 +20,7 @@ namespace home_pisos_vinilicos.Application.DTOs
         [Range(0.01, double.MaxValue, ErrorMessage = "El tamaño debe ser mayor que cero.")]
         public decimal Size { get; set; }
 
-        public string Color { get; set; }
+        public List<ColorDto>? Colors { get; set; } = new List<ColorDto>();
 
         [Required(ErrorMessage = "La cantidad es requerida.")]
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos uno.")]

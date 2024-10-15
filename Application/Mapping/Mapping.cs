@@ -15,13 +15,15 @@ namespace home_pisos_vinilicos.Application.Mapping
                 .ForMember(dest => dest.IdProduct, opt => opt.MapFrom(src => src.IdProduct)) // Mapeo correcto de IdProduct
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))   // Mapeo de la relación Category
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl))   // Mapeo correcto de ImageUrl
-                .ForMember(dest => dest.TechnicalSheet, opt => opt.MapFrom(src => src.TechnicalSheet)); // Mapeo de ficha técnica
+                .ForMember(dest => dest.TechnicalSheet, opt => opt.MapFrom(src => src.TechnicalSheet)) // Mapeo de ficha técnica
+                .ForMember(dest => dest.Colors, opt => opt.MapFrom(src => src.Colors)); // Mapeo de lista de colores
 
             // Mapeo de Product a ProductDto
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))   // Mapeo de la relación Category
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl))   // Mapeo correcto de ImageUrl
-                .ForMember(dest => dest.TechnicalSheet, opt => opt.MapFrom(src => src.TechnicalSheet)); // Mapeo de ficha técnica
+                .ForMember(dest => dest.TechnicalSheet, opt => opt.MapFrom(src => src.TechnicalSheet)) // Mapeo de ficha técnica
+                .ForMember(dest => dest.Colors, opt => opt.MapFrom(src => src.Colors)); // Mapeo de lista de colores
 
             // Mapeo de Category a CategoryDto y viceversa
             CreateMap<Category, CategoryDto>().ReverseMap()
