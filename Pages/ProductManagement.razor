@@ -76,9 +76,10 @@
 
                 <div class="form-group">
                     <div class="error-text">
-                        <label for="color">Color</label>
-                        <InputText id="color" class="form-control" @bind-Value="editingProduct.Color" />
+                        <label for="colors">Colores</label>
+                        <InputTextArea type="text" @bind-value="colorInput" @bind-value:event="oninput" placeholder="Agregar colores (separados por comas)" />
                     </div>
+                    <ValidationMessage For="@(() => editingProduct.Colors)" class="text-danger" />
                 </div>
 
                 <div class="form-group">
@@ -288,6 +289,8 @@
     private List<ProductDto> filteredProducts = new List<ProductDto>();
     private List<ProductDto> featuredProducts = new List<ProductDto>();
     private List<CategoryDto> categories = new List<CategoryDto>();
+    private List<ColorDto> availableColors = new List<ColorDto>();
+    private List<string> selectedColors = new List<string>();
     private ProductDto editingProduct = new ProductDto();
     private bool errorFeaturedLimit = false;
     private string searchText = "";
@@ -302,13 +305,13 @@
     private const int MaxFeaturedProducts = 6;
     private IBrowserFile selectedFile;
     private string Image;
-
+    private string colorInput;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadProducts();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
-
+        //availableColors = await LoadColors();
         CalculateTotalPages();
     }
 
@@ -343,7 +346,7 @@
                     Description = p.Description,
                     Price = p.Price,
                     Size = p.Size,
-                    Color = p.Color,
+                    Colors = p.Colors,
                     Quantity = p.Quantity,
                     IsFeatured = p.IsFeatured,
                     Model = p.Model,
@@ -373,7 +376,7 @@
                 Description = "",
                 Price = 0,
                 Size = 0,
-                Color = "",
+                Colors = new List<ColorDto>(),
                 Quantity = 0,
                 Model = "",
                 Dimensions = "",
@@ -404,7 +407,7 @@
                 Description = product.Description,
                 Price = product.Price,
                 Size = product.Size,
-                Color = product.Color,
+                Colors = product.Colors,
                 Quantity = product.Quantity,
                 Model = product.Model,
                 Dimensions = product.Dimensions,
@@ -482,6 +485,7 @@
             {
                 var imageUrl = await UploadImage(selectedFile);
                 editingProduct.ImageUrl = imageUrl;
+                editingProduct.Colors = selectedColors.Select(id => new ColorDto { IdColor = id }).ToList();
                 var savedProduct = await productService.SaveAsync(editingProduct);
                 if (savedProduct != null)
                 {
