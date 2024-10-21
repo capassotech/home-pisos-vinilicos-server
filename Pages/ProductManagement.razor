@@ -306,14 +306,30 @@
     private IBrowserFile selectedFile;
     private string Image;
     private string colorInput;
+    private AuthenticationService authenticationService;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadProducts();
-        categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
-        //availableColors = await LoadColors();
-        CalculateTotalPages();
+            
+            var isAuthenticated = await authenticationService.IsAuthenticated();
+            
+            if (!isAuthenticated)
+            {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            else 
+            {
+                await LoadProducts();
+                categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
+                CalculateTotalPages();
+
+            }
+            
+        
+        
     }
+
 
 
     private bool AreRequiredFieldsValid
