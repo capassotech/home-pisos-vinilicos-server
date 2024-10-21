@@ -31,8 +31,8 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public decimal Size { get; set; }
 
         
-        [Column(TypeName = "VARCHAR(100)")]
-        public String Color { get; set; }
+        // ver si necesito el objeto con fk
+        public List<Color> Colors { get; set; } = new List<Color>();
 
 
         [Required]

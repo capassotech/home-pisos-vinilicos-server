@@ -15,7 +15,7 @@ public class AuthenticationService : IAuthenticationService
 {
     private readonly ILoginRepository _loginRepository; 
     private readonly HttpClient _httpClient;
-    private readonly AuthResponse _authResponse;
+    private AuthResponse _authResponse;
 
     private static string _idToken; // Variable estática para el token
     public static string IdToken => _idToken; // Propiedad para acceder al token
@@ -50,10 +50,9 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-
     public async Task<AuthResult> LoginAsync(string email, string password)
     {
-        var apiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM"; 
+        var apiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM";
         var url = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}";
 
         var requestBody = new
@@ -70,6 +69,13 @@ public class AuthenticationService : IAuthenticationService
         if (response.IsSuccessStatusCode)
         {
             var authResponse = JsonConvert.DeserializeObject<AuthResponse>(responseString);
+
+            // Asignar el authResponse a la propiedad de clase _authResponse
+            _authResponse = authResponse;
+
+            // Asignar el token a la variable estática
+            _idToken = authResponse.IdToken;
+
             return new AuthResult
             {
                 IsSuccess = true,
@@ -83,15 +89,24 @@ public class AuthenticationService : IAuthenticationService
             return new AuthResult
             {
                 IsSuccess = false,
-                Message = $"Error de autenticación"
+                Message = "Error de autenticación"
             };
         }
     }
+
+
     public async Task<bool> IsAuthenticated()
     {
-        var token = IdToken; 
+        var token = IdToken;
+
+        if (string.IsNullOrEmpty(token))
+        {
+            return false; // Si no hay token, no está autenticado
+        }
+
         return await IsUserAuthenticated(token);
     }
+
 
     public string GetIdToken()
     {
