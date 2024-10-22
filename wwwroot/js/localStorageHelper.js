@@ -1,4 +1,5 @@
-﻿window.localStorageHelper = {
+﻿console.log("localStorageHelper script loaded!");
+window.localStorageHelper = {
     getItem: function (key) {
         return localStorage.getItem(key);
     },
@@ -7,10 +8,15 @@
     },
     removeItem: function (key) {
         localStorage.removeItem(key);
-    }
-};
-/*
-window.yourJavaScriptFunction = function () {
-    return window.localStorageHelper.getItem("authToken");
-};
-*/
+    },
+    getToken: function() {
+        return localStorage.getItem('token');
+    },
+    setToken: function(token) {
+        localStorage.setItem('token', token);
+    },
+    removeToken: function() {
+        localStorage.removeItem('token');
+    };
+}
+

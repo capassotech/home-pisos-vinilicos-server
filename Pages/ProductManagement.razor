@@ -12,6 +12,7 @@
 @inject IProductRepository fs
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
@@ -306,14 +307,34 @@
     private IBrowserFile selectedFile;
     private string Image;
     private string colorInput;
+    private string token;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadProducts();
-        categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
-        //availableColors = await LoadColors();
-        CalculateTotalPages();
+        try
+        {
+            var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                Console.WriteLine("Token encontrado: " + token);
+
+                await LoadProducts();
+                categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
+                CalculateTotalPages();
+            }
+        }
+        catch (JSException jsEx)
+        {
+            Console.WriteLine("JavaScript Error: " + jsEx.Message);
+            //Navigation.NavigateTo("/login");
+        }
     }
+
 
 
     private bool AreRequiredFieldsValid
