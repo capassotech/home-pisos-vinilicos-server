@@ -26,9 +26,8 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         public String Description { get; set; }
 
 
-        [Required]
-        [Column(TypeName = "DECIMAL(18, 2)")]
-        public decimal Size { get; set; }
+        [Column(TypeName = "VARCHAR(100)")]
+        public string Size { get; set; }
 
         
         // ver si necesito el objeto con fk
