@@ -16,9 +16,8 @@ namespace home_pisos_vinilicos.Application.DTOs
         [Required(ErrorMessage = "La descripción es requerida.")]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "El tamaño es requerido.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "El tamaño debe ser mayor que cero.")]
-        public decimal Size { get; set; }
+        [Required(ErrorMessage = "La descripción es requerida.")]
+        public string Size { get; set; }
 
         public List<ColorDto>? Colors { get; set; } = new List<ColorDto>();
 

@@ -69,18 +69,18 @@
                 <div class="form-group">
                     <div class="error-text">
                         <label for="size">Tamaño</label>
-                        <InputNumber id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
+                        <InputTextArea id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
                 </div>
 
-                <div class="form-group">
+                @* <div class="form-group">
                     <div class="error-text">
                         <label for="colors">Colores</label>
                         <InputTextArea type="text" @bind-value="colorInput" @bind-value:event="oninput" placeholder="Agregar colores (separados por comas)" />
                     </div>
                     <ValidationMessage For="@(() => editingProduct.Colors)" class="text-danger" />
-                </div>
+                </div> *@
 
                 <div class="form-group">
                     <div class="error-text">
@@ -315,7 +315,6 @@
         CalculateTotalPages();
     }
 
-
     private bool AreRequiredFieldsValid
     {
         get
@@ -323,7 +322,7 @@
             return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
                    editingProduct.Price > 0 &&
                    !string.IsNullOrWhiteSpace(editingProduct.Description) &&
-                   editingProduct.Size > 0 &&
+                   !string.IsNullOrWhiteSpace(editingProduct.Size) &&
                    editingProduct.Quantity > 0 &&
                    !string.IsNullOrWhiteSpace(editingProduct.Model) &&
                    !string.IsNullOrWhiteSpace(editingProduct.Dimensions) &&
@@ -331,8 +330,6 @@
                    editingProduct.PricePerSquareMeter > 0;
         }
     }
-
-
 
     private async Task LoadProducts()
     {
@@ -368,14 +365,14 @@
         }
     }
 
-    protected async void AddNewProduct()
+    protected void AddNewProduct()
     {
         editingProduct = new ProductDto
             {
                 Name = "",
                 Description = "",
                 Price = 0,
-                Size = 0,
+                Size = "",
                 Colors = new List<ColorDto>(),
                 Quantity = 0,
                 Model = "",
@@ -449,7 +446,8 @@
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine($"Error al cargar la imagen: {ex.Message}");
+                throw;
             }
         }
         return uploadImageUrl;
@@ -490,7 +488,7 @@
                 if (savedProduct != null)
                 {
                     ShowAlert("Producto agregado correctamente.");
-                    editingProduct = savedProduct; // Actualiza el producto editado con los datos devueltos
+                    editingProduct = savedProduct;
                 }
                 else
                 {
@@ -505,7 +503,7 @@
                 if (updatedProduct != null)
                 {
                     ShowAlert("Producto actualizado correctamente.");
-                    editingProduct = updatedProduct; // Actualiza el producto editado con los datos devueltos
+                    editingProduct = updatedProduct; 
                 }
                 else
                 {

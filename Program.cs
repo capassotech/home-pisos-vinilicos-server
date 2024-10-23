@@ -5,16 +5,17 @@ using Google.Apis.Auth.OAuth2;
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
+using home_pisos_vinilicos.Application.Services.Firebase;
 using home_pisos_vinilicos.Data;
 using home_pisos_vinilicos.Data.Repositories;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-FirebaseApp.Create(new AppOptions
-{
-    Credential = GoogleCredential.FromFile("firebase.json")
-});
+FirebaseInitializer.InitializeFirebase();
+
+builder.Services.AddScoped<FirebaseClient>(sp =>
+    new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
 
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((sp, httpClient) =>
 {
