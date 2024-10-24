@@ -1,5 +1,4 @@
-﻿console.log("localStorageHelper script loaded!");
-window.localStorageHelper = {
+﻿window.localStorageHelper = {
     getItem: function (key) {
         return localStorage.getItem(key);
     },
@@ -17,6 +16,10 @@ window.localStorageHelper = {
     },
     removeToken: function() {
         localStorage.removeItem('token');
+    },
+    logout: function () {
+        this.removeToken();
+        console.log("Usuario deslogueado.");
     };
 }
 

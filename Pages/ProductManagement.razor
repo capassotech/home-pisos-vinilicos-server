@@ -331,15 +331,16 @@
         catch (JSException jsEx)
         {
             Console.WriteLine("JavaScript Error: " + jsEx.Message);
-            //Navigation.NavigateTo("/login");
         }
     }
 
-<<<<<<< HEAD
+    private async Task Logout()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorageHelper.logout");
 
+        Navigation.NavigateTo("/login");
+    }
 
-=======
->>>>>>> 0b6c9e8b98c16b3235e1de9683205e89d21a6039
     private bool AreRequiredFieldsValid
     {
         get
