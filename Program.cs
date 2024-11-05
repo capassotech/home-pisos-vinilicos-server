@@ -22,6 +22,12 @@ builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((s
 
 });
 
+builder.Services.AddSignalR(options =>
+{
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // Aumenta el timeout
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);  // Intervalo para mantener la conexión activa
+});
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers();
