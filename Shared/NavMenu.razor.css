@@ -69,9 +69,7 @@
 
 
 .sidebar {
-    background: #bdc3c7;
-    background: -webkit-linear-gradient(to left, #bdc3c7, #2c3e50);
-    background: linear-gradient(to left, #bdc3c7, #2c3e50);
+    background: #2c3e50;
     height: 100vh;
     width: 250px;
 }
