@@ -15,6 +15,7 @@
 
 <head>
     <link href="css/productManagement.css" rel="stylesheet" />
+    <title>Gestión de Productos</title>
 </head>
 
 <div class="container-management-products">
@@ -167,13 +168,20 @@
 
                             <div class="form-group">
                                 <label for="category">Categoría</label>
-                                <select id="category" class="form-control" @bind="editingProduct.IdCategory">
-                                    <option value="">Selecciona una categoría</option>
-                                    @foreach (var category in categories)
-                                    {
+                                @if (categories != null && categories.Count != 0)
+                                {
+                                    <select id="category" class="form-control" @bind="editingProduct.IdCategory">
+                                        <option value="">Selecciona una categoría</option>
+                                        @foreach (var category in categories)
+                                        {
                                             <option value="@category.IdCategory">@category.Name</option>
-                                    }
-                                </select>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary">Crear categoría</button>
+                                }
                                 <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
                             </div>
 
@@ -193,20 +201,18 @@
                             {
                                     <div class="alert alert-danger mt-3">@errorMessage</div>
                             }
-                        </EditForm>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
-                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancelar</button>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
+                                <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancelar</button>
+                            </div>
+                        </EditForm>
                     </div>
                 </div>
             </div>
         </div>
     }
 
-
-    
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {

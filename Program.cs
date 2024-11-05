@@ -1,7 +1,5 @@
 using CurrieTechnologies.Razor.SweetAlert2;
 using Firebase.Database;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
@@ -22,6 +20,12 @@ builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((s
     var configuration = sp.GetRequiredService<IConfiguration>();
     httpClient.BaseAddress = new Uri(configuration["Authentication: TokenUri"]!);
 
+});
+
+builder.Services.AddSignalR(options =>
+{
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // Aumenta el timeout
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);  // Intervalo para mantener la conexión activa
 });
 
 builder.Services.AddRazorPages();
