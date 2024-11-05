@@ -47,7 +47,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Insert(Product newProduct, Stream? imageStream = null)
+        public override async Task<bool> Insert(Product newProduct, List<Stream> imageStreams)
         {
             try
             {
@@ -57,29 +57,37 @@ namespace home_pisos_vinilicos.Data.Repositories
 
                 newProduct.IdProduct = firebaseResult.Key;
 
-                if (imageStream != null)
+                if (imageStreams != null && imageStreams.Any())
                 {
-                    string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct);
-
-                    if (!string.IsNullOrEmpty(imageUrl))
+                    var imageUrls = new List<string>();
+                    foreach (var imageStream in imageStreams)
                     {
-                        newProduct.ImageUrl = imageUrl;
+                        string imageUrl = await UploadProductImageAsync(imageStream, newProduct.IdProduct);
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            imageUrls.Add(imageUrl);
+                        }
+                        else
+                        {
+                            Console.WriteLine("No se pudo subir una de las imágenes.");
+                        }
+                    }
+
+                    if (imageUrls.Any())
+                    {
+                        newProduct.ImageUrls = imageUrls;
 
                         await _firebaseClient
                             .Child("Product")
                             .Child(newProduct.IdProduct)
                             .PutAsync(newProduct);
                     }
-                    else
-                    {
-                        Console.WriteLine("No se pudo subir la imagen.");
-                    }
                 }
+
                 if (newProduct.Colors != null && newProduct.Colors.Any())
                 {
                     foreach (var color in newProduct.Colors)
                     {
-                        // Inserta cada color asociado al producto en Firebase
                         await _firebaseClient
                             .Child("Product")
                             .Child(newProduct.IdProduct)
@@ -96,20 +104,47 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(Product updateProduct, Stream? imageStream = null)
+        public async Task<List<string>> UploadProductImagesAsync(List<Stream> imageStreams, string idProduct)
+        {
+            var imageUrls = new List<string>();
+            foreach (var imageStream in imageStreams)
+            {
+                string imageUrl = await UploadProductImageAsync(imageStream, idProduct);
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    imageUrls.Add(imageUrl);
+                }
+            }
+            return imageUrls;
+        }
+
+        public override async Task<bool> Update(Product updateProduct, List<Stream> imageStreams)
         {
             try
             {
-                if (imageStream != null)
+                if (imageStreams != null && imageStreams.Any())
                 {
-                    string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct);
-                    if (!string.IsNullOrEmpty(newImageUrl))
+                    var newImageUrls = new List<string>();
+                    foreach (var imageStream in imageStreams)
                     {
-                        updateProduct.ImageUrl = newImageUrl;
+                        string newImageUrl = await UploadProductImageAsync(imageStream, updateProduct.IdProduct);
+                        if (!string.IsNullOrEmpty(newImageUrl))
+                        {
+                            newImageUrls.Add(newImageUrl);
+                        }
+                        else
+                        {
+                            Console.WriteLine("No se pudo actualizar una de las imágenes.");
+                        }
+                    }
+
+                    if (newImageUrls.Any())
+                    {
+                        updateProduct.ImageUrls = newImageUrls;
                     }
                     else
                     {
-                        throw new Exception("No se pudo actualizar la imagen.");
+                        throw new Exception("No se pudo actualizar ninguna imagen.");
                     }
                 }
 
@@ -117,6 +152,7 @@ namespace home_pisos_vinilicos.Data.Repositories
                     .Child("Product")
                     .Child(updateProduct.IdProduct)
                     .PutAsync(updateProduct);
+
                 if (updateProduct.Colors != null && updateProduct.Colors.Any())
                 {
                     // Borra la lista actual de colores en Firebase para evitar duplicados o inconsistencias
@@ -144,7 +180,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return false;
             }
         }
-
 
         public override async Task<bool> Delete(string id)
         {

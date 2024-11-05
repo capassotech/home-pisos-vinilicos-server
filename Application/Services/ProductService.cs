@@ -43,12 +43,12 @@ namespace home_pisos_vinilicos.Application.Services
             return await _productRepository.Delete(idProduct);
         }
 
-        public async Task<ProductDto> UpdateAsync(ProductDto productDto, Stream? imageStream = null)
+        public async Task<ProductDto> UpdateAsync(ProductDto productDto, List<Stream> imageStreams)
         {
             await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
-            var success = await _productRepository.Update(product, imageStream);
+            var success = await _productRepository.Update(product, imageStreams);
 
             if (!success)
             {
@@ -59,14 +59,14 @@ namespace home_pisos_vinilicos.Application.Services
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
-        public async Task<ProductDto> SaveAsync(ProductDto productDto, Stream? imageStream = null)
+        public async Task<ProductDto> SaveAsync(ProductDto productDto, List<Stream> imageStreams)
         {
             await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
             product.CreatedDate = DateTime.UtcNow;
 
-            var success = await _productRepository.Insert(product, imageStream);
+            var success = await _productRepository.Insert(product, imageStreams);
 
             if (!success)
             {

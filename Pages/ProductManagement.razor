@@ -148,15 +148,20 @@
                             <br/>
 
                             <div class="form-group">
-                                <label>Imagen:</label>
-                                <InputFile OnChange="OnFileSelected" accept="image/*" />
-                                @if (!string.IsNullOrEmpty(Image))
+                                <label>Imágenes:</label>
+                                <InputFile OnChange="OnFileSelected" accept="image/*" multiple />
+
+                                @if (Images != null && Images.Any())
                                 {
-                                        <div class="mt-2">
-                                            <img src="@Image" alt="Vista previa" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
-                                        </div>
+                                    <div class="mt-2 d-flex flex-wrap">
+                                        @foreach (var image in Images)
+                                        {
+                                            <img src="@image" alt="Vista previa" class="img-thumbnail m-2" style="max-width: 200px; max-height: 200px;" />
+                                        }
+                                    </div>
                                 }
                             </div>
+
 
                                 <br/>
 
@@ -431,36 +436,44 @@
                 TechnicalSheet = product.TechnicalSheet,
                 IsFeatured = product.IsFeatured,
                 RequiresUnderlay = product.RequiresUnderlay,
-                ImageUrl = product.ImageUrl
+                ImageUrls = product.ImageUrls ?? new List<string>()
             };
 
-        Image = product.ImageUrl!;
+        Images = product.ImageUrls ?? new List<string>();
         isNewProduct = false;
         isModalOpen = true;
         successMessage = "";
         errorMessage = "";
     }
+    private List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+    private List<string> Images = new List<string>();
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
-        selectedFile = e.File;
+        selectedFiles.Clear();
+        selectedFiles.AddRange(e.GetMultipleFiles());
 
-        if (selectedFile != null)
+        foreach (var file in selectedFiles)
         {
-            await PreviewImage(selectedFile);
+            await PreviewImage(file);
         }
     }
 
-    private async Task<string> UploadImage(IBrowserFile file)
+    private async Task<List<string>> UploadImages(List<IBrowserFile> files)
     {
-        string uploadImageUrl = null!;
-        if (file != null)
+        var uploadedUrls = new List<string>();
+
+        foreach (var file in files)
         {
             try
             {
                 var stream = file.OpenReadStream();
                 var fileName = file.Name;
-                uploadImageUrl = await fs.UploadProductImageAsync(stream, fileName);
+                var uploadImageUrl = await fs.UploadProductImageAsync(stream, fileName);
+                if (!string.IsNullOrEmpty(uploadImageUrl))
+                {
+                    uploadedUrls.Add(uploadImageUrl);
+                }
             }
             catch (Exception ex)
             {
@@ -468,7 +481,8 @@
                 throw;
             }
         }
-        return uploadImageUrl;
+
+        return uploadedUrls;
     }
 
     private async Task PreviewImage(IBrowserFile file)
@@ -476,15 +490,17 @@
         var buffers = new byte[file.Size];
         await file.OpenReadStream().ReadAsync(buffers);
         string imageType = file.ContentType;
-        Image = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
-        StateHasChanged(); 
+        var imageUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+        Images.Add(imageUrl);
+        StateHasChanged();
     }
 
-    private async Task SaveImage()
+    private async Task SaveImages()
     {
-        if (selectedFile != null)
+        if (selectedFiles.Any())
         {
-            await UploadImage(selectedFile); 
+            var uploadedUrls = await UploadImages(selectedFiles);
+            editingProduct.ImageUrls.AddRange(uploadedUrls);
         }
     }
 
@@ -494,15 +510,22 @@
         successMessage = "";
         errorMessage = "";
 
-
         try
         {
+            List<Stream> imageStreams = new List<Stream>();
+            if (selectedFiles.Any())
+            {
+                foreach (var file in selectedFiles)
+                {
+                    var stream = file.OpenReadStream();
+                    imageStreams.Add(stream);
+                }
+            }
+
             if (isNewProduct)
             {
-                var imageUrl = await UploadImage(selectedFile);
-                editingProduct.ImageUrl = imageUrl;
                 editingProduct.Colors = selectedColors.Select(id => new ColorDto { IdColor = id }).ToList();
-                var savedProduct = await productService.SaveAsync(editingProduct);
+                var savedProduct = await productService.SaveAsync(editingProduct, imageStreams);
                 if (savedProduct != null)
                 {
                     ShowAlert("Producto agregado correctamente.");
@@ -515,13 +538,11 @@
             }
             else
             {
-                var imageUrl = await UploadImage(selectedFile);
-                editingProduct.ImageUrl = imageUrl;
-                var updatedProduct = await productService.UpdateAsync(editingProduct);
+                var updatedProduct = await productService.UpdateAsync(editingProduct, imageStreams);
                 if (updatedProduct != null)
                 {
                     ShowAlert("Producto actualizado correctamente.");
-                    editingProduct = updatedProduct; 
+                    editingProduct = updatedProduct;
                 }
                 else
                 {
@@ -534,9 +555,8 @@
         }
         catch (Exception ex)
         {
-            ShowAlert($"Error: {ex.Message}");
+            errorMessage = $"Error: {ex.Message}";
         }
-        
         finally
         {
             isLoading = false;
@@ -571,37 +591,38 @@
     }
 
     protected async Task ToggleFeatured(ProductDto product)
+{
+    try
     {
-        try
-        {
-            var featuredProductsCount = GetFeaturedProductsCount();
+        var featuredProductsCount = GetFeaturedProductsCount();
 
-            if (product.IsFeatured)
+        if (product.IsFeatured)
+        {
+            product.IsFeatured = false;
+            await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
+            await LoadProducts();
+        }
+        else
+        {
+            if (featuredProductsCount < MaxFeaturedProducts)
             {
-                product.IsFeatured = false;
-                await productService.UpdateAsync(product);
+                product.IsFeatured = true;
+                await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
                 await LoadProducts();
             }
             else
             {
-                if (featuredProductsCount < MaxFeaturedProducts)
-                {
-                    product.IsFeatured = true;
-                    await productService.UpdateAsync(product);
-                    await LoadProducts();
-                }
-                else
-                {
-                    ShowAlert("Ya hay 6 productos destacados.");
-                }
+                ShowAlert("Ya hay 6 productos destacados.");
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al destacar el producto: {ex.Message}");
-            ShowAlert($"Error al destacar el producto: {ex.Message}");
-        }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al destacar el producto: {ex.Message}");
+        ShowAlert($"Error al destacar el producto: {ex.Message}");
+    }
+}
+
 
     private int GetFeaturedProductsCount()
     {

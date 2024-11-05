@@ -7,8 +7,8 @@ namespace home_pisos_vinilicos.Data.Repositories.IRepository
     {
         Task<List<T>> GetAll(Expression<Func<T, bool>>? filter = null);
         Task<T> GetById(string id);
-        Task<bool> Insert(T entity, Stream? imageStream = null);
-        Task<bool> Update(T entity, Stream? imageStream = null);
+        Task<bool> Insert(T entity, List<Stream>? imageStreams = null);
+        Task<bool> Update(T entity, List<Stream>? imageStreams = null);
         Task<bool> Delete(string id);
     }
 }

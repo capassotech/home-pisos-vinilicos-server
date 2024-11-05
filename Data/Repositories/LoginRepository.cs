@@ -16,7 +16,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
         }
 
-        public override async Task<bool> Insert(Login newLogin, Stream? imageStream = null)
+        public override async Task<bool> Insert(Login newLogin, List<Stream>? imageStreams = null)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(Login updateLogin, Stream? imageStream = null)
+        public override async Task<bool> Update(Login updateLogin, List<Stream>? imageStreams = null)
         {
             try
             {
