@@ -40,10 +40,12 @@ namespace home_pisos_vinilicos.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                Console.WriteLine(ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
@@ -56,12 +58,14 @@ namespace home_pisos_vinilicos.Controllers
                 var product = await _productService.GetByIdAsync(id);
                 if (product == null)
                 {
+                    Console.WriteLine($"No se encontró el producto con ID {id}");
                     return NotFound($"No se encontró el producto con ID {id}");
                 }
                 return Ok(product);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
@@ -82,10 +86,12 @@ namespace home_pisos_vinilicos.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                Console.WriteLine(ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
@@ -104,6 +110,7 @@ namespace home_pisos_vinilicos.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
@@ -123,6 +130,7 @@ namespace home_pisos_vinilicos.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
