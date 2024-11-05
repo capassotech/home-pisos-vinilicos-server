@@ -1,7 +1,5 @@
 using CurrieTechnologies.Razor.SweetAlert2;
 using Firebase.Database;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Application.Mapping;
 using home_pisos_vinilicos.Application.Services;
