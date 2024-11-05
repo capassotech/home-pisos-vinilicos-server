@@ -6,7 +6,6 @@
 }
 
 .title-contact {
-    text-transform: uppercase;
     padding-top: 2%;
     margin-bottom: 2%;
     font-weight: bolder;
@@ -48,7 +47,6 @@
     cursor: pointer;
     margin: 0.5rem 0;
     width: 250px;
-    box-shadow: 0 4px 6px -1px #2c3e5031, 0 2px 4px -1px #2c3e5017;
 }
 
 

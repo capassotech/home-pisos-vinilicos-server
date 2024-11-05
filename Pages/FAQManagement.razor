@@ -15,7 +15,9 @@
 
     <h3 class="title-faq">Gestión de Preguntas Frecuentes</h3>
 
-    <button class="button-add" @onclick="ShowAddFAQModal">Agregar Nueva Pregunta</button>
+    <button type="submit" @onclick="ShowAddFAQModal" class="button-add" aria-label="Click me">
+        <i class="fas fa-plus"></i> Nueva pregunta
+    </button>
 
     <table class="table table-faq-questions">
         <thead>
@@ -46,26 +48,43 @@
 
     @if (isModalVisible)
     {
-        <div class="modal-overlay">
-            <EditForm Model="@faqModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
-                <div class="form-group">
-                    <label>Pregunta</label>
-                    <InputText class="form-control" @bind-Value="faqModel.Question" required/>
-                    <ValidationMessage For="() => faqModel.Question" />
-                </div>
-                <div class="form-group">
-                    <label>Respuesta</label>
-                    <InputTextArea class="form-control" @bind-Value="faqModel.Answer" required />
-                    <ValidationMessage For="() => faqModel.Answer" />
-                </div>
+        <div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(faqModel.IdFAQ == null ? "Agregar Pregunta Frecuente" : "Editar Pregunta Frecuente")</h5>
+                        <button type="button" class="close" aria-label="Close" @onclick="CloseModal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
-                <div class="container-buttons">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    <div class="modal-body">
+                        <EditForm Model="@faqModel" OnValidSubmit="HandleValidSubmit" class="edit-form">
+                            <DataAnnotationsValidator />
+
+                            <div class="form-group">
+                                <label for="question">Pregunta</label>
+                                <InputText id="question" class="form-control" @bind-Value="faqModel.Question" required />
+                                <ValidationMessage For="@(() => faqModel.Question)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="answer">Respuesta</label>
+                                <InputTextArea id="answer" class="form-control" @bind-Value="faqModel.Answer" required />
+                                <ValidationMessage For="@(() => faqModel.Answer)" class="text-danger" />
+                            </div>
+                        </EditForm>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    </div>
                 </div>
-            </EditForm>
+            </div>
         </div>
     }
+
 </div>
 
 @code {
