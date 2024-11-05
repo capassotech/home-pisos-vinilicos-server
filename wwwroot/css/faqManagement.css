@@ -8,45 +8,32 @@
     border: none;
     display: flex;
     padding: 0.75rem 1.5rem;
-    background-color: #488aec;
+    background-color: #2c3e50;
     color: #ffffff;
     font-size: 0.75rem;
     line-height: 1rem;
     font-weight: 700;
     text-align: center;
     cursor: pointer;
-    text-transform: uppercase;
     vertical-align: middle;
     align-items: center;
     border-radius: 0.5rem;
     user-select: none;
     gap: 0.75rem;
-    box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
+    box-shadow: 0 4px 6px -1px #2c3e5031, 0 2px 4px -1px #2c3e5017;
     transition: all 0.6s ease;
     height: 50px;
 }
 th, td {
     padding: 12px;
-    text-transform: uppercase;
 }
 
-thead {
-    color: #ffff;
-}
-
-
-tr {
-    background-color: #919ba3;
-}
 .table-faq-questions {
     width: 80%;
-    margin-top: 2%;
     border-collapse: collapse;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .title-faq {
-    text-transform: uppercase;
     padding-top: 2%;
     margin-bottom: 2%;
     font-weight: bolder;
@@ -92,7 +79,7 @@ tr {
     }
 
 .edit-form button {
-    background-color: #488aec;
+    background-color: #2c3e50;
     color: #ffffff;
     border: none;
     border-radius: 4px;
@@ -100,7 +87,7 @@ tr {
     cursor: pointer;
     margin: 0.5rem 0;
     width: 150px;
-    box-shadow: 0 4px 6px -1px #488aec31, 0 2px 4px -1px #488aec17;
+    box-shadow: 0 4px 6px -1px #2c3e5031, 0 2px 4px -1px #2c3e5017;
 }
 
 

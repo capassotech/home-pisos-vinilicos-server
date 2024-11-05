@@ -1,4 +1,4 @@
-﻿@page "/product-management"
+﻿@page "/productos"
 @using System.Net.Http.Json
 @using home_pisos_vinilicos.Application
 @using home_pisos_vinilicos.Application.DTOs
@@ -203,7 +203,7 @@
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {
-        <table class="table table-products">
+        <table class="table table-products table-hover">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -217,7 +217,15 @@
                 {
                     <tr class="@GetHighlightClass(product)">
                         <td>@product.Name</td>
-                        <td>@product.Description</td>
+
+                        @if(product.Category != null){
+                            <td>@product.Category.Name</td>
+                        }
+                        else
+                        {
+                            <td>Sin categoría</td>
+                        }
+
                         <td>$@product.Price</td>
                         <td class="buttons-edition">
                             <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
@@ -261,7 +269,7 @@
     <!-- Tabla de Productos Destacados -->
     @if (featuredProducts != null && featuredProducts.Any())
     {
-        <h4 class="title-featured">PRODUCTOS DESTACADOS</h4>
+        <h4 class="title-featured">Productos Destacados</h4>
 
         <table class="table table-featured-products">
             <thead>
@@ -276,7 +284,13 @@
                 {
                     <tr>
                         <td>@product.Name</td>
-                        <td>@product.Description</td>
+                        @if(product.Category != null){
+                            <td>@product.Category.Name</td>
+                        }
+                        else
+                        {
+                            <td>Sin categoría</td>
+                        }
                         <td>$@product.Price</td>
                     </tr>
                 }
@@ -352,7 +366,8 @@
                     RequiresUnderlay = p.RequiresUnderlay,
                     PricePerSquareMeter = p.PricePerSquareMeter,
                     TechnicalSheet = p.TechnicalSheet,
-                    ImageUrl = p.ImageUrl
+                    ImageUrl = p.ImageUrl,
+                    Category = p.Category
                 }).ToList();
 
             filteredProducts = products;
@@ -640,7 +655,6 @@
         }
     }
 
-
     private void OnFeaturedChange()
     {
         
@@ -659,4 +673,3 @@
         }
 
 }
-

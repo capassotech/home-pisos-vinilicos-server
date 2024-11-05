@@ -13,7 +13,7 @@ main {
 }
 
 .top-row {
-    background-color: #ffff;
+    background-color: #2c3e50;
     border-bottom: 1px solid #d6d5d5;
     box-shadow: 0 4px 4px -4px rgba(0, 0, 0, 0.1);
     justify-content: flex-end;
@@ -23,7 +23,7 @@ main {
 }
 
     .top-row .login-icon {
-        color: #0071c1; 
+        color: white; 
         text-decoration: none; 
         font-size: 1.2rem; 
     }

@@ -22,7 +22,8 @@ namespace home_pisos_vinilicos.Application.Services
         public async Task<List<ProductDto>> GetAllAsync(Expression<Func<Product, bool>>? filter = null)
         {
             var products = await _productRepository.GetAllWithCategories();
-            return _mapper.Map<List<ProductDto>>(products);
+            var result = _mapper.Map<List<ProductDto>>(products);
+            return result;
         }
 
         public async Task<ProductDto?> GetByIdAsync(string id)
