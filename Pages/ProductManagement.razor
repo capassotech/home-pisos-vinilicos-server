@@ -36,169 +36,171 @@
 
     @if (isModalOpen)
     {
-        <div class="modal-overlay">
-            <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct" class="edit-form">
-                <DataAnnotationsValidator />
-                <h4>@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h4>
-
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="name">Nombre del producto</label>
-                        <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
+        <div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(isNewProduct ? "Agregar Nuevo Producto" : "Editar Producto")</h5>
+                        <button type="button" class="close" aria-label="Close" @onclick="CancelEdit">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
-                </div>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="price">Precio</label>
-                        <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
-                </div>
+                    <div class="modal-body">
+                        <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct">
+                            <DataAnnotationsValidator />
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="description">Descripción</label>
-                        <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="name">Nombre del producto</label>
+                                <InputText id="name" class="form-control" @bind-Value="editingProduct.Name" />
+                                <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
+                            </div>
 
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="size">Tamaño</label>
-                        <InputTextArea id="size" class="form-control" @bind-Value="editingProduct.Size" step="0.01" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="price">Precio</label>
+                                <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
+                                <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                @* <div class="form-group">
-                    <div class="error-text">
-                        <label for="colors">Colores</label>
-                        <InputTextArea type="text" @bind-value="colorInput" @bind-value:event="oninput" placeholder="Agregar colores (separados por comas)" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Colors)" class="text-danger" />
-                </div> *@
+                            <div class="form-group">
+                                <label for="description">Descripción</label>
+                                <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
+                                <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="quantity">Cantidad</label>
-                        <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="size">Tamaño</label>
+                                <InputText id="size" class="form-control" @bind-Value="editingProduct.Size" />
+                                <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="isFeatured">Destacar producto</label>
-                        <InputCheckbox id="isFeatured"  @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
-                    </div>
-                    @if (errorFeaturedLimit)
-                    {
-                        <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
-                    }
-                </div>
+                            <div class="form-group">
+                                <label for="quantity">Cantidad</label>
+                                <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
+                                <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
+                            <div class="form-group form-check">
+                                <InputCheckbox id="isFeatured" class="form-check-input" @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
+                                <label for="isFeatured" class="form-check-label">Destacar producto</label>
+                                @if (errorFeaturedLimit)
+                                {
+                                        <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
+                                }
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="model">Modelo</label>
-                        <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="model">Modelo</label>
+                                <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
+                                <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="dimensions">Dimensiones</label>
-                        <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="dimensions">Dimensiones</label>
+                                <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
+                                <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="surfacePerBox">Superficie por Caja</label>
-                        <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="surfacePerBox">Superficie por Caja</label>
+                                <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
+                                <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="requiresUnderlay">Requiere Manta</label>
-                        <InputCheckbox id="requiresUnderlay" @bind-Value="editingProduct.RequiresUnderlay" />
-                    </div>
-                </div>
+                            <div class="form-group form-check">
+                                <InputCheckbox id="requiresUnderlay" class="form-check-input" @bind-Value="editingProduct.RequiresUnderlay" />
+                                <label for="requiresUnderlay" class="form-check-label">Requiere Manta</label>
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="pricePerSquareMeter">Precio por m²</label>
-                        <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
-                    </div>
-                    <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
-                </div>
+                            <div class="form-group">
+                                <label for="pricePerSquareMeter">Precio por m²</label>
+                                <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
+                                <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="technicalSheet">Ficha Técnica</label>
-                        <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label for="technicalSheet">Ficha Técnica</label>
+                                <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
+                            </div>
+                            
+                            <br/>
 
-                <div class="form-group">
-                    <div class="error-text">
-                        <label>Imagen:</label>
-                        <InputFile OnChange="OnFileSelected" accept="image/*" />
-                    @if (!string.IsNullOrEmpty(Image))
-                    {
-                        <div>
-                            <img src="@Image" alt="Vista previa" style="max-width: 200px; max-height: 200px;" />
-                        </div>
-                    }
-                </div>
-                </div>
-                <div class="form-group">
-                    <div class="error-text">
-                        <label for="category">Categoría</label>
-                        <select id="category" class="form-control" @bind="editingProduct.IdCategory">
-                            <option  value="">Selecciona una categoría</option>
-                            @foreach (var category in categories)
+                            <div class="form-group">
+                                <label>Imagen:</label>
+                                <InputFile OnChange="OnFileSelected" accept="image/*" />
+                                @if (!string.IsNullOrEmpty(Image))
+                                {
+                                        <div class="mt-2">
+                                            <img src="@Image" alt="Vista previa" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                        </div>
+                                }
+                            </div>
+
+                                <br/>
+
+                            <div class="form-group">
+                                <label for="category">Categoría</label>
+                                <select id="category" class="form-control" @bind="editingProduct.IdCategory">
+                                    <option value="">Selecciona una categoría</option>
+                                    @foreach (var category in categories)
+                                    {
+                                            <option value="@category.IdCategory">@category.Name</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
+                            </div>
+
+                            @if (isLoading)
                             {
-                                <option value="@category.IdCategory">@category.Name</option>
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Cargando...</span>
+                                    </div>
                             }
-                        </select>
+
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                    <div class="alert alert-success mt-3">@successMessage</div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                    <div class="alert alert-danger mt-3">@errorMessage</div>
+                            }
+                        </EditForm>
                     </div>
-                    <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
-                </div>
-                @if (isLoading)
-                {
-                    <div class="spinner">
-                        <svg viewBox="25 25 50 50">
-                            <circle r="20" cy="50" cx="50"></circle>
-                        </svg>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancelar</button>
                     </div>
-                }
-
-                @if (!string.IsNullOrEmpty(successMessage))
-                {
-                    <div class="alert alert-success">@successMessage</div>
-                }
-
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger">@errorMessage</div>
-                }
-
-                <div class="container-buttons">
-                    <button type="submit" class="btn btn-primary" disabled="@(!AreRequiredFieldsValid)">Guardar</button>
-                    <button type="button" @onclick="CancelEdit" class="btn btn-secondary">Cancelar</button>
                 </div>
-            </EditForm>
+            </div>
         </div>
     }
+
+
     
     <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
@@ -298,6 +300,7 @@
         </table>
     }
 </div>
+
 @code {
     private List<ProductDto> products = new List<ProductDto>();
     private List<ProductDto> filteredProducts = new List<ProductDto>();
