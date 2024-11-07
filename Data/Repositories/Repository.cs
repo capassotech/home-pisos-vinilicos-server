@@ -87,7 +87,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         }
 
 
-        public virtual async Task<bool> Insert(T entity, Stream? imageStream = null)
+        public virtual async Task<bool> Insert(T entity, List<Stream>? imageStreams = null)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         }
 
 
-        public virtual async Task<bool> Update(T entity, Stream? imageStream = null)
+        public virtual async Task<bool> Update(T entity, List<Stream>? imageStreams = null)
         {
             try
             {

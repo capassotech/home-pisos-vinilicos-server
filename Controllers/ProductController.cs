@@ -30,12 +30,16 @@ namespace home_pisos_vinilicos.Controllers
         }
 
         [HttpPost("new")]
-        public async Task<ActionResult<ProductDto>> SaveProduct([FromForm] ProductDto productDto, IFormFile? productImage)
+        public async Task<ActionResult<ProductDto>> SaveProduct([FromForm] ProductDto productDto, List<IFormFile> productImages)
         {
             try
             {
-                using var imageStream = productImage?.OpenReadStream();
-                var savedProduct = await _productService.SaveAsync(productDto, imageStream);
+                var imageStreams = new List<Stream>();
+                foreach (var image in productImages)
+                {
+                    imageStreams.Add(image.OpenReadStream());
+                }
+                var savedProduct = await _productService.SaveAsync(productDto, imageStreams);
                 return CreatedAtAction(nameof(GetProductById), new { id = savedProduct.IdProduct }, savedProduct);
             }
             catch (InvalidOperationException ex)
@@ -71,7 +75,7 @@ namespace home_pisos_vinilicos.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<ActionResult<ProductDto>> UpdateProductById(string id, [FromForm] ProductDto productDto, IFormFile? productImage)
+        public async Task<ActionResult<ProductDto>> UpdateProductById(string id, [FromForm] ProductDto productDto, List<IFormFile> productImages)
         {
             if (id != productDto.IdProduct)
             {
@@ -80,8 +84,12 @@ namespace home_pisos_vinilicos.Controllers
 
             try
             {
-                using var imageStream = productImage?.OpenReadStream();
-                var updatedProduct = await _productService.UpdateAsync(productDto, imageStream);
+                var imageStreams = new List<Stream>();
+                foreach (var image in productImages)
+                {
+                    imageStreams.Add(image.OpenReadStream());
+                }
+                var updatedProduct = await _productService.UpdateAsync(productDto, imageStreams);
                 return Ok(updatedProduct);
             }
             catch (InvalidOperationException ex)

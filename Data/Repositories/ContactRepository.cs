@@ -11,7 +11,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
         }
 
-        public override async Task<bool> Insert(Contact newContact, Stream? imageStream = null)
+        public override async Task<bool> Insert(Contact newContact, List<Stream>? imageStreams = null)
         {
             try
             {
@@ -23,7 +23,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        public override async Task<bool> Update(Contact updateContact, Stream? imageStream = null)
+        public override async Task<bool> Update(Contact updateContact, List<Stream>? imageStreams = null)
         {
             try
             {
