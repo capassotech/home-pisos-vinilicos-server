@@ -164,14 +164,13 @@
                             </div>
 
 
-                                <br/>
+                            <br/>
 
                             <div class="form-group">
                                 <label for="category">Categoría</label>
-                                @if (categories != null && categories.Count != 0)
+                                @if (categories != null && categories.Count > 0)
                                 {
                                     <select id="category" class="form-control" @bind="editingProduct.IdCategory">
-                                        <option value="">Selecciona una categoría</option>
                                         @foreach (var category in categories)
                                         {
                                             <option value="@category.IdCategory">@category.Name</option>
@@ -338,6 +337,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadProducts();
+        await LoadCategories();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
         //availableColors = await LoadColors();
         CalculateTotalPages();
@@ -418,8 +418,10 @@
         errorMessage = "";
     }
 
-    protected void StartEditProduct(ProductDto product)
+    protected async Task StartEditProduct(ProductDto product)
     {
+        await LoadCategories();
+
         if (string.IsNullOrEmpty(product.IdProduct))
         {
             Console.WriteLine("Error: El producto no tiene un IdProduct válido.");
@@ -442,17 +444,26 @@
                 TechnicalSheet = product.TechnicalSheet,
                 IsFeatured = product.IsFeatured,
                 RequiresUnderlay = product.RequiresUnderlay,
-                ImageUrls = product.ImageUrls ?? new List<string>()
+                ImageUrls = product.ImageUrls ?? new List<string>(),
+                IdCategory = product.IdCategory
             };
 
         Images = product.ImageUrls ?? new List<string>();
         isNewProduct = false;
         isModalOpen = true;
+        StateHasChanged();
         successMessage = "";
         errorMessage = "";
     }
     private List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
     private List<string> Images = new List<string>();
+    private List<CategoryDto> Categories = new List<CategoryDto>();
+
+    private async Task LoadCategories()
+    {
+        categories = await categoryService.GetAllAsync();
+        StateHasChanged(); 
+    }
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
