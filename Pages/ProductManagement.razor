@@ -380,8 +380,7 @@
                     RequiresUnderlay = p.RequiresUnderlay,
                     PricePerSquareMeter = p.PricePerSquareMeter,
                     TechnicalSheet = p.TechnicalSheet,
-                    ImageUrl = p.ImageUrl,
-                    Category = p.Category
+                    ImageUrls = p.ImageUrls
                 }).ToList();
 
             filteredProducts = products;
@@ -409,7 +408,8 @@
                 SurfacePerBox = 0,
                 PricePerSquareMeter = 0,
                 TechnicalSheet = "",
-                ImageUrl = ""
+                ImageUrls = new List<string>()
+          
             };
 
         isNewProduct = true;

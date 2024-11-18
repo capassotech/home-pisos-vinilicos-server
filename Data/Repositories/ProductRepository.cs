@@ -221,19 +221,24 @@ namespace home_pisos_vinilicos.Data.Repositories
             if (product != null)
             {
                 product.IdProduct = id;
-                if (string.IsNullOrEmpty(product.ImageUrl))
+
+                // Intentar obtener la lista de URLs en lugar de un solo string
+                var imageUrls = await _firebaseClient
+                    .Child("Product")
+                    .Child(id)
+                    .Child("ImageUrl")
+                    .OnceAsync<string>();
+
+                // Si se obtuvieron URLs, mapearlas a una lista de strings
+                if (imageUrls != null && imageUrls.Any())
                 {
-                    var imageUrl = await _firebaseClient
-                        .Child("Product")
-                        .Child(id)
-                        .Child("ImageUrl")
-                        .OnceSingleAsync<string>();
-                    product.ImageUrl = imageUrl;
+                    product.ImageUrls = imageUrls.Select(i => i.Object).ToList();
                 }
             }
 
             return product;
         }
+
 
         private async Task<Category?> GetCategoryById(string? Idcategory)
         {
@@ -268,20 +273,33 @@ namespace home_pisos_vinilicos.Data.Repositories
 
         private async Task<List<Product>> GetAllProducts()
         {
-            var products = await _firebaseClient.Child("Product").OnceAsync<Product>();
+            var productsData = await _firebaseClient.Child("Product").OnceAsync<Product>();
 
-            return products.Select(p =>
+            var products = new List<Product>();
+
+            foreach (var p in productsData)
             {
                 var product = p.Object;
                 product.IdProduct = p.Key;
 
-                if (p.Object.ImageUrl != null)
+                // Obtener ImageUrls como una lista de strings
+                var imageUrlsData = await _firebaseClient
+                    .Child("Product")
+                    .Child(p.Key)
+                    .Child("ImageUrl")
+                    .OnceAsync<string>();
+
+                if (imageUrlsData != null && imageUrlsData.Any())
                 {
-                    product.ImageUrl = p.Object.ImageUrl;
+                    product.ImageUrls = imageUrlsData.Select(i => i.Object).ToList();
                 }
-                return product;
-            }).ToList();
+
+                products.Add(product);
+            }
+
+            return products;
         }
+
 
         private async Task<Dictionary<string, Category>> GetCategoryDictionary()
         {
