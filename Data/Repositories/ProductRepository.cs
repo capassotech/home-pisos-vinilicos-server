@@ -4,6 +4,9 @@ using Firebase.Storage;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
 using home_pisos_vinilicos_admin.Domain.Entities;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -23,16 +26,123 @@ namespace home_pisos_vinilicos.Data.Repositories
             });
         }
 
+        public async Task<(bool Success, string Url)> UploadProductImageAsync(Stream imageStream, string idProduct, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var imagePath = $"Product/{idProduct}/{Guid.NewGuid()}.jpg";
+
+                await RetryHelper.ExecuteWithRetry(async () =>
+                {
+                    await _firebaseStorage.Child(imagePath).PutAsync(imageStream, cancellationToken);
+                }, maxRetries: 3);
+
+                var imageUrl = await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    throw new Exception("No se pudo obtener la URL de la imagen.");
+                }
+
+                return (true, imageUrl);
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("La carga de la imagen se canceló debido a que excedió el tiempo límite.");
+                return (false, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al subir imagen: {ex.Message}");
+                return (false, string.Empty);
+            }
+        }
+
+        public async Task<List<string>> UploadProductImagesAsync(List<Stream> imageStreams, string idProduct, CancellationToken cancellationToken = default)
+        {
+            var imageUrls = new List<string>();
+
+            var tasks = imageStreams.Select(stream => UploadProductImageAsync(stream, idProduct, cancellationToken));
+            var results = await Task.WhenAll(tasks);
+
+            foreach (var result in results)
+            {
+                if (result.Success)
+                {
+                    imageUrls.Add(result.Url);
+                }
+            }
+
+            return imageUrls;
+        }
+
+        public override async Task<bool> Insert(Product newProduct, List<Stream> imageStreams)
+        {
+            try
+            {
+                // Insertar producto sin imágenes primero
+                var firebaseResult = await _firebaseClient
+                    .Child("Product")
+                    .PostAsync(newProduct);
+
+                newProduct.IdProduct = firebaseResult.Key;
+
+                // Subir las imágenes solo si se pasaron
+                if (imageStreams != null && imageStreams.Any())
+                {
+                    // Subir imágenes
+                    var imageUrls = await UploadProductImagesAsync(imageStreams, newProduct.IdProduct);
+
+                    // Asignar las URLs de las imágenes al producto
+                    newProduct.ImageUrls = imageUrls;
+
+                    // Actualizar producto con las URLs de las imágenes en Firebase
+                    await _firebaseClient
+                        .Child("Product")
+                        .Child(newProduct.IdProduct)
+                        .PutAsync(newProduct);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al insertar producto: {ex.Message}");
+                return false;
+            }
+        }
+
+
         public async Task<string> UploadProductImageAsync(Stream imageStream, string idProduct)
         {
             try
             {
                 var imagePath = $"products/{idProduct}/{Guid.NewGuid()}.jpg";
 
-                // Añadir un límite de tiempo para la carga
-                var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                // Aumentar el tiempo de espera a 15 minutos
+                var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(15));
 
-                await _firebaseStorage.Child(imagePath).PutAsync(imageStream, cancellationTokenSource.Token);
+                // Comprimir la imagen antes de cargarla
+                using (var compressedImageStream = new MemoryStream())
+                {
+                    await CompressImage(imageStream, compressedImageStream, 80); // Calidad de compresión del 80%
+                    compressedImageStream.Position = 0;
+
+                    // Implementar carga por fragmentos
+                    const int chunkSize = 1 * 1024 * 1024; // 1 MB por fragmento
+                    var buffer = new byte[chunkSize];
+                    int bytesRead;
+                    long position = 0;
+
+                    while ((bytesRead = await compressedImageStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        var chunk = new MemoryStream(buffer, 0, bytesRead);
+                        await _firebaseStorage
+                            .Child(imagePath)
+                            .PutAsync(chunk, cancellationTokenSource.Token);
+                        position += bytesRead;
+                    }
+                }
 
                 var imageUrl = await _firebaseStorage.Child(imagePath).GetDownloadUrlAsync();
 
@@ -54,72 +164,30 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return string.Empty;
             }
         }
-
-        public override async Task<bool> Insert(Product newProduct, List<Stream> imageStreams)
+        private async Task CompressImage(Stream input, Stream output, int quality)
         {
-            try
+            using (var image = await SixLabors.ImageSharp.Image.LoadAsync(input))
             {
-                var firebaseResult = await _firebaseClient
-                    .Child("Product")
-                    .PostAsync(newProduct);
-
-                newProduct.IdProduct = firebaseResult.Key;
-
-                if (imageStreams != null && imageStreams.Any())
+                image.Mutate(x => x.Resize(new ResizeOptions
                 {
-                    var imageUrls = await UploadProductImagesAsync(imageStreams, newProduct.IdProduct);
-
-                    if (imageUrls.Any())
-                    {
-                        newProduct.ImageUrls = imageUrls;
-
-                        await _firebaseClient
-                            .Child("Product")
-                            .Child(newProduct.IdProduct)
-                            .PutAsync(newProduct);
-                    }
-                }
-
-                // ... (resto del código sin cambios)
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al insertar producto: {ex.Message}");
-                return false;
+                    Size = new Size(800, 0), // Ancho máximo de 800px, altura proporcional
+                    Mode = ResizeMode.Max
+                }));
+                await image.SaveAsJpegAsync(output, new JpegEncoder { Quality = quality });
             }
         }
 
-        public async Task<List<string>> UploadProductImagesAsync(List<Stream> imageStreams, string idProduct)
-        {
-            var imageUrls = new List<string>();
-
-            foreach (var imageStream in imageStreams)
-            {
-                string imageUrl = await UploadProductImageAsync(imageStream, idProduct);
-                if (!string.IsNullOrEmpty(imageUrl))
-                {
-                    imageUrls.Add(imageUrl);
-                }
-            }
-
-            return imageUrls;
-        }
 
         public override async Task<bool> Update(Product updateProduct, List<Stream> imageStreams)
         {
             try
             {
-                // Obtener el producto existente
                 var existingProduct = await GetByIdWithCategory(updateProduct.IdProduct);
-
                 if (existingProduct == null)
                 {
                     throw new Exception("Producto no encontrado");
                 }
 
-                // Eliminar las imágenes que ya no están en la lista actualizada
                 if (existingProduct.ImageUrls != null)
                 {
                     foreach (var url in existingProduct.ImageUrls)
@@ -131,18 +199,20 @@ namespace home_pisos_vinilicos.Data.Repositories
                     }
                 }
 
-                // Subir nuevas imágenes si las hay
                 if (imageStreams != null && imageStreams.Any())
                 {
                     var newImageUrls = await UploadProductImagesAsync(imageStreams, updateProduct.IdProduct);
                     updateProduct.ImageUrls.AddRange(newImageUrls);
                 }
 
-                // Actualizar el producto en Firebase
-                await _firebaseClient
-                    .Child("Product")
-                    .Child(updateProduct.IdProduct)
-                    .PutAsync(updateProduct);
+                // Implementar reintentos para la actualización en Firebase
+                await RetryHelper.ExecuteWithRetry(async () =>
+                {
+                    await _firebaseClient
+                        .Child("Product")
+                        .Child(updateProduct.IdProduct)
+                        .PutAsync(updateProduct);
+                }, maxRetries: 3);
 
                 return true;
             }
@@ -158,29 +228,14 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Crear la URI a partir de la URL proporcionada
                 var uri = new Uri(imageUrl);
-
-                // Extraer el path desde la URL utilizando "indexOf" para buscar "/o/"
                 int index = uri.AbsolutePath.IndexOf("/o/");
-                if (index == -1)
-                {
-                    Console.WriteLine("Error: El path de la URL no es válido.");
-                    return;
-                }
+                if (index == -1) return;
 
-                // Obtener el path después de "/o/" y decodificarlo
                 string path = Uri.UnescapeDataString(uri.AbsolutePath.Substring(index + 3));
-
-                // Verificar si el path es válido
                 if (!string.IsNullOrEmpty(path))
                 {
                     await _firebaseStorage.Child(path).DeleteAsync();
-                    Console.WriteLine("Imagen eliminada correctamente.");
-                }
-                else
-                {
-                    Console.WriteLine("Error: El path es nulo o vacío.");
                 }
             }
             catch (Exception ex)
@@ -233,23 +288,20 @@ namespace home_pisos_vinilicos.Data.Repositories
             {
                 product.IdProduct = id;
 
-                // Intentar obtener la lista de URLs en lugar de un solo string
-                var imageUrls = await _firebaseClient
+                var imageUrlsData = await _firebaseClient
                     .Child("Product")
                     .Child(id)
-                    .Child("ImageUrl")
+                    .Child("ImageUrls")
                     .OnceAsync<string>();
 
-                // Si se obtuvieron URLs, mapearlas a una lista de strings
-                if (imageUrls != null && imageUrls.Any())
+                if (imageUrlsData != null && imageUrlsData.Any())
                 {
-                    product.ImageUrls = imageUrls.Select(i => i.Object).ToList();
+                    product.ImageUrls = imageUrlsData.Select(i => i.Object).ToList();
                 }
             }
 
             return product;
         }
-
 
         private async Task<Category?> GetCategoryById(string? Idcategory)
         {
@@ -327,6 +379,30 @@ namespace home_pisos_vinilicos.Data.Repositories
                     product.Category = categoryDictionary[product.IdCategory]; // Asigna la categoría al producto
                 }
             }
+        }
+
+        public static class RetryHelper
+        {
+            public static async Task ExecuteWithRetry(Func<Task> action, int maxRetries = 3, int delayMs = 1000)
+            {
+                for (int i = 0; i < maxRetries; i++)
+                {
+                    try
+                    {
+                        await action();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (i == maxRetries - 1) throw;
+                        Console.WriteLine($"Intento {i + 1} falló: {ex.Message}. Reintentando...");
+                        await Task.Delay(delayMs);
+                    }
+                }
+            }
+
+
+
         }
     }
 }

@@ -74,8 +74,7 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "VARCHAR(50)")]
         public String TechnicalSheet { get; set; }
 
-        [Column(TypeName = "VARCHAR(50)")]
-        public string? ImageUrl { get; set; }
+        
         public List<string> ImageUrls { get; set; } = new List<string>();
 
         [Required]

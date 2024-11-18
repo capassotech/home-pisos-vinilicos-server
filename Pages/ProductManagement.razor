@@ -324,7 +324,7 @@
     private bool isNewProduct = true;
     private bool isModalOpen = false;
     private int currentPage = 1;
-    private int pageSize = 5; 
+    private int pageSize = 5;
     private int totalPages = 1;
     private string successMessage = "";
     private string errorMessage = "";
@@ -409,7 +409,7 @@
                 PricePerSquareMeter = 0,
                 TechnicalSheet = "",
                 ImageUrls = new List<string>()
-          
+
             };
 
         isNewProduct = true;
@@ -462,7 +462,7 @@
     private async Task LoadCategories()
     {
         categories = await categoryService.GetAllAsync();
-        StateHasChanged(); 
+        StateHasChanged();
     }
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
@@ -485,8 +485,11 @@
             try
             {
                 var stream = file.OpenReadStream();
-                var fileName = file.Name;
-                var uploadImageUrl = await fs.UploadProductImageAsync(stream, fileName);
+
+                var uniqueFileName = $"{Guid.NewGuid()}.jpg";
+
+                var uploadImageUrl = await fs.UploadProductImageAsync(stream, uniqueFileName);
+
                 if (!string.IsNullOrEmpty(uploadImageUrl))
                 {
                     uploadedUrls.Add(uploadImageUrl);
@@ -495,31 +498,45 @@
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al cargar la imagen: {ex.Message}");
-                throw;
             }
         }
 
         return uploadedUrls;
     }
 
+
     private async Task PreviewImage(IBrowserFile file)
     {
-        var buffers = new byte[file.Size];
-        await file.OpenReadStream().ReadAsync(buffers);
-        string imageType = file.ContentType;
-        var imageUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
-        Images.Add(imageUrl);
+        try
+        {
+            var stream = file.OpenReadStream();
+            var uniqueFileName = $"{Guid.NewGuid()}.jpg";
+            var uploadImageUrl = await fs.UploadProductImageAsync(stream, uniqueFileName);
+
+            if (!string.IsNullOrEmpty(uploadImageUrl))
+            {
+                Images.Add(uploadImageUrl);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al previsualizar la imagen: {ex.Message}");
+        }
+
         StateHasChanged();
     }
+
 
     private async Task SaveImages()
     {
         if (selectedFiles.Any())
         {
             var uploadedUrls = await UploadImages(selectedFiles);
+
             editingProduct.ImageUrls.AddRange(uploadedUrls);
         }
     }
+
 
     private async Task SaveProduct()
     {

@@ -44,7 +44,6 @@ namespace home_pisos_vinilicos.Application.DTOs
         public decimal PricePerSquareMeter { get; set; }
 
         public string TechnicalSheet { get; set; }
-        public string? ImageUrl { get; set; }
         public List<string> ImageUrls { get; set; } = new List<string>();
         public string IdCategory { get; set; }
         public CategoryDto? Category { get; set; }
