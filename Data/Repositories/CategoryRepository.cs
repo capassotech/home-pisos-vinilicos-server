@@ -79,7 +79,7 @@ namespace home_pisos_vinilicos.Data.Repositories
             return category;
         }
 
-        private async Task<Category?> GetCategoryById(string id)
+        public async Task<Category?> GetCategoryById(string id)
         {
             return await _firebaseClient
                 .Child("Category")

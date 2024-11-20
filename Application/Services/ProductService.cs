@@ -31,11 +31,21 @@ namespace home_pisos_vinilicos.Application.Services
             var product = await _productRepository.GetByIdWithCategory(id);
             if (product == null) return null;
 
+            Console.WriteLine($"Product IdCategory: {product.IdCategory}");
+
             if (!string.IsNullOrEmpty(product.IdCategory))
             {
-                product.Category = await _categoryRepository.GetById(product.IdCategory);
+                Console.WriteLine($"Fetching category for IdCategory: {product.IdCategory}");
+                product.Category = await _categoryRepository.GetCategoryById(product.IdCategory);
             }
-            return _mapper.Map<ProductDto>(product);
+            else
+            {
+                Console.WriteLine("IdCategory is null or empty");
+            }
+
+            var productDto = _mapper.Map<ProductDto>(product);
+            Console.WriteLine($"Mapped ProductDto IdCategory: {productDto.IdCategory}");
+            return productDto;
         }
 
         public async Task<bool> DeleteAsync(string idProduct)
