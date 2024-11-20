@@ -438,9 +438,6 @@
             return;
         }
 
-        Console.WriteLine($"Input Product IdCategory: {fullProduct.IdCategory}");
-        Console.WriteLine($"Input Product Category: {fullProduct.Category?.IdCategory} - {fullProduct.Category?.Name}");
-
         editingProduct = new ProductDto
             {
                 IdProduct = fullProduct.IdProduct,
@@ -467,12 +464,6 @@
                     }
                     : null
             };
-
-        Console.WriteLine($"Editing Product IdCategory: {editingProduct.IdCategory}");
-        foreach (var category in categories)
-        {
-            Console.WriteLine($"Category: {category.IdCategory} - {category.Name}");
-        }
 
         Images = fullProduct.ImageUrls ?? new List<string>();
         isNewProduct = false;
