@@ -84,17 +84,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                     }
                 }
 
-                if (newProduct.Colors != null && newProduct.Colors.Any())
-                {
-                    foreach (var color in newProduct.Colors)
-                    {
-                        await _firebaseClient
-                            .Child("Product")
-                            .Child(newProduct.IdProduct)
-                            .Child("Colors")
-                            .PostAsync(color);
-                    }
-                }
                 return true;
             }
             catch (Exception ex)
@@ -153,25 +142,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                     .Child(updateProduct.IdProduct)
                     .PutAsync(updateProduct);
 
-                if (updateProduct.Colors != null && updateProduct.Colors.Any())
-                {
-                    // Borra la lista actual de colores en Firebase para evitar duplicados o inconsistencias
-                    await _firebaseClient
-                        .Child("Product")
-                        .Child(updateProduct.IdProduct)
-                        .Child("Colors")
-                        .DeleteAsync();
-
-                    // Inserta los nuevos colores en Firebase
-                    foreach (var color in updateProduct.Colors)
-                    {
-                        await _firebaseClient
-                            .Child("Product")
-                            .Child(updateProduct.IdProduct)
-                            .Child("Colors")
-                            .PostAsync(color);
-                    }
-                }
                 return true;
             }
             catch (Exception ex)
