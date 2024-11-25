@@ -70,7 +70,6 @@ namespace home_pisos_vinilicos.Application.Services
             await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
-            product.CreatedDate = DateTime.UtcNow;
 
             var success = await _productRepository.Insert(product, imageStreams);
 
@@ -122,7 +121,6 @@ namespace home_pisos_vinilicos.Application.Services
         {
             var allProducts = await _productRepository.GetAll();
             return allProducts
-                .OrderByDescending(p => p.CreatedDate)
                 .Where(p => p.IsFeatured)
                 .ToList();
         }
@@ -137,7 +135,6 @@ namespace home_pisos_vinilicos.Application.Services
             var allProducts = await _productRepository.GetAll();
 
             return allProducts
-                .OrderByDescending(p => p.CreatedDate)
                 .Where(p => !p.IsFeatured)
                 .Take(6 - currentFeaturedCount)
                 .ToList();

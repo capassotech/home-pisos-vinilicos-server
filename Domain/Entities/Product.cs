@@ -11,11 +11,9 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "VARCHAR(100)")]
         public string IdProduct { get; set; }
 
-
         [Required]
         [Column(TypeName = "VARCHAR(100)")]
         public string Name { get; set; }
-
 
         [Required]
         [Column(TypeName = "DECIMAL(18, 2)")]
@@ -25,15 +23,11 @@ namespace home_pisos_vinilicos_admin.Domain.Entities
         [Column(TypeName = "VARCHAR(100)")]
         public String Description { get; set; }
 
-
         [Column(TypeName = "VARCHAR(100)")]
         public string Size { get; set; }
 
         [Column(TypeName = "BIT")]
         public bool IsFeatured { get; set; }
-
-        [Column(TypeName = "Date")]
-        public DateTime CreatedDate { get; set; }
 
         [Column(TypeName = "VARCHAR(50)")]
         public List<string> ImageUrls { get; set; } = new List<string>();

@@ -20,7 +20,6 @@ namespace home_pisos_vinilicos.Application.DTOs
         public string Size { get; set; }
         public string Cod_Art { get; set; }
         public string PriceType { get; set; }
-
         public bool IsFeatured { get; set; }
         public List<string> ImageUrls { get; set; } = new List<string>();
         public string IdCategory { get; set; }
