@@ -196,22 +196,13 @@
         {
             var featuredCategoriesCount = GetFeaturedCategoriesCount();
 
-            if (category.IsFeatured)
+            if (!category.IsFeatured && featuredCategoriesCount >= MaxFeaturedCategories)
             {
-                category.IsFeatured = false;
-                ShowAlert("La categoría ha sido removida de destacados.");
-            }
-            else
-            {
-                if (featuredCategoriesCount >= MaxFeaturedCategories)
-                {
-                    ShowAlert("Ya hay 2 categorías destacadas.");
-                    return;
-                }
-                category.IsFeatured = true;
-                ShowAlert("La categoría ha sido añadida a destacados.");
+                ShowAlert("Ya hay 2 categorías destacadas.");
+                return;
             }
 
+            category.IsFeatured = !category.IsFeatured;
             await _categoryService.UpdateAsync(category);
             await LoadCategories();
         }
@@ -220,6 +211,7 @@
             ShowAlert($"Error al actualizar la categoría: {ex.Message}");
         }
     }
+
 
     private void ShowEditCategoryModal(Category category)
     {
@@ -361,19 +353,23 @@
             Console.WriteLine($"Error al destacar la categoría: {ex.Message}");
         }
     }
-    private async Task OnFeaturedChange()
+    private void OnFeaturedChange(ChangeEventArgs e)
     {
-        var featuredCategoriesCount = GetFeaturedCategoriesCount();
+        var isFeatured = (bool)e.Value;
+        var featuredCategoriesCount = categories.Count(c => c.IsFeatured);
 
-        if (featuredCategoriesCount >= MaxFeaturedCategories && categoryModel.IsFeatured)
+        if (isFeatured && featuredCategoriesCount >= MaxFeaturedCategories)
         {
             errorFeaturedLimit = true;
+            ShowAlert("No se pueden destacar más de 2 categorías.");
             categoryModel.IsFeatured = false;
         }
         else
         {
             errorFeaturedLimit = false;
+            categoryModel.IsFeatured = isFeatured;
         }
     }
+
 }
 
