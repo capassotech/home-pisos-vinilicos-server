@@ -18,33 +18,9 @@ namespace home_pisos_vinilicos.Application.DTOs
 
         [Required(ErrorMessage = "La descripción es requerida.")]
         public string Size { get; set; }
-
-        public List<ColorDto>? Colors { get; set; } = new List<ColorDto>();
-
-        [Required(ErrorMessage = "La cantidad es requerida.")]
-        [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos uno.")]
-        public int Quantity { get; set; }
-
+        public string Cod_Art { get; set; }
+        public string PriceType { get; set; }
         public bool IsFeatured { get; set; }
-
-        [Required(ErrorMessage = "El modelo es requerido.")]
-        public string Model { get; set; }
-
-        [Required(ErrorMessage = "Las dimensiones son requeridas.")]
-        public string Dimensions { get; set; }
-
-        [Required(ErrorMessage = "La superficie por caja es requerida.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "La superficie por caja debe ser mayor que cero.")]
-        public decimal SurfacePerBox { get; set; }
-
-        public bool RequiresUnderlay { get; set; }
-
-        [Required(ErrorMessage = "El precio por m² es requerido.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "El precio por m² debe ser mayor que cero.")]
-        public decimal PricePerSquareMeter { get; set; }
-
-        public string TechnicalSheet { get; set; }
-        public string? ImageUrl { get; set; }
         public List<string> ImageUrls { get; set; } = new List<string>();
         public string IdCategory { get; set; }
         public CategoryDto? Category { get; set; }

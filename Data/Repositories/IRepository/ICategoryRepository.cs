@@ -10,5 +10,6 @@ namespace home_pisos_vinilicos.Data.Repositories.IRepository
         Task<List<Category>> GetAll(Expression<Func<Category, bool>>? filter = null);
         Task<Category?> GetByIdWithSubCategories(string id);
         Task<List<Category>> GetAllWithSubCategories();
+        Task<Category?> GetCategoryById(string id);
     }
 }
