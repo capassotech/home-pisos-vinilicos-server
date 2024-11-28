@@ -83,14 +83,6 @@
                             
                             <br/>
 
-                            <div class="form-group">
-                                <label for="quantity">Cantidad</label>
-                                <InputNumber id="quantity" class="form-control" @bind-Value="editingProduct.Quantity" />
-                                <ValidationMessage For="@(() => editingProduct.Quantity)" class="text-danger" />
-                            </div>
-                            
-                            <br/>
-
                             <div class="form-group form-check">
                                 <InputCheckbox id="isFeatured" class="form-check-input" @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
                                 <label for="isFeatured" class="form-check-label">Destacar producto</label>
@@ -99,53 +91,22 @@
                                         <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
                                 }
                             </div>
-                            
                             <br/>
 
                             <div class="form-group">
-                                <label for="model">Modelo</label>
-                                <InputText id="model" class="form-control" @bind-Value="editingProduct.Model" />
-                                <ValidationMessage For="@(() => editingProduct.Model)" class="text-danger" />
+                                <label for="priceType">Tipo de Precio</label>
+                                <InputText id="priceType" class="form-control" @bind-Value="editingProduct.PriceType" />
+                                <ValidationMessage For="@(() => editingProduct.PriceType)" class="text-danger" />
                             </div>
-                            
+
                             <br/>
 
                             <div class="form-group">
-                                <label for="dimensions">Dimensiones</label>
-                                <InputText id="dimensions" class="form-control" @bind-Value="editingProduct.Dimensions" />
-                                <ValidationMessage For="@(() => editingProduct.Dimensions)" class="text-danger" />
+                                <label for="cod_Art">Codigo de Articulo</label>
+                                <InputText id="cod_Art" class="form-control" @bind-Value="editingProduct.Cod_Art" />
+                                <ValidationMessage For="@(() => editingProduct.Cod_Art)" class="text-danger" />
                             </div>
-                            
-                            <br/>
 
-                            <div class="form-group">
-                                <label for="surfacePerBox">Superficie por Caja</label>
-                                <InputNumber id="surfacePerBox" class="form-control" @bind-Value="editingProduct.SurfacePerBox" step="0.01" />
-                                <ValidationMessage For="@(() => editingProduct.SurfacePerBox)" class="text-danger" />
-                            </div>
-                            
-                            <br/>
-
-                            <div class="form-group form-check">
-                                <InputCheckbox id="requiresUnderlay" class="form-check-input" @bind-Value="editingProduct.RequiresUnderlay" />
-                                <label for="requiresUnderlay" class="form-check-label">Requiere Manta</label>
-                            </div>
-                            
-                            <br/>
-
-                            <div class="form-group">
-                                <label for="pricePerSquareMeter">Precio por m²</label>
-                                <InputNumber id="pricePerSquareMeter" class="form-control" @bind-Value="editingProduct.PricePerSquareMeter" step="0.01" />
-                                <ValidationMessage For="@(() => editingProduct.PricePerSquareMeter)" class="text-danger" />
-                            </div>
-                            
-                            <br/>
-
-                            <div class="form-group">
-                                <label for="technicalSheet">Ficha Técnica</label>
-                                <InputTextArea id="technicalSheet" class="form-control" @bind-Value="editingProduct.TechnicalSheet" />
-                            </div>
-                            
                             <br/>
 
                             <div class="form-group">
@@ -164,11 +125,11 @@
                             </div>
 
 
-                                <br/>
+                            <br/>
 
                             <div class="form-group">
                                 <label for="category">Categoría</label>
-                                @if (categories != null && categories.Count != 0)
+                                @if (categories != null && categories.Any())
                                 {
                                     <select id="category" class="form-control" @bind="editingProduct.IdCategory">
                                         <option value="">Selecciona una categoría</option>
@@ -180,10 +141,10 @@
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-primary">Crear categoría</button>
+                                    <p>No hay categorías disponibles.</p>
                                 }
-                                <ValidationMessage For="@(() => editingProduct.IdCategory)" class="text-danger" />
                             </div>
+
 
                             @if (isLoading)
                             {
@@ -338,6 +299,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadProducts();
+        await LoadCategories();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
         //availableColors = await LoadColors();
         CalculateTotalPages();
@@ -350,12 +312,7 @@
             return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
                    editingProduct.Price > 0 &&
                    !string.IsNullOrWhiteSpace(editingProduct.Description) &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Size) &&
-                   editingProduct.Quantity > 0 &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Model) &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Dimensions) &&
-                   editingProduct.SurfacePerBox > 0 &&
-                   editingProduct.PricePerSquareMeter > 0;
+                   !string.IsNullOrWhiteSpace(editingProduct.Size);
         }
     }
 
@@ -371,16 +328,11 @@
                     Description = p.Description,
                     Price = p.Price,
                     Size = p.Size,
-                    Colors = p.Colors,
-                    Quantity = p.Quantity,
+                    Cod_Art = p.Cod_Art,
+                    PriceType = p.PriceType,
                     IsFeatured = p.IsFeatured,
-                    Model = p.Model,
-                    Dimensions = p.Dimensions,
-                    SurfacePerBox = p.SurfacePerBox,
-                    RequiresUnderlay = p.RequiresUnderlay,
-                    PricePerSquareMeter = p.PricePerSquareMeter,
-                    TechnicalSheet = p.TechnicalSheet,
-                    ImageUrls = p.ImageUrls
+                    ImageUrls = p.ImageUrls,
+                    Category = p.Category
                 }).ToList();
 
             filteredProducts = products;
@@ -401,13 +353,8 @@
                 Description = "",
                 Price = 0,
                 Size = "",
-                Colors = new List<ColorDto>(),
-                Quantity = 0,
-                Model = "",
-                Dimensions = "",
-                SurfacePerBox = 0,
-                PricePerSquareMeter = 0,
-                TechnicalSheet = "",
+                Cod_Art = "",
+                PriceType = "",
                 ImageUrls = new List<string>()
           
             };
@@ -417,42 +364,62 @@
         successMessage = "";
         errorMessage = "";
     }
-
-    protected void StartEditProduct(ProductDto product)
+    protected async Task StartEditProduct(ProductDto product)
     {
+        await LoadCategories();
+
         if (string.IsNullOrEmpty(product.IdProduct))
         {
             Console.WriteLine("Error: El producto no tiene un IdProduct válido.");
             return;
         }
 
+        // Obtener el producto completo de la base de datos
+        var fullProduct = await productService.GetByIdAsync(product.IdProduct);
+
+        if (fullProduct == null)
+        {
+            Console.WriteLine("Error: No se pudo obtener el producto completo de la base de datos.");
+            return;
+        }
+
         editingProduct = new ProductDto
             {
-                IdProduct = product.IdProduct,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Size = product.Size,
-                Colors = product.Colors,
-                Quantity = product.Quantity,
-                Model = product.Model,
-                Dimensions = product.Dimensions,
-                SurfacePerBox = product.SurfacePerBox,
-                PricePerSquareMeter = product.PricePerSquareMeter,
-                TechnicalSheet = product.TechnicalSheet,
-                IsFeatured = product.IsFeatured,
-                RequiresUnderlay = product.RequiresUnderlay,
-                ImageUrls = product.ImageUrls ?? new List<string>()
+                IdProduct = fullProduct.IdProduct,
+                Name = fullProduct.Name,
+                Description = fullProduct.Description,
+                Price = fullProduct.Price,
+                Size = fullProduct.Size,
+                IsFeatured = fullProduct.IsFeatured,
+                ImageUrls = fullProduct.ImageUrls ?? new List<string>(),
+                Cod_Art = fullProduct.Cod_Art,
+                PriceType = fullProduct.PriceType,
+                IdCategory = fullProduct.IdCategory,
+                Category = fullProduct.Category != null
+                    ? new CategoryDto
+                    {
+                        IdCategory = fullProduct.Category.IdCategory,
+                        Name = fullProduct.Category.Name
+                    }
+                    : null
             };
 
-        Images = product.ImageUrls ?? new List<string>();
+        Images = fullProduct.ImageUrls ?? new List<string>();
         isNewProduct = false;
         isModalOpen = true;
+        StateHasChanged();
         successMessage = "";
         errorMessage = "";
     }
     private List<IBrowserFile> selectedFiles = new List<IBrowserFile>();
     private List<string> Images = new List<string>();
+    private List<CategoryDto> Categories = new List<CategoryDto>();
+
+    private async Task LoadCategories()
+    {
+        categories = await categoryService.GetAllAsync();
+        StateHasChanged(); 
+    }
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -530,7 +497,6 @@
 
             if (isNewProduct)
             {
-                editingProduct.Colors = selectedColors.Select(id => new ColorDto { IdColor = id }).ToList();
                 var savedProduct = await productService.SaveAsync(editingProduct, imageStreams);
                 if (savedProduct != null)
                 {

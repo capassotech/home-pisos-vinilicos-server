@@ -33,9 +33,15 @@ namespace home_pisos_vinilicos.Application.Services
 
             if (!string.IsNullOrEmpty(product.IdCategory))
             {
-                product.Category = await _categoryRepository.GetById(product.IdCategory);
+                product.Category = await _categoryRepository.GetCategoryById(product.IdCategory);
             }
-            return _mapper.Map<ProductDto>(product);
+            else
+            {
+                Console.WriteLine("IdCategory is null or empty");
+            }
+
+            var productDto = _mapper.Map<ProductDto>(product);
+            return productDto;
         }
 
         public async Task<bool> DeleteAsync(string idProduct)
@@ -64,7 +70,6 @@ namespace home_pisos_vinilicos.Application.Services
             await EnsureFeaturedProductLimitNotExceeded(productDto);
 
             var product = _mapper.Map<Product>(productDto);
-            product.CreatedDate = DateTime.UtcNow;
 
             var success = await _productRepository.Insert(product, imageStreams);
 
@@ -116,7 +121,6 @@ namespace home_pisos_vinilicos.Application.Services
         {
             var allProducts = await _productRepository.GetAll();
             return allProducts
-                .OrderByDescending(p => p.CreatedDate)
                 .Where(p => p.IsFeatured)
                 .ToList();
         }
@@ -131,7 +135,6 @@ namespace home_pisos_vinilicos.Application.Services
             var allProducts = await _productRepository.GetAll();
 
             return allProducts
-                .OrderByDescending(p => p.CreatedDate)
                 .Where(p => !p.IsFeatured)
                 .Take(6 - currentFeaturedCount)
                 .ToList();
