@@ -164,6 +164,28 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
+        public async Task<bool> UpdateRangeAsync(IEnumerable<Product> products)
+        {
+            try
+            {
+                var tasks = products.Select(async product =>
+                {
+                    await _firebaseClient
+                        .Child("Product")
+                        .Child(product.IdProduct)
+                        .PutAsync(product);
+                });
+
+                await Task.WhenAll(tasks);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar múltiples productos: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<Product?> GetByIdWithCategory(string id)
         {
             var product = await GetProductById(id);

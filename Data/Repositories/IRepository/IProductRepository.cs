@@ -11,5 +11,6 @@ namespace home_pisos_vinilicos.Data.Repositories.IRepository
         Task<string> UploadProductImageAsync(Stream imageStream, string idProduct);
         Task<bool> Insert(Product newProduct, List<Stream> imageStreams);
         Task<bool> Update(Product updateProduct, List<Stream> imageStreams);
+        Task<bool> UpdateRangeAsync(IEnumerable<Product> products);
     }
 }
