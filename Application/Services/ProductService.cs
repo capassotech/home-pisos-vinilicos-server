@@ -84,6 +84,25 @@ namespace home_pisos_vinilicos.Application.Services
             return _mapper.Map<ProductDto>(savedProduct);
         }
 
+        public async Task<bool> UpdatePricesAsync(PriceUpdateDto updateDto)
+        {
+            var products = await _productRepository.GetAll(p => updateDto.CategoryIds.Contains(p.IdCategory));
+
+            foreach (var product in products)
+            {
+                if (updateDto.IsPercentage)
+                {
+                    product.Price *= (1 + (updateDto.UpdateFactor / 100));
+                }
+                else
+                {
+                    product.Price += updateDto.UpdateFactor;
+                }
+            }
+
+            return await _productRepository.UpdateRangeAsync(products);
+        }
+
         public async Task<List<ProductDto>> SearchAsync(string query)
         {
             Expression<Func<Product, bool>> filter = p =>
