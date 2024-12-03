@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using home_pisos_vinilicos.Application;
 using home_pisos_vinilicos.Application.Services;
 using home_pisos_vinilicos.Application.DTOs;
-using home_pisos_vinilicos.Domain.Entities;
 
 namespace home_pisos_vinilicos.Controllers
 {

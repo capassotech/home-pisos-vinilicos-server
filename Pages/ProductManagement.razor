@@ -301,7 +301,6 @@
         await LoadProducts();
         await LoadCategories();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
-        //availableColors = await LoadColors();
         CalculateTotalPages();
     }
 
@@ -563,38 +562,37 @@
     }
 
     protected async Task ToggleFeatured(ProductDto product)
-{
-    try
     {
-        var featuredProductsCount = GetFeaturedProductsCount();
+        try
+        {
+            var featuredProductsCount = GetFeaturedProductsCount();
 
-        if (product.IsFeatured)
-        {
-            product.IsFeatured = false;
-            await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
-            await LoadProducts();
-        }
-        else
-        {
-            if (featuredProductsCount < MaxFeaturedProducts)
+            if (product.IsFeatured)
             {
-                product.IsFeatured = true;
+                product.IsFeatured = false;
                 await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
                 await LoadProducts();
             }
             else
             {
-                ShowAlert("Ya hay 6 productos destacados.");
+                if (featuredProductsCount < MaxFeaturedProducts)
+                {
+                    product.IsFeatured = true;
+                    await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
+                    await LoadProducts();
+                }
+                else
+                {
+                    ShowAlert("Ya hay 6 productos destacados.");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al destacar el producto: {ex.Message}");
+            ShowAlert($"Error al destacar el producto: {ex.Message}");
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al destacar el producto: {ex.Message}");
-        ShowAlert($"Error al destacar el producto: {ex.Message}");
-    }
-}
-
 
     private int GetFeaturedProductsCount()
     {
@@ -653,8 +651,6 @@
 
     private void OnFeaturedChange()
     {
-        
-            Console.WriteLine("checked");
             if (featuredProducts.Count >= 6)
             {
                 editingProduct.IsFeatured = false;
@@ -667,5 +663,4 @@
                 editingProduct.IsFeatured = true;
             }
         }
-
 }
