@@ -164,6 +164,37 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
+        public async Task<bool> InsertRange(List<Product> newProducts)
+        {
+            try
+            {
+                var tasks = newProducts.Select(async product =>
+                {
+                    var firebaseResult = await _firebaseClient
+                        .Child("Product")
+                        .PostAsync(product);
+
+                    product.IdProduct = firebaseResult.Key;
+
+                    if (product.ImageUrls != null && product.ImageUrls.Any())
+                    {
+                        await _firebaseClient
+                            .Child("Product")
+                            .Child(product.IdProduct)
+                            .PutAsync(product);
+                    }
+                });
+
+                await Task.WhenAll(tasks);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al insertar múltiples productos: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<bool> UpdateRangeAsync(IEnumerable<Product> products)
         {
             try

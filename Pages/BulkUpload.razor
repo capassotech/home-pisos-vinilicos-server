@@ -1,0 +1,83 @@
+﻿@page "/bulk-upload"
+@using home_pisos_vinilicos.Application.Services
+@inject ProductService ProductService
+@inject IJSRuntime JSRuntime
+
+<h3>Carga Masiva de Productos</h3>
+
+<InputFile OnChange="@OnFileSelected" accept=".xlsx" />
+
+@if (selectedFile != null)
+{
+    <button class="btn btn-primary mt-3" @onclick="LoadFile">Cargar Productos</button>
+}
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(isSuccess ? "alert-success" : "alert-danger")">
+        @message
+    </div>
+}
+
+@code {
+    private bool isLoading = false;
+    private string message = string.Empty;
+    private bool isSuccess = false;
+    private IBrowserFile selectedFile;
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task LoadFile()
+    {
+        if (selectedFile == null)
+        {
+            message = "Por favor, seleccione un archivo primero.";
+            isSuccess = false;
+            return;
+        }
+
+        isLoading = true;
+        message = string.Empty;
+
+        try
+        {
+            using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10)) // 10MB max
+            {
+                var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                var result = await ProductService.BulkUploadProductsAsync(memoryStream);
+
+                if (result)
+                {
+                    isSuccess = true;
+                    message = "Carga masiva completada con éxito.";
+                }
+                else
+                {
+                    isSuccess = false;
+                    message = "Hubo un error durante la carga masiva.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            isSuccess = false;
+            message = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            selectedFile = null;
+        }
+    }
+}
