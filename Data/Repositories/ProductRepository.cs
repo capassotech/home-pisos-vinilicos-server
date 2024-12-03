@@ -273,19 +273,6 @@ namespace home_pisos_vinilicos.Data.Repositories
             {
                 var product = p.Object;
                 product.IdProduct = p.Key;
-
-                // Obtener ImageUrls como una lista de strings
-                //var imageUrlsData = await _firebaseClient
-                //    .Child("Product")
-                //    .Child(p.Key)
-                //    .Child("ImageUrl")
-                //    .OnceAsync<string>();
-
-                //if (imageUrlsData != null && imageUrlsData.Any())
-                //{
-                //    product.ImageUrls = imageUrlsData.Select(i => i.Object).ToList();
-                //}
-
                 products.Add(product);
             }
 
