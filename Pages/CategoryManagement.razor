@@ -15,15 +15,10 @@
 
 <div class="container-management-categories">
     <h3 class="title-categories">Gestión de Categorías</h3>
+    <button type="submit" @onclick="AddCategory" class="button-add" aria-label="Click me">
+        <i class="fas fa-plus"></i> Nueva categoría
+    </button>
 
-
-<div class="container-buttons">
-    <div class="container-search">
-        <button type="submit" @onclick="AddCategory" class="button-add" aria-label="Click me">
-            <i class="fas fa-plus"></i> Nueva categoría
-        </button>
-    </div>
-</div>
 
 
     @if (isModalVisible)
