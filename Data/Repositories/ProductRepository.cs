@@ -14,7 +14,7 @@ namespace home_pisos_vinilicos.Data.Repositories
 
         public ProductRepository() : base()
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            _firebaseClient = new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com");
 
             _firebaseStorage = new FirebaseStorage("home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
             {

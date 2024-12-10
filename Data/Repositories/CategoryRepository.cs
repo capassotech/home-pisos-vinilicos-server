@@ -12,7 +12,7 @@ namespace home_pisos_vinilicos.Data.Repositories
 
         public CategoryRepository() : base()
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            _firebaseClient = new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com");
         }
 
         public override async Task<bool> Insert(Category newCategory, List<Stream>? imageStreams = null)

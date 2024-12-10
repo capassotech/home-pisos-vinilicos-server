@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 FirebaseInitializer.InitializeFirebase();
 
 builder.Services.AddScoped<FirebaseClient>(sp =>
-    new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
+    new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com"));
 
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((sp, httpClient) =>
 {
@@ -60,7 +60,7 @@ builder.Services.AddAutoMapper(typeof(Mapping));
 
 builder.Services.AddSweetAlert2();
 
-builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
+builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com"));
 
 builder.Services.AddScoped(sp =>
 {

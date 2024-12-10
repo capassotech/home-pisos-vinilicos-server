@@ -15,7 +15,7 @@ namespace home_pisos_vinilicos.Controllers
         public FirebaseTestController()
         {
             _firebaseClient = new FirebaseClient(
-                "https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"
+                "https://hpv-desarrollo-default-rtdb.firebaseio.com"
             );
         }
 

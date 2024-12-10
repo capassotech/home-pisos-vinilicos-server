@@ -13,7 +13,7 @@ namespace home_pisos_vinilicos.Data.Repositories
         // Constructor que inicializa el FirebaseClient sin autenticación
         public LoginRepository() : base()
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            _firebaseClient = new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com");
         }
 
         public override async Task<bool> Insert(Login newLogin, List<Stream>? imageStreams = null)

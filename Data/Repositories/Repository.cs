@@ -18,7 +18,7 @@ namespace home_pisos_vinilicos.Data.Repositories
 
         public FirebaseRepository()
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            _firebaseClient = new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com");
         }
 
         public virtual async Task<List<T>> GetAll(Expression<Func<T, bool>>? filter = null)
