@@ -53,7 +53,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<AuthResult> LoginAsync(string email, string password)
     {
-        var apiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM"; 
+        var apiKey = "AIzaSyBiq1JVYxAteGujLGDaP5FDPiROIpZWKBU"; 
         var url = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}";
 
         var requestBody = new
