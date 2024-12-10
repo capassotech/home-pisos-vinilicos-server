@@ -256,6 +256,7 @@
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -271,6 +272,24 @@
                             <td>Sin categoría</td>
                         }
                         <td>$@product.Price</td>
+                        <td class="buttons-edition">
+                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(product)">
+                                @if (product.IsFeatured)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
