@@ -13,10 +13,8 @@ namespace home_pisos_vinilicos.Application.DTOs
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que cero.")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "La descripción es requerida.")]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "La descripción es requerida.")]
         public string Size { get; set; }
         public string Cod_Art { get; set; }
         public string PriceType { get; set; }
