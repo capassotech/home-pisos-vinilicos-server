@@ -425,10 +425,10 @@
         selectedFiles.Clear();
         selectedFiles.AddRange(e.GetMultipleFiles());
 
-        foreach (var file in selectedFiles)
-        {
-            await PreviewImage(file);
-        }
+        // foreach (var file in selectedFiles)
+        // {
+        //     await PreviewImage(file);
+        // }
     }
 
     private async Task<List<string>> UploadImages(List<IBrowserFile> files)
