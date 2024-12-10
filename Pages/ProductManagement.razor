@@ -120,7 +120,7 @@
                                 <label>Imágenes:</label>
                                 <InputFile OnChange="OnFileSelected" accept="image/*" multiple />
 
-                                @if (Images != null && Images.Any())
+                                @* @if (Images != null && Images.Any())
                                 {
                                     <div class="mt-2 d-flex flex-wrap">
                                         @foreach (var image in Images)
@@ -128,7 +128,7 @@
                                             <img src="@image" alt="Vista previa" class="img-thumbnail m-2" style="max-width: 200px; max-height: 200px;" />
                                         }
                                     </div>
-                                }
+                                } *@
                             </div>
 
                             <br />
