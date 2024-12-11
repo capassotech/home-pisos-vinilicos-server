@@ -1,6 +1,5 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
-using home_pisos_vinilicos.Domain;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +11,16 @@ namespace home_pisos_vinilicos.Controllers
     {
         private readonly FirebaseClient _firebaseClient;
 
-        public FirebaseTestController()
+        public FirebaseTestController(IConfiguration configuration)
         {
-            _firebaseClient = new FirebaseClient(
-                "https://hpv-desarrollo-default-rtdb.firebaseio.com"
-            );
+            var firebaseDatabaseUrl = configuration.GetValue<string>("Firebase_DatabaseUrl");
+
+            if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+            {
+                throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+            }
+
+            _firebaseClient = new FirebaseClient(firebaseDatabaseUrl);
         }
 
         [HttpPost("add-product")]

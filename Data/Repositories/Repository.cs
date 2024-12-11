@@ -4,11 +4,6 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using home_pisos_vinilicos_admin.Domain.Entities;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -16,9 +11,16 @@ namespace home_pisos_vinilicos.Data.Repositories
     {
         private readonly FirebaseClient _firebaseClient;
 
-        public FirebaseRepository()
+        public FirebaseRepository(IConfiguration configuration)
         {
-            _firebaseClient = new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com");
+            var firebaseDatabaseUrl = configuration["Firebase:DatabaseUrl"] ?? Environment.GetEnvironmentVariable("Firebase_DatabaseUrl");
+
+            if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+            {
+                throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+            }
+
+            _firebaseClient = new FirebaseClient(firebaseDatabaseUrl);
         }
 
         public virtual async Task<List<T>> GetAll(Expression<Func<T, bool>>? filter = null)
