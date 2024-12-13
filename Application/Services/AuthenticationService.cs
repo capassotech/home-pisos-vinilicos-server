@@ -1,13 +1,7 @@
 ﻿using FirebaseAdmin.Auth;
-using home_pisos_vinilicos.Application.DTOs;
 using home_pisos_vinilicos.Application.Interfaces;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
-using home_pisos_vinilicos.Domain.Entities;
-using home_pisos_vinilicos.Domain.Models;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net.Mail;
 using System.Text;
 using static AuthenticationService;
 
@@ -16,18 +10,17 @@ public class AuthenticationService : IAuthenticationService
     private readonly ILoginRepository _loginRepository; 
     private readonly HttpClient _httpClient;
     private readonly AuthResponse _authResponse;
-
-    private static string _idToken; // Variable estática para el token
-    public static string IdToken => _idToken; // Propiedad para acceder al token
+    private static string _idToken;
+    public static string IdToken => _idToken;
     private string _token;
+    private readonly IConfiguration _configuration;
 
-
-    public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient)
+    public AuthenticationService(ILoginRepository loginRepository, HttpClient httpClient, IConfiguration configuration)
     {
         _loginRepository = loginRepository;
         _httpClient = httpClient;
+        _configuration = configuration;
     }
-
 
     public async Task<string> RegisterAsync(string email, string password)
     {
@@ -50,10 +43,9 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-
     public async Task<AuthResult> LoginAsync(string email, string password)
     {
-        var apiKey = "AIzaSyDCjcyPOQ_29zyZGtxk13iJdbDsP1AG8bM"; 
+        var apiKey = _configuration["Firebase:ApiKey"] ?? Environment.GetEnvironmentVariable("Firebase_ApiKey");
         var url = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}";
 
         var requestBody = new
@@ -97,8 +89,8 @@ public class AuthenticationService : IAuthenticationService
     {
         if (_authResponse != null && !string.IsNullOrEmpty(_authResponse.IdToken))
         {
-            _token = _authResponse.IdToken; // Asigna el valor a _token
-            return _token; // Devuelve el token
+            _token = _authResponse.IdToken;
+            return _token;
         }
         throw new Exception("El usuario no está autenticado o el token no está disponible.");
     }
@@ -151,7 +143,6 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-
     public async Task<bool> VerifyTokenAsync(string token)
     {
         if (string.IsNullOrEmpty(token))
@@ -188,11 +179,7 @@ public class AuthenticationService : IAuthenticationService
             return false;
         }
     }
-
-   
-    }
-
-
+}
 
 public class AuthResult
 {
@@ -200,5 +187,3 @@ public class AuthResult
     public string Message { get; set; }
     public string Token { get; set; }
 }
-
-

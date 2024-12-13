@@ -57,63 +57,70 @@
                                 <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
                             </div>
 
-                            <br/>
+                            <br />
 
                             <div class="form-group">
                                 <label for="price">Precio</label>
                                 <InputNumber id="price" class="form-control" @bind-Value="editingProduct.Price" step="0.01" />
                                 <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
                             </div>
-                            
-                            <br/>
+
+                            <br />
 
                             <div class="form-group">
                                 <label for="description">Descripción</label>
                                 <InputTextArea id="description" class="form-control" @bind-Value="editingProduct.Description" />
-                                <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
                             </div>
-                            
-                            <br/>
+
+                            <br />
 
                             <div class="form-group">
                                 <label for="size">Tamaño</label>
                                 <InputText id="size" class="form-control" @bind-Value="editingProduct.Size" />
                                 <ValidationMessage For="@(() => editingProduct.Size)" class="text-danger" />
                             </div>
-                            
-                            <br/>
+
+                            <br />
 
                             <div class="form-group form-check">
                                 <InputCheckbox id="isFeatured" class="form-check-input" @bind-Value="editingProduct.IsFeatured" @onclick="OnFeaturedChange" />
                                 <label for="isFeatured" class="form-check-label">Destacar producto</label>
                                 @if (errorFeaturedLimit)
                                 {
-                                        <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
+                                    <div class="text-danger mt-2">No se pueden destacar más de 6 productos.</div>
                                 }
                             </div>
-                            <br/>
+                            <br />
 
                             <div class="form-group">
                                 <label for="priceType">Tipo de Precio</label>
-                                <InputText id="priceType" class="form-control" @bind-Value="editingProduct.PriceType" />
+                                <select id="priceType" class="form-control" @bind="editingProduct.PriceType">
+                                    <option value="">Selecciona un tipo de precio</option>
+                                    <option value="Precio por metro cuadrado (m²)">Precio por metro cuadrado (m²)</option>
+                                    <option value="Precio por unidad">Precio por unidad</option>
+                                    <option value="Precio por rollo">Precio por rollo</option>
+                                    <option value="Precio por lote">Precio por lote</option>
+                                    <option value="Precio por instalación incluida">Precio por instalación incluida</option>
+                                    <option value="Precio por metro lineal">Precio por metro lineal</option>
+                                    <option value="Precio por proyecto">Precio por proyecto</option>
+                                    <option value="Precio al mayor">Precio al mayor</option>
+                                    <option value="Precio promocional">Precio promocional</option>
+                                    <option value="Precio por zona">Precio por zona</option>
+                                    <option value="Precio con transporte incluido">Precio con transporte incluido</option>
+                                    <option value="Precio por acabado">Precio por acabado</option>
+                                    <option value="Precio por resistencia">Precio por resistencia</option>
+                                </select>
+
                                 <ValidationMessage For="@(() => editingProduct.PriceType)" class="text-danger" />
                             </div>
 
-                            <br/>
-
-                            <div class="form-group">
-                                <label for="cod_Art">Codigo de Articulo</label>
-                                <InputText id="cod_Art" class="form-control" @bind-Value="editingProduct.Cod_Art" />
-                                <ValidationMessage For="@(() => editingProduct.Cod_Art)" class="text-danger" />
-                            </div>
-
-                            <br/>
+                            <br />
 
                             <div class="form-group">
                                 <label>Imágenes:</label>
                                 <InputFile OnChange="OnFileSelected" accept="image/*" multiple />
 
-                                @if (Images != null && Images.Any())
+                                @* @if (Images != null && Images.Any())
                                 {
                                     <div class="mt-2 d-flex flex-wrap">
                                         @foreach (var image in Images)
@@ -121,11 +128,10 @@
                                             <img src="@image" alt="Vista previa" class="img-thumbnail m-2" style="max-width: 200px; max-height: 200px;" />
                                         }
                                     </div>
-                                }
+                                } *@
                             </div>
 
-
-                            <br/>
+                            <br />
 
                             <div class="form-group">
                                 <label for="category">Categoría</label>
@@ -145,22 +151,21 @@
                                 }
                             </div>
 
-
                             @if (isLoading)
                             {
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Cargando...</span>
-                                    </div>
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Cargando...</span>
+                                </div>
                             }
 
                             @if (!string.IsNullOrEmpty(successMessage))
                             {
-                                    <div class="alert alert-success mt-3">@successMessage</div>
+                                <div class="alert alert-success mt-3">@successMessage</div>
                             }
 
                             @if (!string.IsNullOrEmpty(errorMessage))
                             {
-                                    <div class="alert alert-danger mt-3">@errorMessage</div>
+                                <div class="alert alert-danger mt-3">@errorMessage</div>
                             }
 
                             <div class="modal-footer">
@@ -237,7 +242,7 @@
     }
     else
     {
-        <p>No se encontraron productos.</p>
+        <p>Cargando...</p>
     }
 
     <!-- Tabla de Productos Destacados -->
@@ -251,6 +256,7 @@
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -266,6 +272,24 @@
                             <td>Sin categoría</td>
                         }
                         <td>$@product.Price</td>
+                        <td class="buttons-edition">
+                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(product)">
+                                @if (product.IsFeatured)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -301,7 +325,6 @@
         await LoadProducts();
         await LoadCategories();
         categories = await categoryService.GetAllCategoriesWithSubCategoryCountAsync();
-        //availableColors = await LoadColors();
         CalculateTotalPages();
     }
 
@@ -310,9 +333,7 @@
         get
         {
             return !string.IsNullOrWhiteSpace(editingProduct.Name) &&
-                   editingProduct.Price > 0 &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Description) &&
-                   !string.IsNullOrWhiteSpace(editingProduct.Size);
+                   editingProduct.Price > 0;
         }
     }
 
@@ -355,8 +376,8 @@
                 Size = "",
                 Cod_Art = "",
                 PriceType = "",
-                ImageUrls = new List<string>()
-          
+                ImageUrls = new List<string>(),
+                IsFeatured = false
             };
 
         isNewProduct = true;
@@ -426,10 +447,10 @@
         selectedFiles.Clear();
         selectedFiles.AddRange(e.GetMultipleFiles());
 
-        foreach (var file in selectedFiles)
-        {
-            await PreviewImage(file);
-        }
+        // foreach (var file in selectedFiles)
+        // {
+        //     await PreviewImage(file);
+        // }
     }
 
     private async Task<List<string>> UploadImages(List<IBrowserFile> files)
@@ -563,38 +584,37 @@
     }
 
     protected async Task ToggleFeatured(ProductDto product)
-{
-    try
     {
-        var featuredProductsCount = GetFeaturedProductsCount();
+        try
+        {
+            var featuredProductsCount = GetFeaturedProductsCount();
 
-        if (product.IsFeatured)
-        {
-            product.IsFeatured = false;
-            await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
-            await LoadProducts();
-        }
-        else
-        {
-            if (featuredProductsCount < MaxFeaturedProducts)
+            if (product.IsFeatured)
             {
-                product.IsFeatured = true;
+                product.IsFeatured = false;
                 await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
                 await LoadProducts();
             }
             else
             {
-                ShowAlert("Ya hay 6 productos destacados.");
+                if (featuredProductsCount < MaxFeaturedProducts)
+                {
+                    product.IsFeatured = true;
+                    await productService.UpdateAsync(product, null); // Pasa null si no hay imágenes
+                    await LoadProducts();
+                }
+                else
+                {
+                    ShowAlert("Ya hay 6 productos destacados.");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al destacar el producto: {ex.Message}");
+            ShowAlert($"Error al destacar el producto: {ex.Message}");
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al destacar el producto: {ex.Message}");
-        ShowAlert($"Error al destacar el producto: {ex.Message}");
-    }
-}
-
 
     private int GetFeaturedProductsCount()
     {
@@ -653,8 +673,6 @@
 
     private void OnFeaturedChange()
     {
-        
-            Console.WriteLine("checked");
             if (featuredProducts.Count >= 6)
             {
                 editingProduct.IsFeatured = false;
@@ -667,5 +685,4 @@
                 editingProduct.IsFeatured = true;
             }
         }
-
 }

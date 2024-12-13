@@ -1,13 +1,11 @@
 ﻿using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
-using home_pisos_vinilicos_admin.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
     public class SocialNetworkRepository : FirebaseRepository<SocialNetwork>, ISocialNetworkRepository
     {
-        public SocialNetworkRepository() : base()
+        public SocialNetworkRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
