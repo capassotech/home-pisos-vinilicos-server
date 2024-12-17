@@ -179,123 +179,164 @@
         </div>
     }
 
-    <!-- Tabla de Productos -->
     @if (filteredProducts != null && filteredProducts.Any())
     {
-        <table class="table table-products table-hover">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var product in GetPaginatedProducts())
-                {
-                    <tr class="@GetHighlightClass(product)">
-                        <td>@product.Name</td>
-
-                        @if(product.Category != null){
-                            <td>@product.Category.Name</td>
-                        }
-                        else
-                        {
-                            <td>Sin categoría</td>
-                        }
-
-                        <td>$@product.Price</td>
-                        <td class="buttons-edition">
-                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(product)">
-                                @if (product.IsFeatured)
-                                {
-                                    <i class="fas fa-star"></i>
-                                }
-                                else
-                                {
-                                    <i class="far fa-star"></i>
-                                }
-                            </button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
+        <!-- Tabla de Productos (Vista en PC) -->
+        <div class="product-table d-none d-lg-block">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var product in GetPaginatedProducts())
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@(product.Category?.Name ?? "Sin categoría")</td>
+                            <td>$@product.Price</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => StartEditProduct(product)">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button class="btn btn-warning" @onclick="() => ToggleFeatured(product)">
+                                    <i class="@(product.IsFeatured ? "fas fa-star" : "far fa-star")"></i>
+                                </button>
+                                <button class="btn btn-danger" @onclick="() => DeleteProduct(product.IdProduct)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Botones de Paginación -->
+        <!-- Tarjetas de Productos (Vista en dispositivos móviles) -->
+        <div class="cards-container d-block d-lg-none">
+            @foreach (var product in GetPaginatedProducts())
+            {
+                <div class="card @GetHighlightClass(product)">
+                    <div class="card-header">
+                        <h3 class="card-title">@product.Name</h3>
+                        @if (product.IsFeatured)
+                        {
+                            <span class="featured-indicator"><i class="fas fa-star"></i></span>
+                        }
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Categoría:</strong> @(product.Category?.Name ?? "Sin categoría")</p>
+                        <p><strong>Precio:</strong> $@product.Price</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary" @onclick="() => StartEditProduct(product)">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="btn btn-warning" @onclick="() => ToggleFeatured(product)">
+                            <i class="@(product.IsFeatured ? "fas fa-star" : "far fa-star")"></i>
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => DeleteProduct(product.IdProduct)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination controls -->
         <div class="pagination-controls">
-            <button @onclick="PreviousPage">
+            <button @onclick="PreviousPage" disabled="@(currentPage == 1)">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <span>Página @currentPage de @totalPages</span>
-            <button @onclick="NextPage">
+            <button @onclick="NextPage" disabled="@(currentPage == totalPages)">
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>
+
     }
     else
     {
         <p>Cargando...</p>
     }
 
-    <!-- Tabla de Productos Destacados -->
+    <!-- Productos Destacados -->
     @if (featuredProducts != null && featuredProducts.Any())
     {
         <h4 class="title-featured">Productos Destacados</h4>
 
-        <table class="table table-featured-products">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var product in featuredProducts)
-                {
+        <!-- Tabla de Productos Destacados (PC) -->
+        <div class="product-table d-none d-lg-block">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>@product.Name</td>
-                        @if(product.Category != null){
-                            <td>@product.Category.Name</td>
-                        }
-                        else
-                        {
-                            <td>Sin categoría</td>
-                        }
-                        <td>$@product.Price</td>
-                        <td class="buttons-edition">
-                            <button class="btn btn-sm" @onclick="() => StartEditProduct(product)">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(product)">
-                                @if (product.IsFeatured)
-                                {
-                                    <i class="fas fa-star"></i>
-                                }
-                                else
-                                {
-                                    <i class="far fa-star"></i>
-                                }
-                            </button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.IdProduct)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var product in featuredProducts)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@(product.Category?.Name ?? "Sin categoría")</td>
+                            <td>$@product.Price</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => StartEditProduct(product)">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button class="btn btn-warning" @onclick="() => ToggleFeatured(product)">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button class="btn btn-danger" @onclick="() => DeleteProduct(product.IdProduct)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tarjetas de Productos Destacados (Móvil) -->
+        <div class="cards-container d-block d-lg-none">
+            @foreach (var product in featuredProducts)
+            {
+                <div class="card featured-card">
+                    <div class="card-header">
+                        <h3 class="card-title">@product.Name</h3>
+                        <span class="featured-indicator"><i class="fas fa-star"></i></span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Categoría:</strong> @(product.Category?.Name ?? "Sin categoría")</p>
+                        <p><strong>Precio:</strong> $@product.Price</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary" @onclick="() => StartEditProduct(product)">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="btn btn-warning" @onclick="() => ToggleFeatured(product)">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => DeleteProduct(product.IdProduct)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
     }
+
+
+
 </div>
+
 
 @code {
     private List<ProductDto> products = new List<ProductDto>();
@@ -684,5 +725,5 @@
                 errorFeaturedLimit = false;
                 editingProduct.IsFeatured = true;
             }
-        }
+    }
 }

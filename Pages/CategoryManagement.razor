@@ -15,12 +15,11 @@
 
 <div class="container-management-categories">
     <h3 class="title-categories">Gestión de Categorías</h3>
+    <button type="submit" @onclick="AddCategory" class="button-add" aria-label="Click me">
+        <i class="fas fa-plus"></i> Nueva categoría
+    </button>
 
-<div>
-        <button type="submit" @onclick="AddCategory" class="button-add" aria-label="Click me">
-            <i class="fas fa-plus"></i> Nueva categoría
-        </button>
-</div>
+
 
     @if (isModalVisible)
     {
@@ -71,77 +70,88 @@
         </div>
     }
 
-<table class="table table-categories">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-        <tbody>
-            @if (categories != null)
-            {
-                @foreach (var category in categories)
-                {
-                    <tr>
-                        <td>@category.Name</td>
-                        <td>@category.Description</td>
-                        <td class="buttons-edition">
-                            <button class="btn btn-sm" @onclick="() => EditCategory(category)">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn btn-sm" @onclick="() => ToggleFeatured(category)">
-                                @if (category.IsFeatured)
-                                {
-                                    <i class="fas fa-star"></i>
-                                }
-                                else
-                                {
-                                    <i class="far fa-star"></i>
-                                }
-                            </button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteCategory(category.IdCategory)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
 
-    <div class="pagination-controls">
-        <button @onclick="PreviousPage">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <span>Página @CurrentPage de @TotalPages</span>
-        <button @onclick="NextPage">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-
-    <h3 class="title-categories">Categorías Destacadas</h3>
-    <table class="table table-featured-categories">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (categories != null)
+    <!-- Tarjetas de Categorías -->
+    @if (categories != null && categories.Any())
+    {
+        <div class="cards-container">
+            @foreach (var category in categories)
             {
-                @foreach (var category in categories.Where(c => c.IsFeatured))
-                {
-                    <tr>
-                        <td>@category.Name</td>
-                        <td>@category.Description</td>
-                    </tr>
-                }
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">@category.Name</h3>
+                        @if (category.IsFeatured)
+                        {
+                            <span class="featured-indicator"><i class="fas fa-star"></i></span>
+                        }
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-button edit-button" @onclick="() => EditCategory(category)" aria-label="Editar categoría">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="card-button star-button" @onclick="() => ToggleFeatured(category)" aria-label="@(category.IsFeatured ? "Quitar de destacados" : "Marcar como destacado")">
+                            <i class="@(category.IsFeatured ? "fas fa-star" : "far fa-star")"></i>
+                        </button>
+                        <button class="card-button delete-button" @onclick="() => DeleteCategory(category.IdCategory)" aria-label="Eliminar categoría">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+
+        <!-- Controles de paginación -->
+        <div class="pagination-controls">
+            <button @onclick="PreviousPage" disabled="@(HasPreviousPage)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span>Página @CurrentPage de @TotalPages</span>
+            <button @onclick="NextPage" disabled="@(HasNextPage)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    }
+    else
+    {
+        <p>Cargando...</p>
+    }
+
+    <!-- Tarjetas de Categorías Destacadas -->
+    @if (categories != null && categories.Any(c => c.IsFeatured))
+    {
+        <h4 class="title-featured">Categorías Destacadas</h4>
+        <div class="cards-container">
+            @foreach (var category in categories.Where(c => c.IsFeatured))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">@category.Name</h3>
+                        <span class="featured-indicator"><i class="fas fa-star"></i></span>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-button edit-button" @onclick="() => EditCategory(category)" aria-label="Editar categoría">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="card-button star-button" @onclick="() => ToggleFeatured(category)" aria-label="Quitar de destacados">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <button class="card-button delete-button" @onclick="() => DeleteCategory(category.IdCategory)" aria-label="Eliminar categoría">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+
+
+
+
+
+
+
+
 </div>
 @code {
     private Category currentCategory = new();

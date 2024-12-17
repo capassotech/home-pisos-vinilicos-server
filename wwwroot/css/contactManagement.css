@@ -49,6 +49,22 @@
     width: 250px;
 }
 
+.navbar-toggler {
+    margin-left: auto;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.navbar-toggler {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
 .container-buttons {
     display: flex;
@@ -58,4 +74,17 @@
     gap: 2%;
     margin-top: 2%;
     width: 100%;
+}
+
+@media (max-width: 700px) {
+    .navbar-toggler {
+        position: absolute;
+        right: 1rem;
+        top: -0.5rem;
+    }
+
+    .navbar {
+        position: relative;
+        padding: 0,5rem;
+    }
 }

@@ -20,32 +20,39 @@
         <i class="fas fa-plus"></i> Nueva pregunta
     </button>
 
-    <table class="table table-faq-questions">
-        <thead>
-            <tr>
-                <th>Pregunta</th>
-                <th>Respuesta</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Tarjetas de Preguntas Frecuentes -->
+    @if (faqs != null && faqs.Any())
+    {
+        <div class="cards-container">
             @foreach (var faq in faqs)
             {
-                <tr>
-                    <td>@faq.Question</td>
-                    <td>@faq.Answer</td>
-                    <td>
-                        <button class="btn btn" @onclick="() => ShowEditFAQModal(faq)">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">@faq.Question</h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-info">
+                            <strong>Respuesta:</strong>
+                            @faq.Answer
+                        </p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-button edit-button" @onclick="() => ShowEditFAQModal(faq)" aria-label="Editar pregunta">
                             <i class="fas fa-pencil-alt"></i>
                         </button>
-                        <button class="btn btn-danger" @onclick="() => DeleteFAQ(faq.IdFAQ)">
+                        <button class="card-button delete-button" @onclick="() => DeleteFAQ(faq.IdFAQ)" aria-label="Eliminar pregunta">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>
-                </tr>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
+    else
+    {
+        <p>Cargando...</p>
+    }
+
 
     @if (isModalVisible)
     {

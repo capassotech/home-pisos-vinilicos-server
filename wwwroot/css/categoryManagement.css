@@ -48,6 +48,125 @@ th, td {
     transition: all 0.6s ease;
     height: 50px;
 }
+.search {
+    padding-top: 2%;
+    padding-bottom: 2%;
+    display: flex;
+    flex-direction: row;
+    gap: 2%;
+}
+
+.navbar-toggler {
+    margin-left: auto;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.navbar-toggler {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.featured-indicator {
+    color: #f59e0b;
+    font-size: 1.25rem;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.card-info {
+    color: #64748b;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin: 0;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.card-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+    .card-button:hover {
+        background-color: #f3f4f6;
+    }
+
+.edit-button {
+    color: #3b82f6;
+}
+
+.star-button {
+    color: #f59e0b;
+}
+
+.delete-button {
+    color: #ef4444;
+}
+
+.title-featured {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 2rem 0 1rem;
+    color: #2c3e50;
+}
 
 .container-buttons {
     display: flex;
@@ -57,6 +176,17 @@ th, td {
     gap: 2%;
     margin-top: 2%;
     width: 100%;
+}
+
+.table-featured-products {
+    width: 80%;
+    margin-top: 2%;
+    border-collapse: collapse;
+}
+
+.title-featured {
+    font-weight: bolder;
+    margin-top: 2%;
 }
 
 .pagination-controls {
@@ -80,6 +210,7 @@ th, td {
         align-items: center;
     }
 
+
         .pagination-controls button i {
             font-size: 16px;
             color: #333;
@@ -100,3 +231,37 @@ th, td {
     .pagination-controls button:hover {
         background-color: #f0f0f0;
     }
+
+
+@media (max-width: 700px) {
+    .navbar-toggler {
+        position: absolute;
+        right: 1rem;
+        top: -0.5rem;
+    }
+
+    .navbar {
+        position: relative;
+        padding: 0,5rem;
+    }
+    .button-add {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .cards-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+    .button-add {
+        width: 100%;
+        justify-content: center;
+    }
+    .search {
+        width: 100%;
+    }
+}
