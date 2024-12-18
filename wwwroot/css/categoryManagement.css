@@ -5,7 +5,7 @@
     flex-direction: column;
 }
 
-.table-categories {
+.category-table {
     width: 80%;
     margin-top: 4%;
     padding: 20px;
@@ -231,9 +231,40 @@ th, td {
     .pagination-controls button:hover {
         background-color: #f0f0f0;
     }
+.container-management-categories {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
 
+.title-categories {
+    padding-top: 2%;
+    margin-bottom: 2%;
+    font-weight: bolder;
+}
 
+.table-featured-categories {
+    width: 80%;
+    margin-top: 2%;
+    border-collapse: collapse;
+}
+.category-table {
+    display: table;
+}
+
+.cards-container {
+    display: none;
+}
 @media (max-width: 700px) {
+    .category-table {
+        display: none;
+    }
+
+    .cards-container {
+        display: block;
+    }
+
     .navbar-toggler {
         position: absolute;
         right: 1rem;
