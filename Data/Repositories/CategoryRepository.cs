@@ -2,7 +2,6 @@
 using Firebase.Database.Query;
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
@@ -10,19 +9,25 @@ namespace home_pisos_vinilicos.Data.Repositories
     {
         private readonly FirebaseClient _firebaseClient;
 
-        public CategoryRepository() : base()
+        public CategoryRepository(IConfiguration configuration) : base(configuration)
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            var firebaseDatabaseUrl = configuration["Firebase:DatabaseUrl"] ?? Environment.GetEnvironmentVariable("Firebase_DatabaseUrl");
+
+            if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+            {
+                throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+            }
+
+            _firebaseClient = new FirebaseClient(firebaseDatabaseUrl);
         }
 
         public override async Task<bool> Insert(Category newCategory, List<Stream>? imageStreams = null)
         {
             try
             {
-                // Asigna el ParentCategoryId si es necesario
                 if (string.IsNullOrEmpty(newCategory.ParentCategoryId))
                 {
-                    newCategory.ParentCategoryId = null; // o alguna lógica para establecerlo
+                    newCategory.ParentCategoryId = null;
                 }
                 return await base.Insert(newCategory);
             }
@@ -36,10 +41,9 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             try
             {
-                // Asegúrate de que el ParentCategoryId esté presente
                 if (string.IsNullOrEmpty(updateCategory.ParentCategoryId))
                 {
-                    updateCategory.ParentCategoryId = null; // o alguna lógica para establecerlo
+                    updateCategory.ParentCategoryId = null;
                 }
                 return await base.Update(updateCategory);
             }
@@ -69,7 +73,6 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return null;
             }
 
-            // Obtener subcategorías asociadas a la categoría
             var subCategories = await GetSubCategoriesByCategoryId(id);
             if (subCategories.Any())
             {
@@ -91,8 +94,8 @@ namespace home_pisos_vinilicos.Data.Repositories
         {
             var subCategories = await _firebaseClient
                 .Child("Category")
-                .OrderBy("ParentCategoryId") // Cambiado a "ParentCategoryId"
-                .EqualTo(idCategory) // Filtrar por el ParentCategoryId
+                .OrderBy("ParentCategoryId") 
+                .EqualTo(idCategory)
                 .OnceAsync<Category>();
 
             return subCategories.Select(c =>
@@ -109,10 +112,8 @@ namespace home_pisos_vinilicos.Data.Repositories
             {
                 var categoryList = await GetAllCategories();
 
-                // Obtener todas las subcategorías de una vez
                 var subCategoryDictionary = await GetSubCategoryDictionary();
 
-                // Asignar subcategorías a cada categoría
                 AssignSubCategoriesToCategories(categoryList, subCategoryDictionary);
 
                 return categoryList;

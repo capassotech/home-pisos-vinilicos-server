@@ -12,11 +12,23 @@ namespace home_pisos_vinilicos.Data.Repositories
         private readonly FirebaseClient _firebaseClient;
         private readonly FirebaseStorage _firebaseStorage;
 
-        public ProductRepository() : base()
+        public ProductRepository(IConfiguration configuration) : base(configuration)
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            var firebaseDatabaseUrl = configuration["Firebase:DatabaseUrl"] ?? Environment.GetEnvironmentVariable("Firebase_DatabaseUrl");
+            if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+            {
+                throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+            }
 
-            _firebaseStorage = new FirebaseStorage("home-pisos-vinilicos.appspot.com", new FirebaseStorageOptions
+            _firebaseClient = new FirebaseClient(firebaseDatabaseUrl);
+
+            var firebaseStorageBucket = configuration["Firebase:StorageBucket"] ?? Environment.GetEnvironmentVariable("Firebase_StorageBucket");
+            if (string.IsNullOrEmpty(firebaseStorageBucket))
+            {
+                throw new InvalidOperationException("Firebase:StorageBucket no está configurado.");
+            }
+
+            _firebaseStorage = new FirebaseStorage(firebaseStorageBucket, new FirebaseStorageOptions
             {
                 AuthTokenAsyncFactory = () => Task.FromResult(AuthenticationService.IdToken),
                 ThrowOnCancel = true
@@ -160,6 +172,37 @@ namespace home_pisos_vinilicos.Data.Repositories
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al eliminar producto: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> InsertRange(List<Product> newProducts)
+        {
+            try
+            {
+                var tasks = newProducts.Select(async product =>
+                {
+                    var firebaseResult = await _firebaseClient
+                        .Child("Product")
+                        .PostAsync(product);
+
+                    product.IdProduct = firebaseResult.Key;
+
+                    if (product.ImageUrls != null && product.ImageUrls.Any())
+                    {
+                        await _firebaseClient
+                            .Child("Product")
+                            .Child(product.IdProduct)
+                            .PutAsync(product);
+                    }
+                });
+
+                await Task.WhenAll(tasks);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al insertar múltiples productos: {ex.Message}");
                 return false;
             }
         }

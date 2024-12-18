@@ -1,13 +1,11 @@
 ﻿using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Entities;
-using home_pisos_vinilicos_admin.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace home_pisos_vinilicos.Data.Repositories
 {
     public class FAQRepository : FirebaseRepository<FAQ>, IFAQRepository
     {
-        public FAQRepository() : base()
+        public FAQRepository(IConfiguration configuration) : base(configuration)
         {
         }
 
@@ -46,8 +44,5 @@ namespace home_pisos_vinilicos.Data.Repositories
                 return false;
             }
         }
-
-
-
     }
 }

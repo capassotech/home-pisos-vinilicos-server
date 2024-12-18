@@ -10,10 +10,24 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 FirebaseInitializer.InitializeFirebase();
 
 builder.Services.AddScoped<FirebaseClient>(sp =>
-    new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
+{
+    var firebaseDatabaseUrl = builder.Configuration["Firebase:DatabaseUrl"] ?? Environment.GetEnvironmentVariable("Firebase_DatabaseUrl");
+    if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+    {
+        throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+    }
+
+    return new FirebaseClient(firebaseDatabaseUrl);
+});
 
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((sp, httpClient) =>
 {
@@ -24,8 +38,8 @@ builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>((s
 
 builder.Services.AddSignalR(options =>
 {
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // Aumenta el timeout
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);  // Intervalo para mantener la conexión activa
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 
 builder.Services.AddRazorPages();
@@ -60,7 +74,7 @@ builder.Services.AddAutoMapper(typeof(Mapping));
 
 builder.Services.AddSweetAlert2();
 
-builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/"));
+builder.Services.AddScoped<FirebaseClient>(sp => new FirebaseClient("https://hpv-desarrollo-default-rtdb.firebaseio.com"));
 
 builder.Services.AddScoped(sp =>
 {
@@ -71,7 +85,7 @@ builder.Services.AddScoped(sp =>
     };
     return new HttpClient(handler)
     {
-        BaseAddress = new Uri("https://localhost:7223/") // Cambia por la URL de tu API
+        BaseAddress = new Uri("https://localhost:7223/")
     };
 });
 

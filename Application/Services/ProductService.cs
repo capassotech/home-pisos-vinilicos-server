@@ -3,6 +3,7 @@ using home_pisos_vinilicos.Data.Repositories.IRepository;
 using System.Linq.Expressions;
 using home_pisos_vinilicos_admin.Domain.Entities;
 using home_pisos_vinilicos.Application.DTOs;
+using OfficeOpenXml;
 
 namespace home_pisos_vinilicos.Application.Services
 {
@@ -103,7 +104,44 @@ namespace home_pisos_vinilicos.Application.Services
             return await _productRepository.UpdateRangeAsync(products);
         }
 
-        public async Task<List<ProductDto>> SearchAsync(string query)
+        public async Task<bool> BulkUploadProductsAsync(Stream fileStream)
+        {
+            try
+            {
+                using (var package = new ExcelPackage(fileStream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0]; // Asumimos que los datos están en la primera hoja
+                    var rowCount = worksheet.Dimension.Rows;
+
+                    var products = new List<Product>();
+
+                    for (int row = 2; row <= rowCount; row++) // Asumimos que la primera fila es el encabezado
+                    {
+                        var product = new Product
+                        {
+                            Name = worksheet.Cells[row, 1].Value?.ToString(),
+                            Description = worksheet.Cells[row, 2].Value?.ToString(),
+                            Price = decimal.Parse(worksheet.Cells[row, 3].Value?.ToString() ?? "0"),
+                            Size = worksheet.Cells[row, 4].Value?.ToString(),
+                            Cod_Art = worksheet.Cells[row, 5].Value?.ToString(),
+                            PriceType = worksheet.Cells[row, 6].Value?.ToString(),
+                            IdCategory = worksheet.Cells[row, 7].Value?.ToString()
+                        };
+
+                        products.Add(product);
+                    }
+
+                    return await _productRepository.InsertRange(products);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en la carga masiva: {ex.Message}");
+                return false;
+            }
+        }
+
+            public async Task<List<ProductDto>> SearchAsync(string query)
         {
             Expression<Func<Product, bool>> filter = p =>
                 p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||

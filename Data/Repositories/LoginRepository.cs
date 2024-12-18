@@ -1,5 +1,4 @@
 ﻿using Firebase.Database;
-using Firebase.Database.Query;  // Asegúrate de tener esta referencia
 using home_pisos_vinilicos.Data.Repositories.IRepository;
 using home_pisos_vinilicos.Domain.Models;
 using System.Linq.Expressions;
@@ -10,10 +9,16 @@ namespace home_pisos_vinilicos.Data.Repositories
     {
         private readonly FirebaseClient _firebaseClient;
 
-        // Constructor que inicializa el FirebaseClient sin autenticación
-        public LoginRepository() : base()
+        public LoginRepository(IConfiguration configuration) : base(configuration)
         {
-            _firebaseClient = new FirebaseClient("https://home-pisos-vinilicos-default-rtdb.firebaseio.com/");
+            var firebaseDatabaseUrl = configuration["Firebase:DatabaseUrl"] ?? Environment.GetEnvironmentVariable("Firebase_DatabaseUrl");
+
+            if (string.IsNullOrEmpty(firebaseDatabaseUrl))
+            {
+                throw new InvalidOperationException("Firebase:DatabaseUrl no está configurada.");
+            }
+
+            _firebaseClient = new FirebaseClient(firebaseDatabaseUrl);
         }
 
         public override async Task<bool> Insert(Login newLogin, List<Stream>? imageStreams = null)
@@ -52,18 +57,14 @@ namespace home_pisos_vinilicos.Data.Repositories
             }
         }
 
-        // Método para obtener todos los logins, con o sin filtro
         public async Task<IEnumerable<Login>> GetAll(Expression<Func<Login, bool>>? filter = null)
         {
-            // Recupera los usuarios desde Firebase Realtime Database
             var users = await _firebaseClient
                 .Child("logins")
                 .OnceAsync<Login>();
 
-            // Convierte los datos recuperados en una lista de Login
             var logins = users.Select(u => u.Object).AsQueryable();
 
-            // Si se proporciona un filtro, lo aplicamos
             if (filter != null)
             {
                 logins = logins.Where(filter);
