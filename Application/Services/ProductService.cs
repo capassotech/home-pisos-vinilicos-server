@@ -108,6 +108,9 @@ namespace home_pisos_vinilicos.Application.Services
         {
             try
             {
+                // Configuración del contexto de licencia (debe ser llamada antes de usar ExcelPackage)
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
                 using (var package = new ExcelPackage(fileStream))
                 {
                     var worksheet = package.Workbook.Worksheets[0]; // Asumimos que los datos están en la primera hoja
@@ -121,7 +124,7 @@ namespace home_pisos_vinilicos.Application.Services
                         {
                             Name = worksheet.Cells[row, 1].Value?.ToString(),
                             Description = worksheet.Cells[row, 2].Value?.ToString(),
-                            Price = decimal.Parse(worksheet.Cells[row, 3].Value?.ToString() ?? "0"),
+                            Price = decimal.TryParse(worksheet.Cells[row, 3].Value?.ToString(), out var price) ? price : 0,
                             Size = worksheet.Cells[row, 4].Value?.ToString(),
                             Cod_Art = worksheet.Cells[row, 5].Value?.ToString(),
                             PriceType = worksheet.Cells[row, 6].Value?.ToString(),
@@ -131,6 +134,7 @@ namespace home_pisos_vinilicos.Application.Services
                         products.Add(product);
                     }
 
+                    // Inserta los productos en la base de datos usando el repositorio
                     return await _productRepository.InsertRange(products);
                 }
             }
@@ -141,7 +145,8 @@ namespace home_pisos_vinilicos.Application.Services
             }
         }
 
-            public async Task<List<ProductDto>> SearchAsync(string query)
+
+        public async Task<List<ProductDto>> SearchAsync(string query)
         {
             Expression<Func<Product, bool>> filter = p =>
                 p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
